@@ -3,7 +3,7 @@
 1. **Project Title and Overview:**  
    - Provide the project name and a brief description based on `src\\site\\markdown\\index.md` content summary.
     - Add `[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/[artifactId].svg)](https://central.sonatype.com/artifact/org.machanism.machai/[artifactId])` and 
-     [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/[artifactId]/bindex.json) in one line after the title as a new paragraph.
+     [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/[artifactId]/refs/heads/main/bindex.json) in one line after the title as a new paragraph.
 3. **Introduction**
    - Use from documentation folder: site/markdown/index.md
 3. **Usage:**  
@@ -25,7 +25,7 @@
 
 # Ghostwriter
 
-[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/ghostwriter.svg)](https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter) [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/ghostwriter/bindex.json)
+[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/ghostwriter.svg)](https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter) [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/ghostwriter/refs/heads/main/bindex.json)
 
 Ghostwriter is an AI-powered command-line agent for guided, project-wide work across source code, documentation, website content, configuration, diagrams, tests, and other project files.
 
@@ -116,6 +116,6 @@ Run `java -jar gw.jar --help` for the complete option syntax and examples.
 - [Ghostwriter on Maven Central](https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter)
 - [Source repository](https://github.com/machanism-org/machai) and [issue tracker](https://github.com/machanism-org/machai/issues)
 - [Ghostwriter MCP Server](https://github.com/machanism-org/gw-mcp-server)
-- [Machanism GitHub organization](https://github.com/machanism-org) for community projects and discussions
+- [Machanism GitHub organization](https://github.com/machanism-org) and [community discussions](https://github.com/orgs/machanism-org/discussions)
 
-For support or inquiries, open an issue in the [project issue tracker](https://github.com/machanism-org/machai/issues). Consult the [Ghostwriter documentation](https://machai.machanism.org/ghostwriter/index.html) and [FAQ/search resources](https://github.com/machanism-org/machai/issues?q=is%3Aissue) before reporting a problem.
+For support or inquiries, open an issue in the [project issue tracker](https://github.com/machanism-org/machai/issues) or start a [community discussion](https://github.com/orgs/machanism-org/discussions). Consult the [Ghostwriter documentation](https://machai.machanism.org/ghostwriter/index.html) and [FAQ/search resources](https://github.com/machanism-org/machai/issues?q=is%3Aissue) before reporting a problem.
