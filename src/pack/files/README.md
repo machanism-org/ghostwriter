@@ -180,7 +180,7 @@ A trailing backslash in interactive input continues the value on the next line. 
 
 - Ghostwriter documentation: https://machai.machanism.org/ghostwriter/index.html
 - Guided File Processing: https://www.machanism.org/guided-file-processing/index.html
-- Source repository and issue/support entry point: https://github.com/machanism-org/machai
+- Source repository and issue/support entry point: https://github.com/machanism-org/ghostwriter
 - Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter
 - Bindex Core: https://machai.machanism.org/bindex-core/index.html
 - CLI download: https://sourceforge.net/projects/machanism/files/machai/ghostwriter/gw.zip/download

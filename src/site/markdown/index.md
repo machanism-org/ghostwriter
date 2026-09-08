@@ -9,7 +9,7 @@ Ghostwriter is an **AI-powered agent** designed to work with **all types of proj
    - **Maven Central Badge:**  
      Use the following Markdown, replacing `[groupId]` and `[artifactId]` with values from `pom.xml`:  
      `[![Maven Central](https://img.shields.io/maven-central/v/[groupId]/[artifactId].svg)](https://central.sonatype.com/artifact/[groupId]/[artifactId])`
-   - Bindex Badge [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/ghostwriter/bindex.json)
+   - Bindex Badge [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/ghostwriter/refs/heads/main/bindex.json)
 2. **Introduction**
    - Provide a comprehensive description of the project's purpose and main benefits.
    - Reference [Guidance-Driven Processing (GDP)](https://www.machanism.org/guided-file-processing/index.html) as the conceptual foundation for Machai Ghostwriter.
@@ -53,7 +53,7 @@ Let me know if you want it even shorter or tailored for a specific toolset!
 
 # Ghostwriter
 
-[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/ghostwriter.svg)](https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter) [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/ghostwriter/bindex.json)
+[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/ghostwriter.svg)](https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter) [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/ghostwriter/refs/heads/main/bindex.json)
 
 ## Introduction
 
