@@ -1,5 +1,7 @@
 package org.machanism.machai.gw.tools;
 
+import org.machanism.machai.ai.tools.SpecialException;
+
 /**
  * Runtime control-flow exception that requests host application termination.
  *
@@ -9,7 +11,7 @@ package org.machanism.machai.gw.tools;
  *
  * @author Viktor Tovstyi
  */
-public class ProcessTerminationException extends RuntimeException {
+public class ProcessTerminationException extends SpecialException {
 	/** Serialization version for this control-flow exception. */
 	private static final long serialVersionUID = 1L;
 	/** Exit code that the host should use when terminating execution. */

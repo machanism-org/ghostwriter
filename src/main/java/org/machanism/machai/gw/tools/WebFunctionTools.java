@@ -113,8 +113,8 @@ public class WebFunctionTools implements FunctionTools {
 			@Param(name = "headers", description = "Specifies HTTP header properties. If null, no additional headers are sent.", defaultValue = "") Map<String, String> headers,
 			@Param(name = "timeout", description = "The maximum time in milliseconds to wait for the HTTP response. If not specified, a default timeout will be used.", defaultValue = "0") int timeout,
 			@Param(name = "charset-name", description = "The name of the character set to use when decoding the response content.", defaultValue = DEFAULT_CHARSET) String charsetName,
-			@Param(name = "text-only", description = "If true, only the plain text content of the web page is returned (HTML tags are stripped). If false or not specified, the full HTML content is returned.", defaultValue = "false") boolean textOnly,
-			@Param(name = "selector", description = "If provided, extracts and returns only the content matching the specified CSS selector. If textOnly is also true, returns only the text of the selected elements; otherwise, returns their HTML.", defaultValue = "") String selector,
+			@Param(name = "text-only", description = "Use for HTML content only: If true, only the plain text content of the web page is returned (HTML tags are stripped). If false, the HTML content of the web page is returned.", defaultValue = "false") boolean textOnly,
+			@Param(name = "selector", description = "Use for HTML content only: If provided, extracts and returns only the content matching the specified CSS selector. If textOnly is also true, returns only the text of the selected elements; otherwise, returns their HTML.", defaultValue = "") String selector,
 			@Param(name = "project-dir", description = "The project dir.") File projectDir, Configurator configurator)
 			throws IOException {
 		String requestId = Long.toHexString(RANDOM.nextLong());
