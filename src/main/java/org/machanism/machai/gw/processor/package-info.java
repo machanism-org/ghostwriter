@@ -10,83 +10,80 @@
  */
 
 /**
- * Processing infrastructure for Ghostwriter's AI-assisted project workflows.
+ * Processors for applying generative-AI workflows to project files, inline
+ * guidance, and reusable TOML-defined acts.
  * <p>
- * This package supplies a common file-processing foundation and three principal
- * workflows: direct AI processing through {@link org.machanism.machai.gw.processor.AIFileProcessor},
- * inline-guidance processing through {@link org.machanism.machai.gw.processor.GuidanceProcessor},
- * and named TOML act execution through {@link org.machanism.machai.gw.processor.ActProcessor}.
- * Each workflow operates with a project layout, makes project metadata available
- * to provider tools, and can process an individual file, a directory, or files
- * selected by a path, glob, or regular-expression pattern.
+ * {@link org.machanism.machai.gw.processor.AIFileProcessor AIFileProcessor}
+ * is the common project-aware execution base. It supplies the current file's
+ * relative path, operating system, and interactive-processing mode to the
+ * provider; resolves public configuration placeholders; registers function
+ * tools; and can process files, folders, modules, or path-pattern matches.
+ * Prompts can begin with YAML front matter: {@code gw.model} selects a provider
+ * or model for that request and {@code enabledTools} selects provider tools.
+ * An {@code enabledTools} value may be a scalar or YAML list.
+ * </p>
+ * <h2>Prompt features</h2>
+ * <ul>
+ * <li>Lines beginning with {@link org.machanism.machai.gw.processor.AIFileProcessor#FILE_INCLUDED_MARKER}
+ * may include UTF-8 prompt content from {@code http://}, {@code https://}, or
+ * project-relative {@code file://} URLs. Included content is processed
+ * recursively.</li>
+ * <li>Properties under the public configuration prefixes can be substituted in
+ * prompts, for example {@code ${public.projectName}}.</li>
+ * <li>In interactive mode, {@code .} ends processing, {@code >} accepts the
+ * response and continues, and {@code >>} switches to non-interactive
+ * processing.</li>
+ * </ul>
+ *
+ * <h2>Guidance-driven processing</h2>
+ * <p>
+ * {@link org.machanism.machai.gw.processor.GuidanceProcessor GuidanceProcessor}
+ * scans supported source types through registered reviewers and sends inline
+ * guidance marked with {@link org.machanism.machai.gw.processor.GuidanceProcessor#GUIDANCE_TAG_NAME}
+ * to the provider. The marker comments remain in their source locations so
+ * later runs can discover them again. A configured default prompt also permits
+ * processing matching files that do not contain inline guidance, while
+ * {@link org.machanism.machai.gw.processor.GuidanceProcessor#getReport()}
+ * exposes file-relative results.
  * </p>
  *
- * <h2>AI file processing</h2>
+ * <h2>Act and episode workflows</h2>
  * <p>
- * {@code AIFileProcessor} sends instructions and prompts to a configured GenAI
- * provider. Prompts may begin with YAML front matter: {@code gw.model} selects
- * a provider or model for that request, and {@code enabledTools} selects tools
- * by name (as a scalar or YAML list). Other front-matter properties remain
- * available to configuration substitution. Public configuration values whose
- * keys begin with {@code public.} or {@code default.public.} can be referenced
- * in prompt text, for example {@code ${public.projectName}}.
+ * {@link org.machanism.machai.gw.processor.ActProcessor ActProcessor} loads
+ * reusable acts from built-in {@code /acts/} resources, local locations, HTTPS
+ * or HTTP locations, and explicit {@code .toml} files. Acts support inheritance
+ * through {@code basedOn}; {@code ${super.value}} incorporates inherited string
+ * and prompt values. TOML {@code default} properties provide fallback values,
+ * while {@code public.prompt} makes the command prompt available to templates.
+ * A leading {@code >} is shorthand for the ad-hoc {@code task} act.
  * </p>
  * <p>
- * A line beginning with {@code >>>} includes UTF-8 content from an
- * {@code http://}, {@code https://}, or project-relative {@code file://}
- * reference; included content is processed recursively. Interactive processing
- * accepts {@code .} to end successfully, {@code >} to accept the current
- * response and continue, and {@code >>} to continue non-interactively.
- * Processing metadata provided to the AI includes the project-relative file
- * path, whether processing is interactive, and the operating-system name.
+ * An act name can select episodes using {@code #}, such as {@code review#1,3}.
+ * Adding {@code !}, for example {@code review#1!}, prevents subsequent
+ * normal-order execution. Episodes are ordered prompts that can be run
+ * sequentially, as an explicit selected subset, repeatedly, or by a requested
+ * numeric or heading-name jump; their execution metadata identifies the current
+ * episode and all available episode names.
  * </p>
- *
- * <h2>Guidance processing</h2>
  * <p>
- * {@code GuidanceProcessor} discovers file-type reviewers through
- * {@link java.util.ServiceLoader}, extracts instructions from supported source
- * comments marked with {@code @guidance:}, and submits those instructions for
- * processing. Guidance markers are retained in their original locations so the
- * same file can be processed again. A configured default prompt also permits
- * processing matching files that have no guidance marker; results are available
- * as file/message report entries.
+ * Episode YAML front matter may set {@code enabledTools: auto}, asking the act
+ * processor to choose tools appropriate to that episode. An {@code auto}
+ * mapping may also provide a selection constraint.
  * </p>
  *
- * <h2>Act processing and episodes</h2>
- * <p>
- * {@code ActProcessor} loads named {@code .toml} definitions from bundled
- * {@code /acts/} resources, a project-relative or absolute location, or an
- * HTTP(S) location. Acts can inherit another act through {@code basedOn}; the
- * {@code ${super.value}} placeholder incorporates inherited string or prompt
- * values. The {@code default} TOML section supplies fallback properties, while
- * {@code public.prompt} exposes the user-supplied prompt to templates. A command
- * starting with {@code >} is an ad-hoc {@code task}; appending {@code #} plus
- * comma-separated episode IDs selects episodes, and a trailing {@code !} stops
- * normal sequential execution afterward.
- * </p>
- * <p>
- * {@link org.machanism.machai.gw.processor.Episodes} executes ordered prompt
- * episodes in regular or selected order, supports repeat and named or numeric
- * episode moves, recognizes optional {@code # Name} headings, and publishes act
- * and current-episode metadata. An act episode can use YAML
- * {@code enabledTools: auto} to request automatic tool selection; an
- * {@code auto} mapping may provide selection constraints.
- * </p>
- *
- * <h2>Usage examples</h2>
- *
- * <pre>
+ * <h2>Typical usage</h2>
+ * <pre>{@code
  * AIFileProcessor processor = new AIFileProcessor(projectDir, configurator, "openai:model");
- * processor.setInstructions("Follow the project standards.");
+ * processor.setInstructions("Follow the project's coding standards.");
  * processor.process(projectLayout, file, "Review this file.");
  *
  * GuidanceProcessor guidance = new GuidanceProcessor(projectDir, "openai:model", configurator);
- * guidance.process(projectLayout, file, "Apply inline guidance.");
+ * guidance.process(projectLayout, file, "Apply the file's inline guidance.");
  *
  * ActProcessor acts = new ActProcessor(projectDir, "openai:model", configurator);
- * acts.setAct("review#1,3! Check error handling");
- * acts.processFolder(projectLayout);
- * </pre>
+ * acts.setAct("review#1,3! Check correctness and error handling");
+ * acts.process(projectLayout);
+ * }</pre>
  *
  * @see org.machanism.machai.gw.processor.AIFileProcessor
  * @see org.machanism.machai.gw.processor.GuidanceProcessor
