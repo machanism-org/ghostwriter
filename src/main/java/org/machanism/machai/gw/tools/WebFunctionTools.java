@@ -19,6 +19,7 @@ import java.util.Map.Entry;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.jsoup.Jsoup;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.Substitutor;
@@ -126,11 +127,11 @@ public class WebFunctionTools implements FunctionTools {
 
 		url = Substitutor.replace(url, configurator);
 
-		URI uri = URI.create(url);
 		String response;
-		if ("file".equals(uri.getScheme())) {
-			response = readFileUriContent(projectDir, charsetName, uri);
+		if (Strings.CS.startsWith(url, "file:")) {
+			response = readFileUriContent(projectDir, charsetName, url);
 		} else {
+			URI uri = URI.create(url);
 			response = fetchHttpContent(requestId, headers, timeout, charsetName, uri,
 					configurator);
 		}
@@ -152,18 +153,20 @@ public class WebFunctionTools implements FunctionTools {
 	 *
 	 * @param projectDir  project root used for relative file paths
 	 * @param charsetName character set used to decode the file
-	 * @param uri         file URI to resolve
+	 * @param uri         textual file URI to resolve
 	 * @return content of the resolved file
-	 * @throws IOException if the resolved file cannot be read
+	 * @throws IllegalArgumentException if {@code charsetName} does not identify a
+	 *                                  supported character set
+	 * @throws IOException              if the resolved file cannot be read
 	 */
-	private String readFileUriContent(File projectDir, String charsetName, URI uri) throws IOException {
+	private String readFileUriContent(File projectDir, String charsetName, String uri) throws IOException {
 		String path;
 		if (uri.toString().startsWith("file:///")) {
-			path = uri.getPath();
+			path = StringUtils.substringAfter(uri, "file:///");
 		} else if (uri.toString().startsWith("file://./")) {
-			path = StringUtils.substringAfter(uri.getPath(), "/");
+			path = StringUtils.substringAfter(uri, "file://./");
 		} else {
-			path = uri.getHost() + uri.getPath();
+			path = StringUtils.substringAfter(uri, "file://");
 		}
 		File file = new File(path);
 		if (!file.isAbsolute()) {
@@ -182,7 +185,10 @@ public class WebFunctionTools implements FunctionTools {
 	 * @param uri         target URI
 	 * @param config      configuration used for header substitution
 	 * @return response content
-	 * @throws IOException if the request cannot be configured, connected, or read
+	 * @throws IllegalArgumentException if {@code charsetName} does not identify a
+	 *                                  supported character set
+	 * @throws IOException              if the request cannot be configured,
+	 *                                  connected, or read
 	 */
 	private String fetchHttpContent(String requestId, Map<String, String> headers, int timeout, String charsetName,
 			URI uri, Configurator config) throws IOException {
@@ -199,7 +205,9 @@ public class WebFunctionTools implements FunctionTools {
 	 * @param file        file to read
 	 * @param charsetName character set used to decode the file
 	 * @return decoded file content
-	 * @throws IOException if the file cannot be opened or decoded
+	 * @throws IllegalArgumentException if {@code charsetName} does not identify a
+	 *                                  supported character set
+	 * @throws IOException              if the file cannot be opened or read
 	 */
 	private String readFileContent(File file, String charsetName) throws IOException {
 		try (FileInputStream io = new FileInputStream(file)) {
@@ -212,8 +220,9 @@ public class WebFunctionTools implements FunctionTools {
 	 *
 	 * @param selector CSS selector (may be blank)
 	 * @param response full response content
-	 * @return selected HTML content (joined with newlines) or the original response
-	 *         if {@code selector} is blank
+	 * @return selected HTML content, joined with line separators, or the original
+	 *         response if {@code selector} is blank
+	 * @throws IllegalArgumentException if {@code selector} is not valid CSS syntax
 	 */
 	String applySelectorIfPresent(String selector, String response) {
 		if (StringUtils.isBlank(selector)) {
@@ -236,6 +245,7 @@ public class WebFunctionTools implements FunctionTools {
 	 * @param response response content (typically HTML)
 	 * @return rendered text content if {@code textOnly} is {@code true}; otherwise
 	 *         the original response
+	 * @throws IllegalArgumentException if the response cannot be parsed as HTML
 	 */
 	private String renderTextOnlyIfRequested(boolean textOnly, String response) {
 		if (!textOnly) {
@@ -257,7 +267,8 @@ public class WebFunctionTools implements FunctionTools {
 	 * @param headers optional headers
 	 * @param config  configuration used to resolve header placeholders
 	 * @return connection
-	 * @throws IOException if opening a connection fails
+	 * @throws IllegalArgumentException if {@code uri} cannot be converted to a URL
+	 * @throws IOException              if opening a connection fails
 	 */
 	HttpURLConnection getConnection(URI uri, Map<String, String> headers, Configurator config) throws IOException {
 		URI cleanUri = uri;
@@ -286,7 +297,9 @@ public class WebFunctionTools implements FunctionTools {
 	 * @param timeout     timeout in milliseconds
 	 * @param charsetName charset used to decode the response
 	 * @return response content including an initial status line
-	 * @throws IOException if the request cannot be executed
+	 * @throws IllegalArgumentException if {@code charsetName} does not identify a
+	 *                                  supported character set
+	 * @throws IOException              if the request cannot be executed
 	 */
 	String getWebPage(HttpURLConnection connection, int timeout, String charsetName) throws IOException {
 		StringBuilder output = new StringBuilder();
@@ -394,7 +407,9 @@ public class WebFunctionTools implements FunctionTools {
 	 * @param responseCode HTTP response code
 	 * @param response     builder already containing the status line
 	 * @return response text
-	 * @throws IOException if reading the response fails
+	 * @throws IllegalArgumentException if {@code charsetName} does not identify a
+	 *                                  supported character set
+	 * @throws IOException              if reading the response fails
 	 */
 	private String parseResult(String requestId, String charsetName, HttpURLConnection connection, int responseCode,
 			StringBuilder response) throws IOException {
@@ -433,8 +448,10 @@ public class WebFunctionTools implements FunctionTools {
 	 * @param body        optional request body
 	 * @param config      configuration used for header substitution
 	 * @return configured HTTP connection
-	 * @throws IOException if the connection cannot be opened or the request body
-	 *                     cannot be written
+	 * @throws IllegalArgumentException if the URL, HTTP method, or character set is
+	 *                                  invalid
+	 * @throws IOException              if the connection cannot be opened or the
+	 *                                  request body cannot be written
 	 */
 	private HttpURLConnection getConnection(String requestId, String url, String charsetName, String method,
 			int timeout, Map<String, String> headers, String body, Configurator config)

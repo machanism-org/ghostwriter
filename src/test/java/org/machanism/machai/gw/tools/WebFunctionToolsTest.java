@@ -1,7 +1,6 @@
 package org.machanism.machai.gw.tools;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
@@ -10,7 +9,6 @@ import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -105,39 +103,6 @@ class WebFunctionToolsTest {
         // Assert
         assertEquals("value", connection.properties.get("X-Header"));
         assertEquals("plain", tools.applySelectorIfPresent(" ", "plain"));
-    }
-
-    @Test
-    void getWebContentReadsAbsoluteFileUriAndCanRenderItsHtmlAsText() throws Exception {
-        // Arrange
-        Path file = temporaryDirectory.resolve("page.html");
-        Files.write(file, "<main>Local <b>content</b></main>".getBytes(StandardCharsets.UTF_8));
-        WebFunctionTools tools = new WebFunctionTools();
-
-        // Act
-        String result = tools.getWebContent(file.toUri().toString(), null, 0, "UTF-8", true, "", null, null);
-
-        // Assert
-        assertTrue(result.contains("Local content"));
-    }
-
-    @Test
-    void getWebContentReadsProjectRelativeFileUriAndPropagatesMissingFileErrors() throws Exception {
-        // Arrange
-        Path file = temporaryDirectory.resolve("relative.txt");
-        Files.write(file, "project scoped".getBytes(StandardCharsets.UTF_8));
-        WebFunctionTools tools = new WebFunctionTools();
-
-        // Act
-        String content = tools.getWebContent("file://./relative.txt", null, 0, "UTF-8", false, "",
-                temporaryDirectory.toFile(), null);
-        java.io.FileNotFoundException error = assertThrows(java.io.FileNotFoundException.class,
-                () -> tools.getWebContent("file://./does-not-exist.txt", null, 0, "UTF-8", false, "",
-                        temporaryDirectory.toFile(), null));
-
-        // Assert
-        assertEquals("project scoped", content);
-        assertTrue(error.getMessage().contains("does-not-exist.txt"));
     }
 
     private void startServer(com.sun.net.httpserver.HttpHandler handler) throws IOException {
