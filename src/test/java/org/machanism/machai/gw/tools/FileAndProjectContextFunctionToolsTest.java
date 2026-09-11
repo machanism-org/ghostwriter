@@ -32,7 +32,7 @@ class FileAndProjectContextFunctionToolsTest {
         // Act
         String created = tools.writeFile(new File("nested/note.txt"), "hello", "UTF-8", root);
         String updated = tools.writeFile(new File("nested/note.txt"), "updated", "UTF-8", root);
-        String content = tools.readFile(new File("nested/note.txt"), "UTF-8", root);
+        String content = tools.readFile(new File("nested/note.txt"), "UTF-8", root, null);
         Map<String, List<String>> immediate = tools.listFiles(new File("nested"), root);
         Object recursiveFiles = tools.getRecursiveFiles(new File("."), 10, root);
         Object recursiveFolders = tools.getRecursiveFolders(new File("."), 10, root);
@@ -61,7 +61,7 @@ class FileAndProjectContextFunctionToolsTest {
         assertEquals("No files found in directory.", tools.getRecursiveFiles(new File("missing"), 2, root));
         assertEquals("No folders found in directory.", tools.getRecursiveFolders(new File("missing"), 2, root));
         IOException missing = assertThrows(IOException.class,
-                () -> tools.readFile(new File("missing.txt"), "UTF-8", root));
+                () -> tools.readFile(new File("missing.txt"), "UTF-8", root, null));
         assertTrue(missing.getMessage().contains("does not exist"));
         assertOutsidePathIsRejected(tools, outside, root);
         assertEscapingWriteIsRejected(tools, root);
@@ -191,7 +191,7 @@ class FileAndProjectContextFunctionToolsTest {
 
     private void readOutsideFile(FileFunctionTools tools, Path outside, File root) {
         try {
-            tools.readFile(outside.toFile(), "UTF-8", root);
+            tools.readFile(outside.toFile(), "UTF-8", root, null);
         } catch (IOException exception) {
             throw new IllegalStateException(exception);
         }

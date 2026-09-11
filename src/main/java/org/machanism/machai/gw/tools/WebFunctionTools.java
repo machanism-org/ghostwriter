@@ -135,8 +135,8 @@ public class WebFunctionTools implements FunctionTools {
 					configurator);
 		}
 
-		if (logger.isInfoEnabled()) {
-			logger.info("[WEB {}] Downloaded web content ({} bytes): {}.", requestId, response.length(),
+		if (logger.isDebugEnabled()) {
+			logger.debug("[WEB {}] Downloaded web content ({} bytes): {}.", requestId, response.length(),
 					StringUtils.abbreviate(response, AbstractAIProvider.LOG_LINE_LENG)
 							.replace(AbstractAIProvider.LINE_SEPARATOR, " ").replace("\r", ""));
 		}
@@ -187,10 +187,9 @@ public class WebFunctionTools implements FunctionTools {
 	private String fetchHttpContent(String requestId, Map<String, String> headers, int timeout, String charsetName,
 			URI uri, Configurator config) throws IOException {
 		HttpURLConnection connection = getConnection(uri, headers, config);
-		logger.info("[WEB {}] URL: {}", requestId, connection.getURL());
+		logger.debug("[WEB {}] URL: {}", requestId, connection.getURL());
 
 		String response = getWebPage(connection, timeout, charsetName);
-
 		return response;
 	}
 
@@ -441,7 +440,7 @@ public class WebFunctionTools implements FunctionTools {
 			int timeout, Map<String, String> headers, String body, Configurator config)
 			throws IOException {
 		HttpURLConnection connection = getConnection(URI.create(url), headers, config);
-		logger.info("[REST {}] URL: {}", requestId, connection.getURL());
+		logger.debug("[REST {}] URL: {}", requestId, connection.getURL());
 
 		connection.setRequestMethod(method);
 
