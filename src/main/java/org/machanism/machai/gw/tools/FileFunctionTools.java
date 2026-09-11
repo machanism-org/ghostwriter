@@ -17,6 +17,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
+import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.macha.core.commons.configurator.Substitutor;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
@@ -55,22 +57,31 @@ public class FileFunctionTools implements FunctionTools {
 	private static final String DEFAULT_CHARSET = "UTF-8";
 
 	/**
-	 * Lists the contents of a specified directory within a project, grouping the results
-	 * into separate lists for directories and files using their relative paths.
+	 * Lists the contents of a specified directory within a project, grouping the
+	 * results into separate lists for directories and files using their relative
+	 * paths.
 	 *
-	 * <p>This method resolves the target directory using {@code dirPath} and {@code projectDir},
-	 * verifies that it is a valid directory, and iterates through its direct children. Each child 
-	 * is classified as either a directory or a file and its relative path is added to the 
-	 * corresponding list in the returned map.</p>
+	 * <p>
+	 * This method resolves the target directory using {@code dirPath} and
+	 * {@code projectDir}, verifies that it is a valid directory, and iterates
+	 * through its direct children. Each child is classified as either a directory
+	 * or a file and its relative path is added to the corresponding list in the
+	 * returned map.
+	 * </p>
 	 *
-	 * @param dirPath    the path to the target directory to list contents of. Defaults to {@code "."} (current directory).
-	 * @param projectDir the root project directory used to compute relative paths for the listed files and folders.
+	 * @param dirPath    the path to the target directory to list contents of.
+	 *                   Defaults to {@code "."} (current directory).
+	 * @param projectDir the root project directory used to compute relative paths
+	 *                   for the listed files and folders.
 	 * @return a {@link Map} containing two key-value pairs:
 	 *         <ul>
-	 *             <li>{@code "directories"} - a {@link List} of relative paths for all subdirectories found.</li>
-	 *             <li>{@code "files"} - a {@link List} of relative paths for all files found.</li>
+	 *         <li>{@code "directories"} - a {@link List} of relative paths for all
+	 *         subdirectories found.</li>
+	 *         <li>{@code "files"} - a {@link List} of relative paths for all files
+	 *         found.</li>
 	 *         </ul>
-	 *         If the specified path is not a directory or is empty, the respective lists will be empty.
+	 *         If the specified path is not a directory or is empty, the respective
+	 *         lists will be empty.
 	 * @throws IllegalArgumentException if either path is {@code null}, cannot be
 	 *                                  canonicalized, or the requested path is
 	 *                                  outside {@code projectDir}
@@ -79,12 +90,12 @@ public class FileFunctionTools implements FunctionTools {
 	public Map<String, List<String>> listFiles(
 			@Param(name = "dir-path", description = "The path to the directory to list contents of.", defaultValue = ".") File dirPath,
 			@Param(name = "project-dir", description = "The project dir.") File projectDir) {
-		
+
 		File directory = getFile(dirPath, projectDir);
-		
+
 		List<String> directories = new ArrayList<>();
 		List<String> files = new ArrayList<>();
-		
+
 		if (directory.isDirectory()) {
 			File[] listFiles = directory.listFiles();
 			if (listFiles != null) {
@@ -98,11 +109,11 @@ public class FileFunctionTools implements FunctionTools {
 				}
 			}
 		}
-		
+
 		Map<String, List<String>> result = new HashMap<>();
 		result.put("directories", directories);
 		result.put("files", files);
-		
+
 		return result;
 	}
 
@@ -261,7 +272,7 @@ public class FileFunctionTools implements FunctionTools {
 	 * @param file        destination file
 	 * @param content     content to write
 	 * @param charsetName character set name
-	 * @throws IOException if writing fails
+	 * @throws IOException              if writing fails
 	 * @throws IllegalArgumentException if {@code charsetName} does not identify a
 	 *                                  supported character set
 	 */
@@ -280,7 +291,7 @@ public class FileFunctionTools implements FunctionTools {
 	 * @param charsetName character set name
 	 * @param filePath    original (relative) file path used for messaging
 	 * @return success message
-	 * @throws IOException if an I/O error occurs
+	 * @throws IOException              if an I/O error occurs
 	 * @throws IllegalArgumentException if {@code charsetName} does not identify a
 	 *                                  supported character set
 	 */
@@ -308,19 +319,27 @@ public class FileFunctionTools implements FunctionTools {
 	 * <li>{@link File} working directory</li>
 	 * </ol>
 	 * 
-	 * @param filePath    file to read, relative to {@code projectDir}
-	 * @param charsetName character set used to decode the file
-	 * @param projectDir  project root used to resolve the file
+	 * @param filePath     file to read, relative to {@code projectDir}
+	 * @param charsetName  character set used to decode the file
+	 * @param projectDir   project root used to resolve the file
+	 * @param configurator configuration used to substitute URL and header values
 	 * @return the file contents as text
-	 * @throws IOException if the path is not a regular file or cannot be read
+	 * @throws IOException              if the path is not a regular file or cannot
+	 *                                  be read
 	 * @throws IllegalArgumentException if the requested path is invalid or outside
 	 *                                  {@code projectDir}
 	 */
 	@Tool(name = "read-file", description = "Read the contents of a file from the disk.")
 	public String readFile(@Param(name = "file-path", description = "The path to the file to be read.") File filePath,
 			@Param(name = "charset-name", description = "the name of the requested charset.", defaultValue = DEFAULT_CHARSET) String charsetName,
-			@Param(name = "project-dir", description = "The project dir.") File projectDir) throws IOException {
+			@Param(name = "project-dir", description = "The project dir.") File projectDir, Configurator configurator)
+			throws IOException {
 		String result;
+
+		if (configurator != null) {
+			filePath = new File(Substitutor.replace(filePath.getPath(), configurator));
+		}
+
 		filePath = getFile(filePath, projectDir);
 		if (!filePath.isFile()) {
 			String detail = filePath.isDirectory() ? "is a directory" : "does not exist";
@@ -374,8 +393,8 @@ public class FileFunctionTools implements FunctionTools {
 	 * @param file         target file or directory
 	 * @param addSingleDot whether to prefix relative path with {@code ./}
 	 * @return relative path, {@code .} if {@code dir} equals {@code file}, or
-	 *         {@code null} when either argument is {@code null} or the paths
-	 *         cannot be relativized (for example, because they use different roots)
+	 *         {@code null} when either argument is {@code null} or the paths cannot
+	 *         be relativized (for example, because they use different roots)
 	 */
 	public static String getRelativePath(File dir, File file, boolean addSingleDot) {
 		if (dir == null || file == null) {
