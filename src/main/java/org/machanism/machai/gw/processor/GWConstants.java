@@ -1,10 +1,14 @@
 package org.machanism.machai.gw.processor;
 
+/*@guidance: >>> ${guidances}/def-class-javadoc.md */
 /**
  * Central constants used by Ghostwriter configuration and runtime processing.
  */
 public final class GWConstants {
 
+	/**
+	 * Prevents instantiation of this utility class.
+	 */
 	private GWConstants() {
 	}
 
@@ -42,13 +46,20 @@ public final class GWConstants {
 	 */
 	public static final String CONFIG_PROP_NAME = "gw.config";
 
-	/** Configuration property for the active model/provider. */
+	/**
+	 * Configuration property that selects the active AI model or provider.
+	 */
 	public static final String MODEL_PROP_NAME = "gw.model";
 
-	/** Configuration property for system instructions. */
+	/**
+	 * Configuration property containing system instructions supplied to the AI
+	 * provider.
+	 */
 	public static final String INSTRUCTIONS_PROP_NAME = "gw.instructions";
 
-	/** Configuration property for excluded paths. */
+	/**
+	 * Configuration property containing paths excluded from processing.
+	 */
 	public static final String EXCLUDES_PROP_NAME = "gw.excludes";
 
 	/**
@@ -99,15 +110,25 @@ public final class GWConstants {
 	 */
 	public static final String PATH_PROP_NAME = "gw.path";
 
-	/** Configuration property controlling recursive module traversal. */
+	/**
+	 * Configuration property that disables recursive traversal of project modules
+	 * when enabled.
+	 */
 	public static final String NONRECURSIVE_PROP_NAME = "gw.nonRecursive";
 
-	/** Configuration property controlling interactive mode. */
+	/**
+	 * Configuration property that enables interactive command processing.
+	 */
 	public static final String INTERACTIVE_MODE_PROP_NAME = "gw.interactive";
 
-	/** Line continuation marker used for multi-line console input. */
+	/**
+	 * Character that marks a console input line as continuing on the next line.
+	 */
 	public static final char MULTIPLE_LINES_BREAKER = '\\';
 
+	/**
+	 * Maximum line length used when formatting log output.
+	 */
 	public static final int LOG_LINE_LENGTH = 73;
 
 }

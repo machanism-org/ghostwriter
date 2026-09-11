@@ -13,6 +13,7 @@ import org.machanism.machai.ai.tools.Tool;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/*@guidance: >>> ${guidances}/def-class-javadoc.md */
 /**
  * Provides function tools for managing project-specific context variables.
  * <p>
@@ -30,9 +31,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class ProjectContextFunctionTools implements FunctionTools {
 
-	/** Map of project directories to their context variable maps. */
+	/**
+	 * Thread-safe registry that associates each project directory with its mutable
+	 * context-variable map. Individual maps are also used as synchronization locks
+	 * for compound operations on their values.
+	 */
 	private static final Map<File, Map<String, Object>> contextProjectMap = new ConcurrentHashMap<>();
-	/** Prefix shared by context-variable status messages. */
+	/** Prefix shared by status messages that identify a context variable. */
 	private static final String CONTEXT_VARIABLE_PREFIX = "Context variable '";
 
 	/**
@@ -122,9 +127,10 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 * @param names      The names of the context variables to retrieve.
 	 * @param projectDir The project directory with which the context variable is
 	 *                   associated.
-	 * @return The value of the context variable if found, a message indicating that
-	 *         the variable or context was not found, or an error message if
-	 *         retrieval fails.
+	 * @return A map containing an entry for every requested name. Entries whose
+	 *         variables are absent have a {@code null} value.
+	 * @throws IllegalArgumentException If no context has been created for
+	 *                                  {@code projectDir}.
 	 */
 	@Tool(name = "get-project-context-variables", description = "Retrieves the value of a variable from the project-specific context. Use this to access a named "
 			+ "variable associated with a particular project for act execution or prompt templates.")
@@ -167,8 +173,8 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 * @param value      The value to push to the context variable.
 	 * @param projectDir The project directory with which the context variable is
 	 *                   associated.
-	 * @return A message indicating the result of the operation, or an error message
-	 *         if the operation fails or the variable type is unsupported.
+	 * @return A success message, or an error message if the operation fails or the
+	 *         existing variable has an unsupported type.
 	 */
 	@Tool(name = "push-project-context-variable", description = "Pushes a value to a project context variable. If the variable exists and is a string, it is converted to a list. Otherwise, the value is appended.")
 	public static Object pushProjectContextVariable(
@@ -235,8 +241,9 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 * @param mode       Pop mode, either "LIFO" (default) or "FIFO".
 	 * @param projectDir The project directory with which the context variable is
 	 *                   associated.
-	 * @return The removed value, or a message if the variable does not exist, is
-	 *         empty, or is of an unsupported type, or if an error occurs.
+	 * @return The removed value, or a message if the context or variable does not
+	 *         exist, the list is empty, the variable type is unsupported, or an
+	 *         error occurs.
 	 */
 	@Tool(name = "pop-project-context-variable", description = "Removes and returns a value from a project context variable. If the variable is a string, it is removed and returned. If it is a list, "
 			+ "the value is removed in LIFO (last-in, first-out) or FIFO (first-in, first-out) mode.")

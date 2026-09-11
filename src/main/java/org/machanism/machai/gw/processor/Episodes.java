@@ -14,8 +14,9 @@ import org.machanism.machai.gw.tools.RepeatEpisodeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/*@guidance:
- * Class javadoc description should describe supported functionality and provide examples to use it.
+/*@guidance: >>> ${guidances}/def-class-javadoc.md 
+ * 
+ * Class javadoc should describe supported functionality and provide examples to use it.
  * If the method used as Javadoc documentation is not public or protected, the method name should not be specified.
  */
 /**
@@ -67,6 +68,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class Episodes {
+    /** Prefix that identifies a first-level Markdown episode heading. */
     private static final String HEADER_MARKER = "# ";
 
     /** Logger for documentation input processing events. */
@@ -81,8 +83,15 @@ public class Episodes {
     /** Logical act name associated with the episodes. */
     private String name;
 
+    /** Processor that receives the result produced by each completed episode. */
     private ActProcessor actProcessor;
 
+    /**
+     * Creates an episode collection whose execution results are recorded by the
+     * supplied processor.
+     *
+     * @param actProcessor processor that receives completed episode results
+     */
     public Episodes(ActProcessor actProcessor) {
         this.actProcessor = actProcessor;
     }
@@ -104,6 +113,13 @@ public class Episodes {
         this.selectedEpisodes = selectedEpisodeIds;
     }
 
+    /**
+     * Finds the 1-based identifier of the episode with the supplied heading.
+     *
+     * @param episodeName heading name to locate
+     * @return the matching 1-based episode identifier
+     * @throws EpisodeNotFoundException if no episode has the requested heading
+     */
     private int getEpisodeIdByName(String episodeName) {
         for (int id = 1; id <= episodePrompts.size(); id++) {
             String firstHeaderLine = getEpisodeName(id);
@@ -114,6 +130,14 @@ public class Episodes {
         throw new EpisodeNotFoundException(episodeName);
     }
 
+    /**
+     * Extracts an episode's first-level Markdown heading, excluding optional
+     * YAML-style front matter.
+     *
+     * @param episodeId 1-based identifier of the episode to inspect
+     * @return the normalized heading text, or {@code null} when no heading exists
+     * @throws IndexOutOfBoundsException if the identifier does not address an episode
+     */
     private String getEpisodeName(int episodeId) {
         String episode = StringUtils.trim(episodePrompts.get(episodeId - 1));
         if (Strings.CS.startsWith(episode, "---")) {
@@ -131,6 +155,7 @@ public class Episodes {
      *
      * @param startEpisodeId starting 1-based episode index
      * @param func callback used to execute an episode
+     * @throws IndexOutOfBoundsException if a requested episode index is invalid
      */
     public void regularOrder(Integer startEpisodeId, BiFunction<Integer, String, String> func) {
         Integer moveToEpisodeId = startEpisodeId;
@@ -139,6 +164,16 @@ public class Episodes {
         }
     }
 
+    /**
+     * Executes consecutive episodes until completion or a move request changes
+     * the next episode to execute.
+     *
+     * @param startEpisodeId 1-based identifier at which execution begins
+     * @param func callback used to execute each episode
+     * @return the requested destination after a move, or {@code null} on completion
+     * @throws IndexOutOfBoundsException if an episode identifier is invalid
+     * @throws EpisodeNotFoundException if a named move destination does not exist
+     */
     private Integer executeRegularEpisodes(int startEpisodeId, BiFunction<Integer, String, String> func) {
         try {
             for (int episodeId = startEpisodeId; episodeId <= episodePrompts.size(); episodeId++) {
@@ -154,7 +189,8 @@ public class Episodes {
      * Executes only the explicitly selected episodes in their requested order.
      *
      * @param func callback used to execute an episode
-     * @return the last processed episode identifier
+     * @return the last processed episode identifier, or {@code 0} when none are selected
+     * @throws IndexOutOfBoundsException if a selected episode identifier is invalid
      */
     public int requestedOrder(BiFunction<Integer, String, String> func) {
         int episodeId = 0;
@@ -165,6 +201,14 @@ public class Episodes {
         return episodeId;
     }
 
+    /**
+     * Executes an episode repeatedly until its callback completes without asking
+     * for another iteration.
+     *
+     * @param episodeId 1-based identifier of the episode to execute
+     * @param func callback used to execute the episode
+     * @throws IndexOutOfBoundsException if the identifier does not address an episode
+     */
     private void executeEpisodeWithRepeats(int episodeId, BiFunction<Integer, String, String> func) {
         int iteration = 1;
         boolean repeat;
@@ -173,6 +217,16 @@ public class Episodes {
         } while (repeat);
     }
 
+    /**
+     * Runs one iteration of an episode and records its result when completed.
+     *
+     * @param episodeId 1-based identifier of the episode to execute
+     * @param iteration current execution iteration, starting at {@code 1}
+     * @param func callback used to execute the episode
+     * @return {@code true} when the iteration completed, or {@code false} when it
+     *         requested a repeat
+     * @throws IndexOutOfBoundsException if the identifier does not address an episode
+     */
     private boolean executeEpisode(int episodeId, int iteration, BiFunction<Integer, String, String> func) {
         try {
             String episode = episodePrompts.get(episodeId - 1);
@@ -187,6 +241,11 @@ public class Episodes {
         }
     }
 
+    /**
+     * Logs a nonblank execution result using the standard output prefix.
+     *
+     * @param perform result returned by an episode callback
+     */
     private void logResult(String perform) {
         if (StringUtils.isNoneBlank(perform)) {
             logger.info(AIFileProcessor.LOG_OUTPUT_PREFIX, perform);
@@ -199,6 +258,7 @@ public class Episodes {
      * @param requestedEpisodeId current fallback episode index
      * @param exception exception describing the requested move
      * @return resolved 1-based episode index
+     * @throws EpisodeNotFoundException if the requested episode name does not exist
      */
     public Integer getEpisodeId(Integer requestedEpisodeId, MoveToEpisodeException exception) {
         Integer episodeId = exception.getEpisodeId();
@@ -211,6 +271,15 @@ public class Episodes {
         return requestedEpisodeId;
     }
 
+    /**
+     * Logs a visual boundary around an episode execution when episode or iteration
+     * information is useful.
+     *
+     * @param episodeId 1-based identifier of the episode being logged
+     * @param iteration current execution iteration
+     * @param msg boundary label, such as {@code Start} or {@code End}
+     * @throws IndexOutOfBoundsException if the identifier does not address an episode
+     */
     private void logEpisodeHeader(int episodeId, int iteration, String msg) {
         if ((episodePrompts.size() > 1 || iteration > 1) && logger.isInfoEnabled()) {
             String iterationLabel = iteration > 1 ? " [Iteration: " + iteration + "]) " : " ";
@@ -221,22 +290,49 @@ public class Episodes {
         }
     }
 
+    /**
+     * Replaces the ordered prompts available for execution.
+     *
+     * @param episodes ordered list of episode prompts
+     */
     public void setEpisodes(List<String> episodes) {
         this.episodePrompts = episodes;
     }
 
+    /**
+     * Returns the ordered episode prompts.
+     *
+     * @return ordered list of episode prompts
+     */
     public List<String> getEpisodes() {
         return episodePrompts;
     }
 
+    /**
+     * Determines whether all episodes should execute in their natural order.
+     *
+     * @return {@code true} if no explicit episode selection exists; otherwise
+     *         {@code false}
+     */
     public boolean isRegularOrder() {
         return selectedEpisodes.isEmpty();
     }
 
+    /**
+     * Returns the number of configured episode prompts.
+     *
+     * @return number of configured episodes
+     */
     public int size() {
         return episodePrompts.size();
     }
 
+    /**
+     * Builds metadata describing every configured episode and the current episode.
+     *
+     * @param episodeId 1-based identifier of the current episode
+     * @return map containing episode metadata and the current episode identifier
+     */
     public Map<String, Object> getActInformation(int episodeId) {
         Map<String, Object> result = new HashMap<>();
         List<Map<String, String>> episodesArray = new ArrayList<>();
@@ -252,10 +348,20 @@ public class Episodes {
         return result;
     }
 
+    /**
+     * Returns the logical name associated with this act.
+     *
+     * @return act name, or {@code null} when no name has been assigned
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Assigns the logical name associated with this act.
+     *
+     * @param name act name to assign
+     */
     public void setName(String name) {
         this.name = name;
     }

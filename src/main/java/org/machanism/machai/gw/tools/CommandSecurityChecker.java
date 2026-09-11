@@ -15,6 +15,7 @@ import org.machanism.machai.gw.processor.ActProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/*@guidance: >>> ${guidances}/def-class-javadoc.md */
 /**
  * Loads and evaluates command deny-list rules used by host-side command
  * execution tools.
@@ -32,23 +33,34 @@ import org.slf4j.LoggerFactory;
  *
  * <p>
  * This class provides a best-effort heuristic check. It should be used in
- * addition to an allow-list and other host security controls.
+ * addition to an allow-list and other host security controls. Instances load
+ * their rules during construction and are intended to be reused for subsequent
+ * command checks.
  * </p>
  *
  * @author Viktor Tovstyi
  */
 public class CommandSecurityChecker {
 	/**
-	 * Configuration property allowing the host to inject/extend the deny-list.
+	 * Configuration property whose value replaces or extends the loaded deny-list.
+	 *
+	 * <p>
+	 * When its value includes {@link ActProcessor#SUPER_VALUE_PLACEHOLDER}, that
+	 * placeholder is replaced with the operating-system-specific default rules.
+	 * </p>
 	 */
 	private static final String DENYLIST_PROP_NAME = "ft.command.denylist";
 
 	/** Logger used to report deny-list loading diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(CommandSecurityChecker.class);
 
-	/** Compiled regular-expression rules that reject matching command fragments. */
+	/**
+	 * Compiled regular-expression rules that reject matching command fragments.
+	 */
 	private final List<Pattern> denyPatterns = new ArrayList<>();
-	/** Case-insensitive keyword rules that reject matching command fragments. */
+	/**
+	 * Case-insensitive keyword rules that reject matching command fragments.
+	 */
 	private final List<String> denyKeywords = new ArrayList<>();
 
 	/**
@@ -68,11 +80,13 @@ public class CommandSecurityChecker {
 	 * override the default deny-list.
 	 * </p>
 	 *
-	 * @param configurator configurator used to optionally extend the deny-list
+	 * @param configurator configurator used to optionally extend the deny-list;
+	 *                     must not be {@code null}
 	 * @throws IOException              if the selected resource cannot be found or
 	 *                                  read
 	 * @throws IllegalArgumentException if no deny-list is defined for the current
 	 *                                  operating system
+	 * @throws NullPointerException     if {@code configurator} is {@code null}
 	 */
 	public CommandSecurityChecker(Configurator configurator) throws IOException {
 		String resourcePath;
@@ -113,8 +127,14 @@ public class CommandSecurityChecker {
 	 * This method is intended for internal initialization.
 	 * </p>
 	 *
+	 * Empty strings and {@code null} values produce no rules and are logged as a
+	 * warning. Lines with an unrecognized prefix are ignored.
+	 *
 	 * @param rulesString string containing rule definitions, separated by line
-	 *                    breaks
+	 *                    breaks; may be {@code null}
+	 * @throws java.util.regex.PatternSyntaxException if a {@code REGEX:} rule is
+	 *                                                 not a valid Java regular
+	 *                                                 expression
 	 */
 	private void loadRules(String rulesString) {
 		if (rulesString == null || rulesString.isEmpty()) {
@@ -145,8 +165,9 @@ public class CommandSecurityChecker {
 	 * message identifying the matched rule.
 	 * </p>
 	 *
-	 * @param command shell command to check
+	 * @param command shell command to check; must not be {@code null}
 	 * @throws DenyException if the command matches a deny-list rule
+	 * @throws NullPointerException if {@code command} is {@code null}
 	 */
 	public void denyCheck(String command) throws DenyException {
 		for (Pattern pattern : denyPatterns) {

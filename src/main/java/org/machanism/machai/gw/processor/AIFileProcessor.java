@@ -45,7 +45,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
 /*@guidance:
- * IMPORTANT: Create or update javadoc of AIFileProcessor class.
+ * >>> file://${guidances}/def-class-javadoc.md
  * Class javadoc description should describe supported functionality and provide examples to use it.
  * If the method used as Javadoc documentation is not public or protected, the method name should not be specified.
  * Functionality:

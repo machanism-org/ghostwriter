@@ -9,6 +9,7 @@ import org.machanism.machai.ai.tools.SupportedFor;
 import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.gw.processor.AIFileProcessor;
 
+/*@guidance: >>> ${guidances}/def-class-javadoc.md */
 /**
  * Provides Functional AI Tools for task and execution control within the
  * {@link AIFileProcessor} context.
@@ -22,17 +23,23 @@ import org.machanism.machai.gw.processor.AIFileProcessor;
 @SupportedFor({ AIFileProcessor.class })
 public class CommandSpecFunctionTools implements FunctionTools {
 
-	/** Default message supplied when a control tool receives no explicit message. */
+	/**
+	 * Default explanatory message used when a control-flow tool is invoked without
+	 * an explicit message.
+	 */
 	private static final String TASK_TERMINATED_BY_FUNCTION_TOOL_MESSAGE = "Execution terminated by function tool.";
 
 	/**
-	 * Functional AI Tool that requests application termination by throwing a
-	 * {@link ProcessTerminationException} with the supplied message and exit code.
+	 * Requests application termination by throwing a {@link ProcessTerminationException}.
+	 * The exception carries the supplied message and exit code for handling by the host.
 	 *
-	 * @param message message exposed to the host
-	 * @param exitCode exit code associated with termination
-	 * @param projectDir project directory associated with the invocation
-	 * @return This method never returns because it always requests termination.
+	 * <p>The {@code projectDir} argument is supplied by the tool infrastructure as
+	 * invocation context and is not used when constructing the termination request.</p>
+	 *
+	 * @param message human-readable message exposed to the host
+	 * @param exitCode process exit code requested from the host
+	 * @param projectDir project directory provided as invocation context; unused
+	 * @return never returns normally because it always requests termination
 	 * @throws ProcessTerminationException always, to request process termination
 	 */
 	@Tool(name = "terminate-execution", description = "Terminates the application by sending an exit code. This function tool should only be used when explicitly requested by the user.  "
@@ -45,12 +52,11 @@ public class CommandSpecFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Functional AI Tool that completes the current task by throwing an
-	 * {@link EndTaskException}. The host remains active and can accept subsequent
-	 * tasks.
+	 * Completes the current task by throwing an {@link EndTaskException}. The host
+	 * remains active and can accept subsequent tasks.
 	 *
-	 * @param message message describing task completion
-	 * @return This method never returns because it always signals task completion.
+	 * @param message human-readable message describing task completion
+	 * @return never returns normally because it always signals task completion
 	 * @throws EndTaskException always, to request task completion
 	 */
 	@Tool(name = "end-task", description = "Use this function if the user has requested to `end the task`. Ends the current task without terminating the application. "

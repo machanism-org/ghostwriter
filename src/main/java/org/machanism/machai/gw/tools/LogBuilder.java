@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.machanism.machai.project.layout.ProjectLayout;
 
+/*@guidance: >>> ${guidances}/def-class-javadoc.md */
 /**
  * A {@link StringBuilder}-like helper that retains only the last
  * {@code maxSize} characters.
@@ -34,44 +35,65 @@ import org.machanism.machai.project.layout.ProjectLayout;
 public class LogBuilder {
 
 	/**
-	 * Name of the directory where log files are stored.
+	 * Name of the directory beneath the runtime temporary directory where this
+	 * builder stores its persisted log file.
 	 * <p>
-	 * This directory is typically used as the parent location for all log files.
+	 * This directory is combined with {@link ProjectLayout#getTempDir()} when a
+	 * log path is requested.
 	 * </p>
 	 */
 	private final String folder;
 
 	/**
-	 * Standard file extension for log files.
+	 * Standard filename extension assigned to persisted command log files.
 	 * <p>
-	 * All log files created by this component or related utilities should use this
-	 * extension.
+	 * All log files created by this class use this extension after their log
+	 * identifier.
 	 * </p>
 	 */
 	public static final String LOG_EXTENSION = ".log";
 
-	/** Maximum number of characters to retain in the buffer. */
+	/**
+	 * Maximum number of characters retained in {@link #sb} after each append.
+	 */
 	private final int maxSize;
-	/** Internal buffer for retained log content. */
+	/**
+	 * Mutable buffer containing the most recently appended, retained log content.
+	 */
 	private final StringBuilder sb;
-	/** Flag indicating whether truncation has occurred. */
+	/**
+	 * Whether content has been removed from the beginning of the buffer since the
+	 * last call to {@link #clear()}.
+	 */
 	private boolean truncated;
-	/** Optional log identifier for file persistence. */
+	/**
+	 * Optional identifier used as the base name of the persisted log file.
+	 */
 	private final String logId;
-	/** Optional project directory for log file location. */
+	/**
+	 * Optional marker indicating that appended content should also be persisted.
+	 * The directory itself is not used to construct the log path.
+	 */
 	private final File projectDir;
-	/** Total number of characters ever appended. */
+	/**
+	 * Total number of characters accepted by {@link #append(String)} since this
+	 * instance was created, including content no longer retained in {@link #sb}.
+	 */
 	private int totalLength;
-	/** Start time in milliseconds since epoch. */
+	/**
+	 * Epoch time in milliseconds at which this builder was created.
+	 */
 	private final long startTime;
 
 	/**
 	 * Creates a builder that keeps at most {@code maxSize} characters.
 	 * 
-	 * @param folder     directory beneath the runtime temporary directory for the log file
+	 * @param folder     directory beneath the runtime temporary directory for the
+	 *                   persisted log file
 	 * @param maxSize    maximum number of characters to retain; must be positive
 	 * @param logId      optional log identifier for file persistence
-	 * @param projectDir optional project directory for log file location
+	 * @param projectDir optional non-null marker enabling file persistence when
+	 *                   {@code logId} is also non-null
 	 *
 	 * @throws IllegalArgumentException if {@code maxSize} is not positive
 	 */
@@ -108,8 +130,8 @@ public class LogBuilder {
 	 * @param text the text to append to the log buffer; if {@code null}, no action
 	 *             is taken
 	 * @return this {@code LogBuilder} instance for method chaining
-	 * @throws IllegalArgumentException if an I/O error occurs while writing to the
-	 *                                  log file
+	 * @throws java.io.UncheckedIOException if an I/O error occurs while writing to
+	 *                                     the log file
 	 */
 	public LogBuilder append(String text) {
 		if (text == null) {
@@ -151,7 +173,7 @@ public class LogBuilder {
 	 * @param folder the directory beneath the runtime temporary directory
 	 * @param logId  the log identifier used as the file name
 	 * @return the path to the log file
-	 * @throws RuntimeException if the log directory cannot be created
+	 * @throws java.io.UncheckedIOException if the log directory cannot be created
 	 */
 	public static Path getCommandLogPath(String folder, String logId) {
 		String tempDir = ProjectLayout.getTempDir();
@@ -169,8 +191,8 @@ public class LogBuilder {
 	 * Returns the retained content.
 	 *
 	 * <p>
-	 * If truncation occurred, a prefix is added to indicate that earlier content
-	 * was discarded.
+	 * Earlier content is omitted when the configured maximum size was exceeded;
+	 * callers can inspect {@link #getReport()} for the truncation status.
 	 * </p>
 	 *
 	 * @return retained text (possibly with a truncation prefix)
@@ -190,6 +212,11 @@ public class LogBuilder {
 
 	/**
 	 * Clears the retained content and resets the truncation flag.
+	 *
+	 * <p>
+	 * This operation does not reset the total appended length, the start time, or
+	 * any persisted log file.
+	 * </p>
 	 */
 	public void clear() {
 		sb.setLength(0);

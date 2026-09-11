@@ -26,9 +26,10 @@ import org.machanism.macha.core.commons.configurator.MutableConfigurator;
 import org.machanism.machai.project.ProjectProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 
+/*@guidance: >>> ${guidances}/def-class-javadoc.md */
 /**
- * Base implementation for processors that traverse a project directory and
- * perform work on files and folders.
+ * Abstract base implementation for processors that traverse project directories
+ * and perform work on their files and folders.
  *
  * <p>
  * {@code AbstractFileProcessor} provides common functionality used by the
@@ -45,7 +46,8 @@ import org.machanism.machai.project.layout.ProjectLayout;
  *
  * <p>
  * This class does not perform dependency resolution or builds; it operates on
- * the filesystem only.
+ * the filesystem only. Subclasses can override the protected processing hooks
+ * to supply their file-specific behavior.
  * </p>
  */
 public abstract class AbstractFileProcessor extends ProjectProcessor {
@@ -81,8 +83,8 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	/**
 	 * Creates a new file processor.
 	 *
-	 * @param rootDir      root directory used as a base for relative path
-	 * @param configurator configuration source used by implementations
+	 * @param rootDir      root directory used as a base for relative paths
+	 * @param configurator configuration source layered for use by implementations
 	 */
 	protected AbstractFileProcessor(File rootDir, Configurator configurator) {
 		super();
@@ -94,8 +96,9 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * Recursively scans project folders, processing documentation inputs for all
 	 * found modules and files.
 	 *
-	 * @param projectDir the directory containing the project/module to be scanned
-	 * @throws IOException if an error occurs reading files
+	 * @param projectDir the directory containing the project or module to scan
+	 * @throws IOException if a subclass encounters an error while reading or
+	 *                     processing files
 	 */
 	@Override
 	public void scanFolder(File projectDir) throws IOException {
@@ -120,8 +123,10 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	/**
 	 * Processes all discovered modules concurrently.
 	 *
-	 * @param projectLayout the parent project directory
-	 * @param modules       list of module relative paths
+	 * @param projectLayout layout for the parent project directory
+	 * @param modules       relative paths of the modules to process
+	 * @throws IllegalStateException if a module cannot be processed or the calling
+	 *                               thread is interrupted while waiting for a module
 	 */
 	void processModulesMultiThreaded(ProjectLayout projectLayout, List<String> modules) {
 		ExecutorService executor = Executors.newFixedThreadPool(threads);
@@ -181,7 +186,8 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Checks whether {@code dir} is one of the project module directories.
+	 * Checks whether {@code dir} is located in one of the project module
+	 * directories.
 	 *
 	 * @param projectLayout layout containing module definitions
 	 * @param dir           directory candidate
@@ -208,10 +214,9 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * </p>
 	 * <ol>
 	 * <li>If the {@code file} is {@code null}, returns {@code false}.</li>
-	 * <li>If the file's absolute path contains any of the excluded directory names
-	 * defined in {@code ProjectLayout.EXCLUDE_DIRS}, returns {@code false}.</li>
-	 * <li>Computes the relative path from {@code rootDir} to {@code file}. If this
-	 * is {@code null}, returns {@code false}.</li>
+	 * <li>If the file is excluded by the project layout, returns {@code false}.</li>
+	 * <li>If no matcher is configured, includes only the explicitly configured
+	 * scan path.</li>
 	 * <li>Uses {@code pathMatcher} to check if the relative path matches the
 	 * configured pattern.</li>
 	 * <li>If it does not match and {@code path} is not {@code null}, performs a
@@ -220,7 +225,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * </ol>
 	 *
 	 * @param file          the file to check for inclusion
-	 * @param projectLayout the project directory of the project
+	 * @param projectLayout layout for the project containing the file
 	 * @return {@code true} if the file matches all criteria for processing;
 	 *         {@code false} otherwise
 	 */
@@ -274,18 +279,19 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * Processes non-module files and directories directly under {@code rootDir}.
 	 *
 	 * @param projectLayout project layout
-	 * @throws IOException if file reading fails
+	 * @throws IOException if a subclass encounters an error while processing parent
+ *                     files
 	 */
 	protected void processParentFiles(ProjectLayout projectLayout) throws IOException {
 		// To be implemented by subclasses if needed
 	}
 
 	/**
-	 * Extracts guidance for a file and, when present, performs provider processing.
+	 * Processes one file in a project layout.
 	 *
 	 * @param projectLayout project layout
 	 * @param file          file to process
-	 * @throws IOException if reading the file or provider execution fails
+	 * @throws IOException if a subclass cannot read or process the file
 	 */
 	protected void processFile(ProjectLayout projectLayout, File file) throws IOException {
 		// To be implemented by subclasses
@@ -297,7 +303,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 *
 	 * @param projectDir directory to traverse
 	 * @return list of files found
-	 * @throws IOException if directory listing fails
+	 * @throws IOException if a directory cannot be listed
 	 */
 	List<File> listFiles(File projectDir) throws IOException {
 		if (projectDir == null || !projectDir.isDirectory()) {
@@ -420,7 +426,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * Processes a project layout for documentation gathering.
 	 *
 	 * @param projectLayout layout describing sources, tests, docs, and modules
-	 * @throws IOException
+	 * @throws IOException if project files cannot be listed or processed
 	 */
 	@Override
 	public void processFolder(ProjectLayout projectLayout) throws IOException {
@@ -492,7 +498,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 *
 	 * @param layout      project layout
 	 * @param filePattern directory path, {@code glob:}, or {@code regex:} pattern
-	 * @throws IOException 
+	 * @throws IOException if matching files cannot be listed or processed
 	 */
 	public void processProjectDir(ProjectLayout layout, String filePattern) throws IOException {
 		List<File> files = listFiles(layout.getProjectDir(), filePattern);

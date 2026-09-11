@@ -22,8 +22,8 @@ import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/*@guidance:
- * Class javadoc description should describe supported functionality and provide examples to use it.
+/*@guidance: >>> ${guidances}/def-class-javadoc.md 
+ * Class javadoc should describe supported functionality and provide examples to use it.
  * If the method used as Javadoc documentation is not public or protected, the method name should not be specified.
  * Functionality:
  *  - describe supported special markers, see javadoc for following constants:
@@ -69,7 +69,9 @@ import org.slf4j.LoggerFactory;
  */
 public class GuidanceProcessor extends AIFileProcessor {
 
-	/** Logger for documentation input processing events. */
+	/**
+	 * Logger used to record processor initialization and provider output.
+	 */
 	private static final Logger logger = LoggerFactory.getLogger(GuidanceProcessor.class);
 
 	/**
@@ -85,12 +87,21 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 */
 	public static final String GUIDANCE_TAG_NAME = "@" + "guidance:";
 
-	/** Resource bundle supplying prompt templates for generators. */
+	/**
+	 * Resource bundle that supplies the default system instructions and guidance
+	 * rules used when no explicit instructions are configured.
+	 */
 	final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
-	/** Reviewer associations keyed by file extension. */
+	/**
+	 * Reviewers indexed by normalized, dot-free lower-case file extension.
+	 */
 	private final Map<String, Reviewer> reviewerMap = new HashMap<>();
 
+	/**
+	 * Provider results accumulated during this processor instance's lifetime.
+	 * Each entry contains the relative file path and the provider message.
+	 */
 	private final List<Map<String, Object>> report = new ArrayList<>();
 
 	/**
@@ -115,8 +126,8 @@ public class GuidanceProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Loads file reviewers via the {@link ServiceLoader} registry, mapping
-	 * supported file extensions to a reviewer.
+	 * Loads file reviewers via the {@link ServiceLoader} registry, mapping each
+	 * supported normalized extension to the first reviewer that declares it.
 	 */
 	void loadReviewers() {
 		reviewerMap.clear();
@@ -153,7 +164,9 @@ public class GuidanceProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Applies matching logic and default-guidance behavior.
+	 * Applies path matching while preserving default-guidance behavior when no path
+	 * matcher is configured. In that case, all files are eligible when no default
+	 * prompt exists; otherwise only the project directory is eligible.
 	 *
 	 * @param file       candidate file/directory
 	 * @param projectLayout current project layout
@@ -170,7 +183,8 @@ public class GuidanceProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Processes a module directory.
+	 * Processes a module directory after determining whether it is relevant to the
+	 * configured scan path.
 	 *
 	 * <p>
 	 * When a scan directory or pattern is configured, modules are only processed
@@ -197,8 +211,9 @@ public class GuidanceProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Processes files and folders under the parent project directory (excluding
-	 * modules).
+	 * Processes files and folders under the parent project directory, excluding
+	 * module directories. A matching project directory is additionally processed
+	 * with the default prompt when one is configured.
 	 */
 	@Override
 	protected void processParentFiles(ProjectLayout projectLayout) throws IOException {
@@ -223,6 +238,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 
 	/**
 	 * Extracts guidance for a file and, when present, performs provider processing.
+	 * When the file has no guidance, the configured default prompt is used instead.
 	 *
 	 * @param projectLayout project layout
 	 * @param file          file to process
@@ -252,7 +268,8 @@ public class GuidanceProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Composes the final prompt and dispatches it to the configured provider.
+	 * Composes the final prompt, dispatches it to the configured provider, and adds
+	 * the resulting message to this processor's report.
 	 *
 	 * @param projectLayout project layout
 	 * @param file          file currently being processed
@@ -275,7 +292,9 @@ public class GuidanceProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Returns the current base instructions used for processing.
+	 * Returns the current base instructions used for processing. If no explicit
+	 * instructions are configured, this method returns the bundled guidance system
+	 * instructions.
 	 * 
 	 * @return the configured instruction text
 	 */
@@ -312,7 +331,8 @@ public class GuidanceProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Resolves a reviewer for a given file extension.
+	 * Resolves a reviewer for a given file extension after normalizing the extension
+	 * to the key format used by the reviewer registry.
 	 *
 	 * @param extension file extension (with or without a dot)
 	 * @return reviewer, or {@code null} if none is registered for that extension
@@ -325,6 +345,16 @@ public class GuidanceProcessor extends AIFileProcessor {
 		return reviewerMap.get(key);
 	}
 
+	/**
+	 * Configures provider tools, expanding the {@code "auto"} shortcut to the
+	 * built-in command, file, and web function-tool classes before delegating to
+	 * the base processor.
+	 *
+	 * @param instructions provider system instructions
+	 * @param prompts      prompts to provide to the provider
+	 * @param provider     configured GenAI provider
+	 * @param tools        requested tool class names or the {@code "auto"} shortcut
+	 */
 	@Override
 	protected void applyTools(String instructions, String[] prompts, Genai provider, String[] tools) {
 		if (tools != null && tools.length != 0 && tools[0].equals("auto")) {
@@ -335,7 +365,10 @@ public class GuidanceProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * @return the report
+	 * Returns the mutable list of processing results collected so far.
+	 *
+	 * @return result entries containing {@code "file"} and {@code "message"}
+	 *         values
 	 */
 	public List<Map<String, Object>> getReport() {
 		return report;

@@ -10,13 +10,15 @@ import org.machanism.machai.gw.processor.ActProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/*@guidance: >>> ${guidances}/def-class-javadoc.md */
 /**
- * Provides functional tools for episode navigation and control within the
- * ActProcessor context.
+ * Provides AI-callable functional tools for episode navigation and control
+ * within an {@link ActProcessor} context.
  * <p>
- * This class registers tools for moving between episodes and repeating episodes
- * in a project workflow. It is intended for use with {@link ActProcessor} and
- * integrates with the {@link Genai} provider.
+ * This {@link FunctionTools} implementation registers tools for moving to a
+ * requested episode and for repeating the current episode in a project workflow.
+ * It is intended for use with {@link ActProcessor} and integrates with the
+ * {@link Genai} provider.
  * </p>
  *
  * @author Viktor Tovstyi
@@ -24,20 +26,25 @@ import org.slf4j.LoggerFactory;
 @SupportedFor({ ActProcessor.class })
 public class ActSpecFunctionTools implements FunctionTools {
 
-	/** Logger for shell tool execution and diagnostics. */
+	/**
+	 * Logger used to emit the optional response message before the current episode
+	 * is repeated.
+	 */
 	private static final Logger logger = LoggerFactory.getLogger(ActSpecFunctionTools.class);
 
 	/**
-	 * AI functional tool that moves to the episode specified by {@code id} or
-	 * {@code name}. Sequential navigation to the next episode is handled
-	 * automatically by the system and should not invoke this tool.
+	 * AI functional tool that requests navigation to the episode identified by its
+	 * {@code id} or {@code name}. Use this tool only when the user explicitly
+	 * requests a particular episode; the system handles sequential navigation to
+	 * the next episode automatically.
 	 * <p>
-	 * This method always throws a {@link MoveToEpisodeException} to signal episode
-	 * navigation.
+	 * The method does not return normally. It throws a
+	 * {@link MoveToEpisodeException}, which the surrounding act-processing flow
+	 * interprets as a navigation request.
 	 * </p>
 	 *
-	 * @param targetId the ID of the episode to move to
-	 * @param name the name of the episode to move to
+	 * @param targetId the identifier of the requested episode
+	 * @param name the name of the requested episode
 	 * @throws MoveToEpisodeException always thrown to signal episode navigation
 	 */
 	@Tool(name = "move-to-episode", description = "Moves to a specific episode ONLY when the user explicitly requests to navigate to an episode by its 'id' or 'name'. "
@@ -48,16 +55,17 @@ public class ActSpecFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * AI functional tool that repeats the current episode by terminating the
-	 * current execution and restarting the same episode, preserving the context.
+	 * AI functional tool that repeats the current episode by terminating its
+	 * execution and restarting the same episode while preserving its context.
 	 * <p>
-	 * This method can be used to re-execute the current episode, for example, after
-	 * a validation failure or when additional user input is required. If a custom
-	 * message is provided, it is logged before the episode is repeated.
+	 * This method can re-execute an episode after a validation failure or when
+	 * additional user input is required. When {@code message} is non-empty, it is
+	 * emitted to the configured log before repetition is requested. The method does
+	 * not return normally.
 	 * </p>
 	 *
-	 * @param message A custom response message to output before repeating the
-	 *                episode. If empty, no message is logged.
+	 * @param message a non-null custom response message to log before repeating
+	 *                the episode; if empty, no message is logged
 	 * @throws RepeatEpisodeException always thrown to signal the episode should be
 	 *                                repeated
 	 */

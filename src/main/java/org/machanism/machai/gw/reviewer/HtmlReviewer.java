@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 
+/*@guidance: >>> ${guidances}/def-class-javadoc.md  */
 /**
  * {@link Reviewer} implementation for HTML and XML files ({@code .html}, {@code .htm}, {@code .xml}).
  *
@@ -20,6 +21,9 @@ import org.machanism.machai.project.layout.ProjectLayout;
  */
 public class HtmlReviewer implements Reviewer {
 
+	/**
+	 * Localized prompt templates used to construct review requests for HTML and XML files.
+	 */
 	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
 	/**

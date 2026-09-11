@@ -8,20 +8,24 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+/*@guidance: >>> ${guidances}/def-class-javadoc.md */
 /**
  * Applies unified and simplified search-and-replace diff patches to text files.
  *
  * <p>The utility parses patch hunks, locates their original context near the
  * position indicated by a unified-diff header, and writes the resulting lines
  * using the caller-supplied character set. It rejects patches that cannot be
- * matched, make no changes, or would erase a nonempty file.</p>
+ * matched, make no changes, or would erase a nonempty file. This class has no
+ * mutable shared state and exposes only static operations.</p>
  *
  * @author Viktor Tovstyi
  * @since 1.2.0
  */
 public final class PatchApplier {
 
-    /** Prevents instantiation of this static utility class. */
+    /**
+     * Prevents instantiation of this static utility class.
+     */
     private PatchApplier() {
         // Sonar java:S1118: utility methods are static, so construction is prohibited.
     }
@@ -74,11 +78,19 @@ public final class PatchApplier {
         lines.remove(index);
     }
 
-    /** Represents a single context, addition, or removal line in a patch hunk. */
+    /**
+     * Represents a parsed context, addition, or removal line in a patch hunk.
+     *
+     * <p>The operation identifies how the line affects the target file, while
+     * {@link #content} contains the corresponding text without the diff prefix.</p>
+     */
     private static final class PatchLine {
-        /** Patch operation: space for context, plus for addition, minus for removal. */
+        /**
+         * Patch operation: a space for context, a plus sign for addition, or a
+         * minus sign for removal.
+         */
         private final char operation;
-        /** Line content without its patch-operation prefix. */
+        /** Text of the line without its patch-operation prefix. */
         private final String content;
 
         /**
@@ -93,11 +105,16 @@ public final class PatchApplier {
         }
     }
 
-    /** Represents a patch hunk and its preferred zero-based starting position. */
+    /**
+     * Represents a patch hunk and its preferred zero-based starting position.
+     *
+     * <p>The start position is a preference derived from the hunk header; the
+     * applier can search nearby for the original context when necessary.</p>
+     */
     private static final class Hunk {
-        /** Expected zero-based location of the original hunk content. */
+        /** Preferred zero-based location of the original hunk content. */
         private final int expectedStart;
-        /** Raw lines that comprise the hunk. */
+        /** Raw, prefix-preserving patch lines that comprise the hunk. */
         private final List<String> lines;
 
         /**
@@ -118,9 +135,9 @@ public final class PatchApplier {
      * <p>Standard unified-diff headers, such as {@code @@ -1,5 +1,6 @@}, and
      * simplified {@code @@} headers are supported.</p>
      *
-     * @param file target file to patch
-     * @param patchLines lines from the patch file
-     * @param charset charset for reading and writing the file
+     * @param file target file to patch; it is created when absent
+     * @param patchLines ordered lines from the patch file
+     * @param charset character set used to read and write the target file
      * @throws IOException if file operations fail, a hunk cannot be applied, or
      *                     validation rejects the resulting content
      */

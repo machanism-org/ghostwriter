@@ -1,5 +1,6 @@
 package org.machanism.machai.gw.processor;
 
+/*@guidance: >>> ${guidances}/def-class-javadoc.md  */
 /**
  * Represents the context metadata keys used for evaluating and storing project layouts.
  * <p>
@@ -109,6 +110,9 @@ public enum ProjectContextKey {
      */
     MODULES("MODULES");
 
+    /**
+     * Raw string representation used to identify this context value in the backend registry map.
+     */
     private final String key;
 
     /**

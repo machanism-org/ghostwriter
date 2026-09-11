@@ -25,6 +25,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+/*@guidance: >>> ${guidances}/def-class-javadoc.md */
 /**
  * Installs file-system tools into a {@link Genai}.
  *
@@ -70,6 +71,9 @@ public class FileFunctionTools implements FunctionTools {
 	 *             <li>{@code "files"} - a {@link List} of relative paths for all files found.</li>
 	 *         </ul>
 	 *         If the specified path is not a directory or is empty, the respective lists will be empty.
+	 * @throws IllegalArgumentException if either path is {@code null}, cannot be
+	 *                                  canonicalized, or the requested path is
+	 *                                  outside {@code projectDir}
 	 */
 	@Tool(name = "list-files-in-directory", description = "List files and directories in a specified folder, grouped by type.")
 	public Map<String, List<String>> listFiles(
@@ -116,7 +120,8 @@ public class FileFunctionTools implements FunctionTools {
 	 * @return a {@link List} of relative file path strings, or a message string
 	 *         indicating no files were found
 	 * @throws IllegalArgumentException if the number of discovered files exceeds
-	 *                                  {@code max_count}
+	 *                                  {@code maxCount}, or if the requested path
+	 *                                  is invalid or outside {@code projectDir}
 	 */
 	@Tool(name = "get-recursive-file-list", description = "List files recursively in a directory (includes files in subdirectories).")
 	public Object getRecursiveFiles(
@@ -163,7 +168,8 @@ public class FileFunctionTools implements FunctionTools {
 	 * @return project-relative folder paths as a list, or a message when none are
 	 *         found
 	 * @throws IllegalArgumentException if the number of discovered folders exceeds
-	 *                                  {@code max_count}
+	 *                                  {@code maxCount}, or if the requested path
+	 *                                  is invalid or outside {@code projectDir}
 	 */
 	@Tool(name = "get-recursive-folder-list", description = "Recursively lists only the folder structure (directories) within a directory. Does not include files.")
 	public Object getRecursiveFolders(
@@ -223,6 +229,8 @@ public class FileFunctionTools implements FunctionTools {
 	 * @param charsetName character set used to encode the content
 	 * @param projectDir  project root used to resolve the file
 	 * @return a success message or an error message when writing fails
+	 * @throws IllegalArgumentException if the requested path is invalid or outside
+	 *                                  {@code projectDir}
 	 */
 	@Tool(name = "write-file", description = "Write changes to a file on the file system, either by replacing content at specific positions or writing the full content.")
 	public String writeFile(
@@ -254,6 +262,8 @@ public class FileFunctionTools implements FunctionTools {
 	 * @param content     content to write
 	 * @param charsetName character set name
 	 * @throws IOException if writing fails
+	 * @throws IllegalArgumentException if {@code charsetName} does not identify a
+	 *                                  supported character set
 	 */
 	private void writeFileContent(File file, String content, String charsetName) throws IOException {
 		try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charset.forName(charsetName))) {
@@ -271,6 +281,8 @@ public class FileFunctionTools implements FunctionTools {
 	 * @param filePath    original (relative) file path used for messaging
 	 * @return success message
 	 * @throws IOException if an I/O error occurs
+	 * @throws IllegalArgumentException if {@code charsetName} does not identify a
+	 *                                  supported character set
 	 */
 	private String writeNewFile(File file, String text, String charsetName, File filePath) throws IOException {
 		File parent = file.getParentFile();
@@ -301,6 +313,8 @@ public class FileFunctionTools implements FunctionTools {
 	 * @param projectDir  project root used to resolve the file
 	 * @return the file contents as text
 	 * @throws IOException if the path is not a regular file or cannot be read
+	 * @throws IllegalArgumentException if the requested path is invalid or outside
+	 *                                  {@code projectDir}
 	 */
 	@Tool(name = "read-file", description = "Read the contents of a file from the disk.")
 	public String readFile(@Param(name = "file-path", description = "The path to the file to be read.") File filePath,
@@ -360,7 +374,8 @@ public class FileFunctionTools implements FunctionTools {
 	 * @param file         target file or directory
 	 * @param addSingleDot whether to prefix relative path with {@code ./}
 	 * @return relative path, {@code .} if {@code dir} equals {@code file}, or
-	 *         {@code null} if {@code file} is not a descendant of {@code dir}
+	 *         {@code null} when either argument is {@code null} or the paths
+	 *         cannot be relativized (for example, because they use different roots)
 	 */
 	public static String getRelativePath(File dir, File file, boolean addSingleDot) {
 		if (dir == null || file == null) {
@@ -399,6 +414,13 @@ public class FileFunctionTools implements FunctionTools {
 	 * This AI functional tool applies a targeted unified or simplified
 	 * search-and-replace patch to a file within the project directory.
 	 * </p>
+	 *
+	 * @param file        path of the file to patch, relative to {@code projectDir}
+	 * @param patch       patch content in a supported format
+	 * @param charsetName character set used to read and write the file
+	 * @param projectDir  project root used to resolve the file
+	 * @return a success message, or a failure message containing the underlying
+	 *         error detail
 	 */
 	@Tool(name = "apply-patch-to-file", description = "Use this tool to update a part of a file efficiently "
 			+ "by applying a targeted diff patch. Supports two formats:\n"

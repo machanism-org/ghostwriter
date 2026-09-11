@@ -1,5 +1,6 @@
 package org.machanism.machai.gw.tools;
 
+/*@guidance: >>> ${guidances}/def-class-javadoc.md */
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -102,9 +103,13 @@ public class WebFunctionTools implements FunctionTools {
 	 * @param selector     optional CSS selector used to select response elements
 	 * @param projectDir   project root used to resolve file URLs
 	 * @param configurator configuration used to substitute URL and header values
-	 * @return fetched, optionally selected and rendered content, or an error
-	 *         message
-	 * @throws IOException
+	 * @return fetched content, optionally restricted to matching elements and
+	 *         rendered as plain text
+	 * @throws IllegalArgumentException if {@code url} is not a valid URI or
+	 *                                  {@code charsetName} does not name a supported
+	 *                                  charset
+	 * @throws IOException              if the target file cannot be read or the HTTP
+	 *                                  request cannot be completed
 	 */
 	@Tool(name = "get-web-content", description = "Fetches the content of a web page using an HTTP GET request or reads a project-scoped file. The URL may include user credentials in the userInfo format "
 			+ "(e.g., https://user:password@host/path) for basic authentication, or use the file:// scheme with a relative path resolved against the project directory.")
@@ -142,6 +147,15 @@ public class WebFunctionTools implements FunctionTools {
 		return response;
 	}
 
+	/**
+	 * Resolves a project-scoped {@code file:} URI and reads the referenced file.
+	 *
+	 * @param projectDir  project root used for relative file paths
+	 * @param charsetName character set used to decode the file
+	 * @param uri         file URI to resolve
+	 * @return content of the resolved file
+	 * @throws IOException if the resolved file cannot be read
+	 */
 	private String readFileUriContent(File projectDir, String charsetName, URI uri) throws IOException {
 		String path;
 		if (uri.toString().startsWith("file:///")) {
@@ -168,7 +182,7 @@ public class WebFunctionTools implements FunctionTools {
 	 * @param uri         target URI
 	 * @param config      configuration used for header substitution
 	 * @return response content
-	 * @throws IOException if the connection or response cannot be read
+	 * @throws IOException if the request cannot be configured, connected, or read
 	 */
 	private String fetchHttpContent(String requestId, Map<String, String> headers, int timeout, String charsetName,
 			URI uri, Configurator config) throws IOException {
@@ -185,8 +199,8 @@ public class WebFunctionTools implements FunctionTools {
 	 *
 	 * @param file        file to read
 	 * @param charsetName character set used to decode the file
-	 * @return file content or a not-found message
-	 * @throws IOException
+	 * @return decoded file content
+	 * @throws IOException if the file cannot be opened or decoded
 	 */
 	private String readFileContent(File file, String charsetName) throws IOException {
 		try (FileInputStream io = new FileInputStream(file)) {
@@ -333,9 +347,14 @@ public class WebFunctionTools implements FunctionTools {
 	 * @param projectDir   The project directory context for file-based URLs.
 	 * @param configurator The configuration object for property resolution and
 	 *                     header placeholder substitution.
-	 * @return The REST API response as a string, including the status line and
-	 *         response body, or an error message if the call fails.
-	 * @throws IOException if the URL connection cannot be opened or configured
+	 * @return the REST API response, including the status line and response body;
+	 *         when no response stream is available, a response-code summary
+	 * @throws IllegalArgumentException if {@code url} is not a valid URI,
+	 *                                  {@code method} is invalid, or
+	 *                                  {@code charsetName} does not name a supported
+	 *                                  charset
+	 * @throws IOException              if the URL connection cannot be opened,
+	 *                                  configured, or its response cannot be read
 	 */
 	@Tool(name = "call-rest-api", description = "Executes a REST API call to the specified URL using the given HTTP method. The URL may include user credentials in "
 			+ "the userInfo format (e.g., https://user:password@host/path) for basic authentication.")
@@ -401,6 +420,23 @@ public class WebFunctionTools implements FunctionTools {
 		return "ResponseCode: " + connection.getResponseCode() + " " + connection.getRequestMethod();
 	}
 
+	/**
+	 * Creates and configures a connection for a REST request, including optional
+	 * request-body transmission.
+	 *
+	 * @param requestId   request correlation identifier used for logging
+	 * @param url         endpoint URL
+	 * @param charsetName character set used to encode the request body
+	 * @param method      HTTP method
+	 * @param timeout     connection and read timeout in milliseconds, or zero for
+	 *                    the connection default
+	 * @param headers     optional request headers
+	 * @param body        optional request body
+	 * @param config      configuration used for header substitution
+	 * @return configured HTTP connection
+	 * @throws IOException if the connection cannot be opened or the request body
+	 *                     cannot be written
+	 */
 	private HttpURLConnection getConnection(String requestId, String url, String charsetName, String method,
 			int timeout, Map<String, String> headers, String body, Configurator config)
 			throws IOException {

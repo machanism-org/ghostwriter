@@ -2,6 +2,7 @@ package org.machanism.machai.gw.tools;
 
 import org.machanism.machai.ai.tools.SpecialException;
 
+/*@guidance: >>> ${guidances}/def-class-javadoc.md */
 /**
  * Exception used to signal the end of a task without terminating the
  * application.

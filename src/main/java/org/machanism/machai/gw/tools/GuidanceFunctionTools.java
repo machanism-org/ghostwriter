@@ -31,6 +31,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/*@guidance: >>> ${guidances}/def-class-javadoc.md */
 /**
  * Provides function tools for discovering and processing files with guidance
  * tags in project directories.
@@ -56,6 +57,14 @@ import org.slf4j.LoggerFactory;
  */
 @SupportedFor(ActProcessor.class)
 public class GuidanceFunctionTools implements FunctionTools {
+
+	/**
+	 * Creates a guidance function-tools provider using the default prompt resource
+	 * bundle.
+	 */
+	public GuidanceFunctionTools() {
+		// Default construction initializes instance fields.
+	}
 
 	/** Logger used to report asynchronous guidance-processing failures. */
 	private static final Logger logger = LoggerFactory.getLogger(GuidanceFunctionTools.class);
@@ -123,6 +132,18 @@ public class GuidanceFunctionTools implements FunctionTools {
 
 		String model = configurator.get(GWConstants.MODEL_PROP_NAME, null);
 		AIFileProcessor processor = new GuidanceProcessor(new File(rootDir), model, configurator) {
+			/**
+			 * Records a guidance-tagged file under the directory of its project rather
+			 * than applying its guidance instructions.
+			 *
+			 * @param projectLayout layout that identifies the file's project
+			 * @param file          guidance-tagged file found during the scan
+			 * @param instructions  extracted guidance instructions, which are not
+			 *                      processed by this discovery-only implementation
+			 * @param prompts       optional prompts associated with the file, which are
+			 *                      not used by this discovery-only implementation
+			 * @return {@code null}, because discovery produces no processed-file result
+			 */
 			@Override
 			protected String process(ProjectLayout projectLayout, File file, String instructions, String... prompts) {
 				map.computeIfAbsent(projectLayout.getProjectDir(), k -> new ArrayList<>()).add(file);

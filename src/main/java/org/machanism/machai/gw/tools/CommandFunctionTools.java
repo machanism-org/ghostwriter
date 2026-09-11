@@ -13,12 +13,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,6 +32,7 @@ import org.machanism.machai.ai.tools.Tool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/*@guidance: >>> ${guidances}/def-class-javadoc.md */
 /**
  * Provides function tools for executing and managing system commands within a
  * project context.
@@ -80,7 +79,10 @@ public class CommandFunctionTools implements FunctionTools {
 	/** Default character set used to decode process output streams. */
 	private static final String DEFAULT_CHARSET = "UTF-8";
 
-	/** Maximum time to wait for a started process to complete, in seconds. */
+	/**
+	 * Maximum number of seconds to wait for a started process before forcibly
+	 * terminating it.
+	 */
 	private int processTimeoutSeconds = 600;
 
 	/**
@@ -110,8 +112,11 @@ public class CommandFunctionTools implements FunctionTools {
 	 * @param configurator   configuration used for substitutions and security rules
 	 * @return command execution report, or an error message for an invalid
 	 *         directory
-	 * @throws IOException if the process cannot be started or its output cannot be
-	 *                     collected
+	 * @throws IOException if the project or working directory cannot be resolved,
+	 *                     the process cannot be started, or its output cannot be
+	 *                     read
+	 * @throws ErrorResultException if command execution, output collection, or the
+	 *                              command itself fails
 	 */
 	@Tool(name = "run-sys-command", description = "Executes a system command for operation system: `${OS_NAME}` while ensuring safe execution.\n"
 			+ "Only explicitly allowed commands can be executed for security reasons.\n"
@@ -233,6 +238,8 @@ public class CommandFunctionTools implements FunctionTools {
 	 * @param charsetName       character set used to decode the log
 	 * @return the requested preceding log fragment
 	 * @throws IOException if the log cannot be found or read
+	 * @throws IllegalArgumentException if {@code charsetName} is not a supported
+	 *                                  character set
 	 */
 	@Tool(name = "get-log-chunk", description = "Extracts a log fragment from a command execution. "
 			+ "Use this to retrieve earlier log data if only the end of the output was previously retrieved "
@@ -274,7 +281,9 @@ public class CommandFunctionTools implements FunctionTools {
 	 * @param regexp      Java regular expression used to find matches
 	 * @param charsetName character set used to decode the log
 	 * @return a list of matching text segments and their positions
-	 * @throws IOException
+	 * @throws IOException if the log cannot be found or read
+	 * @throws IllegalArgumentException if {@code charsetName} is not a supported
+	 *                                  character set or {@code regexp} is invalid
 	 */
 	@Tool(name = "get-log-matches", description = "Searches the command log for all text matching the provided regular expression (regexp).\n"
 			+ "Use this to extract specific patterns, error messages, or any custom content from the log output of a command execution.\n"
@@ -332,12 +341,9 @@ public class CommandFunctionTools implements FunctionTools {
 	 * @return a map containing the collected output and related information
 	 * @throws InterruptedException if the current thread is interrupted while
 	 *                              waiting
-	 * @throws TimeoutException     if the process does not complete within the
-	 *                              timeout
-	 * @throws ExecutionException   if an error occurs during output collection
 	 */
 	Map<String, Object> waitAndCollect(Process process, LogBuilder output, String logId)
-			throws InterruptedException, TimeoutException, ExecutionException {
+			throws InterruptedException {
 		boolean finished = process.waitFor(processTimeoutSeconds, TimeUnit.SECONDS);
 		if (!finished) {
 			process.destroyForcibly();
@@ -444,6 +450,7 @@ public class CommandFunctionTools implements FunctionTools {
 	 * try-with-resources.
 	 */
 	private static final class ExecutorServiceAutoCloseable implements AutoCloseable {
+		/** Executor service whose lifecycle is managed by this wrapper. */
 		private final ExecutorService executor;
 
 		/**

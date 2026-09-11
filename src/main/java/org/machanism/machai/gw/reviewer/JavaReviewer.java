@@ -14,6 +14,7 @@ import org.apache.commons.lang3.Strings;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 
+/*@guidance: >>> ${guidances}/def-class-javadoc.md */
 /**
  * {@link Reviewer} implementation for Java source files ({@code .java}).
  *

@@ -23,6 +23,8 @@ import org.machanism.machai.gw.tools.ProcessTerminationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/*@guidance: >>> ${guidances}/def-class-javadoc.md */
+
 /**
  * Command-line entry point for the Ghostwriter application.
  *
@@ -54,23 +56,37 @@ import org.slf4j.LoggerFactory;
  */
 public final class Ghostwriter {
 
+	/** Logger for CLI lifecycle, configuration, and processing events. */
 	private static final Logger LOGGER = LoggerFactory.getLogger(Ghostwriter.class);
 
+	/** Prefix displayed before interactive Act-mode input. */
 	public static final String USER_INPUT_PREFIX = ">>>";
 
+	/** Long option name for displaying CLI help. */
 	private static final String HELP_OPTION = "help";
+	/** Long option name for configuring processing concurrency. */
 	private static final String THREADS_OPTION = "threads";
+	/** CLI option and configuration-property name for the project directory. */
 	private static final String PROJECT_DIR_PROP_NAME = "projectDir";
+	/** CLI option and configuration-property name for system instructions. */
 	private static final String INSTRUCTIONS_PROP_NAME = "instructions";
+	/** Long option name for selecting an AI provider and model. */
 	private static final String MODEL_OPTION = "model";
+	/** Long option name for specifying excluded scan paths. */
 	private static final String EXCLUDES_OPTION = "excludes";
+	/** Long option name for enabling Act mode and selecting an act. */
 	private static final String ACT_OPTION = "act";
+	/** Long option name for selecting a custom acts directory. */
 	private static final String ACTS_OPTION = "acts";
+	/** Long option name for selecting a configuration file. */
 	private static final String CONFIG_OPTION = "config";
+	/** Exit code returned for a handled processing failure. */
 	private static final int EXIT_CODE_ERROR = 1;
 
+	/** Log-message template used when an explicit AI model is selected. */
 	public static final String DEFAULT_MODEL_MSG = "Using default model: {}";
 
+	/** Prevents instantiation of this static CLI entry-point class. */
 	private Ghostwriter() {
 	}
 
@@ -84,7 +100,7 @@ public final class Ghostwriter {
 	 * </p>
 	 *
 	 * @param args command-line arguments
-	 * @throws IOException    if configuration or processing fails with an I/O error
+	 * @throws IOException    if command-line setup fails with an I/O error
 	 * @throws ParseException if command-line parsing fails
 	 */
 	public static void main(String[] args) throws IOException, ParseException {
@@ -144,7 +160,7 @@ public final class Ghostwriter {
 	 * example invocations, to standard output.
 	 *
 	 * @param options available command-line options
-	 * @throws IOException
+	 * @throws IOException if usage text cannot be written to the configured output
 	 */
 	private static void printHelp(Options options) throws IOException {
 		String header = "\nGhostwriter CLI - Scan and process directories or files using GenAI guidance.\n\n"
@@ -181,7 +197,7 @@ public final class Ghostwriter {
 	/**
 	 * Loads the external configuration properties file when present, using either
 	 * the {@code GWConstants.CONFIG_PROP_NAME} system property or the default
-	 * Ghostwriter properties file name, resolved relative to the home directory.
+	 * Ghostwriter properties file name, resolved relative to the project directory.
 	 *
 	 * <p>
 	 * Failures to locate or load the file are tolerated: a missing file is silently
@@ -189,9 +205,10 @@ public final class Ghostwriter {
 	 * can continue.
 	 * </p>
 	 *
+	 * @param cmd        parsed command line, used to resolve an explicit configuration file
+	 * @param projectDir project directory used as the base for a relative configuration file
 	 * @param config     configuration source to populate
-	 * @param projectDir
-	 * @throws IOException
+	 * @throws IOException if an explicitly selected configuration file cannot be loaded
 	 */
 	private static void initializeConfiguration(CommandLine cmd, String projectDir, PropertiesConfigurator config)
 			throws IOException {
@@ -366,8 +383,7 @@ public final class Ghostwriter {
 	 * Lines ending with {@code GWConstants.MULTIPLE_LINES_BREAKER} are treated as
 	 * continued: the breaker is stripped and a line separator is appended, and
 	 * reading continues on the next line. Reading stops at the first line that does
-	 * not end with the breaker. After input is collected, a right-aligned signature
-	 * footer with the current user name is printed.
+	 * not end with the breaker.
 	 * </p>
 	 *
 	 * @param scanner scanner reading standard input
@@ -415,8 +431,7 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Logs basic startup path information at INFO level: the resolved Ghostwriter
-	 * home directory and the resolved project directory.
+	 * Logs the resolved project directory at INFO level.
 	 *
 	 * @param projectDir project directory
 	 */
@@ -431,17 +446,16 @@ public final class Ghostwriter {
 	 * <p>
 	 * Recognized failures are logged and translated into a non-zero exit code via
 	 * {@link #handleExitCode(int)} rather than propagating as uncaught exceptions,
-	 * except for I/O errors during processor creation, which are rethrown.
+	 * while I/O errors are logged.
 	 * </p>
 	 *
 	 * @param scanner  console scanner
 	 * @param config   configuration source
 	 * @param cmd      parsed command line
 	 * @param settings resolved runtime settings
-	 * @throws IOException if processor creation fails with an I/O error
 	 */
 	private static void execute(Scanner scanner, PropertiesConfigurator config, CommandLine cmd,
-			RuntimeSettings settings) throws IOException {
+			RuntimeSettings settings) {
 		try {
 			AIFileProcessor processor = createProcessor(scanner, config, cmd, settings);
 			applyCommonSettings(processor, settings);
@@ -504,6 +518,11 @@ public final class Ghostwriter {
 			LOGGER.info(DEFAULT_MODEL_MSG, genai);
 		}
 		return new ActProcessor(settings.projectDir, genai, config) {
+			/**
+			 * Obtains the next Act-mode response from standard input.
+			 *
+			 * @return text entered by the user, including any supported continued lines
+			 */
 			@Override
 			protected String input() {
 				return readActInput(scanner);

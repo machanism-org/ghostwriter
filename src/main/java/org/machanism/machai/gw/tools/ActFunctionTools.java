@@ -27,6 +27,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/*@guidance: >>> ${guidances}/def-class-javadoc.md */
 /**
  * Provides function tools for managing and executing Ghostwriter Acts within a
  * project.
@@ -60,11 +61,18 @@ public class ActFunctionTools implements FunctionTools {
 	/** Response-map key that identifies the asynchronous Act execution status. */
 	private static final String STATUS_KEY = "status";
 
-	/** Logger for shell tool execution and diagnostics. */
+	/** Logger for Act execution lifecycle events and diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(ActFunctionTools.class);
 
-	/** Resource bundle supplying prompt templates for generators. */
+	/** Resource bundle that supplies MCP prompt templates for Act execution. */
 	final ResourceBundle mcpPromptBundle = ResourceBundle.getBundle("mcp-prompts");
+
+	/**
+	 * Creates an Act-function tool and initializes its MCP prompt-template bundle.
+	 */
+	public ActFunctionTools() {
+		// The prompt bundle is initialized when this tool instance is created.
+	}
 
 	/**
 	 * AI functional tool that loads the details of a specific Act template,
@@ -117,6 +125,8 @@ public class ActFunctionTools implements FunctionTools {
 	 * @param path         scan path supplied to the processor
 	 * @param actName      Act name used in completion logging
 	 * @param tempFile     file that receives the serialized result
+	 * @throws IllegalArgumentException If the result file cannot be created or
+	 *                                  written.
 	 */
 	private void saveAsyncActResult(ActProcessor actProcessor, File projectDir, String path, String actName,
 			File tempFile) {
@@ -148,7 +158,7 @@ public class ActFunctionTools implements FunctionTools {
 	 * <p>
 	 * Use this tool to trigger a predefined action or workflow identified by the
 	 * given Act name. This method supports both synchronous and asynchronous
-	 * execution modes based on the `async` parameter.
+	 * execution modes based on the {@code async} parameter.
 	 * </p>
 	 *
 	 * @param actName    The name of the Act to perform.
@@ -255,30 +265,32 @@ public class ActFunctionTools implements FunctionTools {
 
 	/**
 	 * AI functional tool that retrieves the result of a previously started Act by
-	 * its GUID.
+	 * its process identifier.
 	 * <p>
 	 * This method reconstructs the path to the temporary file where the Act result
-	 * was stored, using the provided GUID and the system's temporary directory. If
-	 * the result file exists, it reads and returns the result. If the file does not
-	 * exist, it returns a status indicating that the result is still processing or
-	 * unavailable.
+	 * was stored, using the provided process identifier and the project's temporary
+	 * directory. If the result file has been created but is still being written, it
+	 * returns a processing status. Once the serialized result is available, it
+	 * returns a completed status and the result. A missing result file causes a
+	 * {@link FileNotFoundException}.
 	 * </p>
 	 *
-	 * @param processId The GUID returned when the Act was started. Used to identify
-	 *                  the result file.
+	 * @param processId The process identifier returned when the Act was started and
+	 *                  used to identify the result file.
 	 * @return A map containing:
 	 *         <ul>
-	 *         <li><b>guid</b>: The provided GUID.</li>
 	 *         <li><b>status</b>: "done" if the result is available, "processing"
 	 *         otherwise.</li>
 	 *         <li><b>result</b>: The Act result object if available.</li>
 	 *         <li><b>message</b>: An informational message if the result is not
 	 *         ready.</li>
 	 *         </ul>
-	 * @throws IOException If there is an error reading the result from the temp
+	 * @throws IOException If there is an error reading the result from the temporary
 	 *                     file.
+	 * @throws ClassNotFoundException If the serialized result contains an unavailable
+	 *                                class.
 	 */
-	@Tool(name = "get-act-result", description = "Retrieves the result of a previously started Act by GUID.")
+	@Tool(name = "get-act-result", description = "Retrieves the result of a previously started Act by process ID.")
 	public Map<String, Object> getActResult(
 			@Param(name = "process-id", description = "The process_id returned when the Act was started.") String processId)
 			throws IOException, ClassNotFoundException {

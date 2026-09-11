@@ -1,5 +1,6 @@
 package org.machanism.machai.gw.tools;
 
+/*@guidance: >>> ${guidances}/def-class-javadoc.md */
 /**
  * Exception thrown when a command fails a deny-list security check.
  *

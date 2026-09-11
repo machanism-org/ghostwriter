@@ -2,6 +2,7 @@ package org.machanism.machai.gw.tools;
 
 import org.machanism.machai.ai.tools.SpecialException;
 
+/*@guidance: >>> ${guidances}/def-class-javadoc.md */
 /**
  * Runtime control-flow exception that requests host application termination.
  *

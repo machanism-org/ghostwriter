@@ -40,7 +40,9 @@ import org.tomlj.TomlParseResult;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-/*@guidance:
+/*@guidance: 
+ * >>> file://${guidances}/def-class-javadoc.md
+ * 
  * IMPORTANT: Create or Update the Javadoc for ActProcessor class.
  * Class javadoc description should describe supported functionality and provide examples to use it.
  * If the method used as Javadoc documentation is not public or protected, the method name should not be specified.
@@ -100,13 +102,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * </ul>
  * <h2>Examples</h2>
  * 
- * <pre>{@code
+ * <pre>
  * ActProcessor processor = new ActProcessor(projectDir, "openai:gpt-4o", configurator);
  * processor.setAct("help");
  * processor.process(projectLayout);
  *
  * // Run an ad-hoc task using the shorthand marker.
- * processor.setAct("> summarize the project structure");
+ * processor.setAct("&gt; summarize the project structure");
  *
  * // Run only episodes 1 and 3 of an act, then stop without continuing normally.
  * processor.setAct("review#1,3! Check concurrency and error handling");
@@ -114,18 +116,26 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * // Use external TOML acts from a local directory or HTTPS location.
  * processor.setActsLocation("acts");
  * processor.setAct("custom-review");
- * }</pre>
+ * </pre>
  */
 public class ActProcessor extends AIFileProcessor {
 
 	/** Logger for documentation input processing events. */
 	private static final Logger logger = LoggerFactory.getLogger(ActProcessor.class);
 
+	/**
+	 * Front-matter value that requests provider-assisted selection of the tools
+	 * needed by an act episode.
+	 */
 	private static final String TOOL_AUTO_SEARCH_NAME = "auto";
 
 	/** Resource bundle supplying prompt templates for generators. */
 	final ResourceBundle actBundle = ResourceBundle.getBundle("act-bundle");
 
+	/**
+	 * Prefix used to identify the serialized act and episode metadata injected
+	 * into an episode prompt.
+	 */
 	private static final String ACT_EXECUTION_INFORMATION_PREFIX = "The current act execution information: ";
 
 	/**
@@ -1003,12 +1013,12 @@ public class ActProcessor extends AIFileProcessor {
 	 * actual request. For example:
 	 * </p>
 	 *
-	 * <pre>{@code
+	 * <pre>
 	 * ---
 	 * enabledTools: auto
 	 * ---
 	 * Review this module and use only the tools needed for the task.
-	 * }</pre>
+	 * </pre>
 	 *
 	 * <p>
 	 * A YAML mapping can give the automatic selector additional constraints. Its
@@ -1016,13 +1026,13 @@ public class ActProcessor extends AIFileProcessor {
 	 * rather than directly disabling tools. For example:
 	 * </p>
 	 *
-	 * <pre>{@code
+	 * <pre>
 	 * ---
 	 * enabledTools:
 	 *   auto: Don't use web access and system command tools.
 	 * ---
 	 * Analyze the local implementation.
-	 * }</pre>
+	 * </pre>
 	 *
 	 * <p>
 	 * Any other {@code enabledTools} value is delegated unchanged to the standard
@@ -1074,12 +1084,13 @@ public class ActProcessor extends AIFileProcessor {
 	 * Selects and caches the tools required for the current act episode by asking
 	 * the configured provider for a JSON tool list.
 	 *
-	 * @param instructions provider instructions; retained for the selection context
-	 * @param query
+	 * @param query        optional constraints supplied with the automatic
+	 *                     selection marker
+	 * @param instructions provider instructions retained for the selection context
 	 * @param prompts      prompt parts containing act execution metadata and the
 	 *                     episode prompt
-	 * @return selected tool names, or {@code null} when selection fails
-	 * @throws IllegalArgumentException if the provider returns malformed JSON
+	 * @return selected tool names, or {@code null} when selection fails or the
+	 *         provider does not restrict the available tools
 	 */
 	@SuppressWarnings("unchecked")
 	private String[] getAutoTools(String query, String instructions, String[] prompts) {
