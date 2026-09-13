@@ -41,7 +41,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /*@guidance: 
- * >>> file://${guidances}/def-class-javadoc.md
+ * >>> ${guidances}/def-class-javadoc.md
  * 
  * IMPORTANT: Create or Update the Javadoc for ActProcessor class.
  * Class javadoc description should describe supported functionality and provide examples to use it.
