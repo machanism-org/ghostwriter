@@ -99,8 +99,8 @@ public class GuidanceProcessor extends AIFileProcessor {
 	private final Map<String, Reviewer> reviewerMap = new HashMap<>();
 
 	/**
-	 * Provider results accumulated during this processor instance's lifetime.
-	 * Each entry contains the relative file path and the provider message.
+	 * Provider results accumulated during this processor instance's lifetime. Each
+	 * entry contains the relative file path and the provider message.
 	 */
 	private final List<Map<String, Object>> report = new ArrayList<>();
 
@@ -168,7 +168,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 * matcher is configured. In that case, all files are eligible when no default
 	 * prompt exists; otherwise only the project directory is eligible.
 	 *
-	 * @param file       candidate file/directory
+	 * @param file          candidate file/directory
 	 * @param projectLayout current project layout
 	 * @return {@code true} when the candidate should be processed
 	 */
@@ -200,7 +200,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 		if (getPath() != null) {
 			File moduleDir = new File(projectDir, module);
 			ProjectLayout projectLayout = getProjectLayout(moduleDir);
-			
+
 			String relativePath = ProjectLayout.getRelativePath(moduleDir, getPath());
 			if (match(moduleDir, projectLayout) || relativePath != null) {
 				super.processModule(projectDir, module);
@@ -299,10 +299,11 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 * @return the configured instruction text
 	 */
 	public String getInstructions() {
-		String instructions = super.getInstructions();
+		String instructions = promptBundle.getString("guidance_sys_instructions");
 
-		if (instructions == null) {
-			instructions = promptBundle.getString("guidance_sys_instructions");
+		String userInstructions = super.getInstructions();
+		if (userInstructions != null) {
+			instructions = String.format(instructions, "# User Instruction\n\n" + userInstructions);
 		}
 
 		return instructions;
@@ -331,8 +332,8 @@ public class GuidanceProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Resolves a reviewer for a given file extension after normalizing the extension
-	 * to the key format used by the reviewer registry.
+	 * Resolves a reviewer for a given file extension after normalizing the
+	 * extension to the key format used by the reviewer registry.
 	 *
 	 * @param extension file extension (with or without a dot)
 	 * @return reviewer, or {@code null} if none is registered for that extension
@@ -367,8 +368,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 	/**
 	 * Returns the mutable list of processing results collected so far.
 	 *
-	 * @return result entries containing {@code "file"} and {@code "message"}
-	 *         values
+	 * @return result entries containing {@code "file"} and {@code "message"} values
 	 */
 	public List<Map<String, Object>> getReport() {
 		return report;
