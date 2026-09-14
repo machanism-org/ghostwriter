@@ -1,8 +1,8 @@
 /*@guidance:
- * >>> file://src/guidance/package-info-javadoc.md
+ * >>> ${guidances}/package-info-javadoc.md
  * - Explain the direct functional purpose, all parameters (`@param`), return values (`@return`), and exceptions thrown (`@throws`).
  * - **AI Metaprogramming Metadata:** If a class or method is annotated with `@Tool`, `@Prompt`, or `@Resource`, explicitly document its role as a "Functional AI Tool", "Prompt Template", or "Contextual Resource" respectively.
- * >>> file://src/guidance/javadoc-format.md
+ * >>> ${guidances}/javadoc-format.md
  */
 
 /**

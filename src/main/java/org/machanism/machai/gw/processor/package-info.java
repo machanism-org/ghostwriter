@@ -1,7 +1,7 @@
 
 /*-
  * @guidance:
- * >>> file://src/guidance/package-info-code.md
+ * >>> ${guidances}/package-info-javadoc.md
  * - Describe all supported features based on javadoc information from:
  *     - AIFileProcessor
  *     - GuidanceProcessor

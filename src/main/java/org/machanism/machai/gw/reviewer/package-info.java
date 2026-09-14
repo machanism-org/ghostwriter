@@ -1,5 +1,5 @@
 /*@guidance:
- * >>> file://src/guidance/package-info-code.md
+ * >>> ${guidances}/package-info-javadoc.md
  */
 
 /**
