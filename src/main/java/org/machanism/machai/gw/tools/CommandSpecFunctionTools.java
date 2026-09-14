@@ -11,12 +11,13 @@ import org.machanism.machai.gw.processor.AIFileProcessor;
 
 /*@guidance: >>> ${guidances}/def-class-javadoc.md */
 /**
- * Provides Functional AI Tools for task and execution control within the
- * {@link AIFileProcessor} context.
+ * Provides function tools for task and process-execution control within an
+ * {@link AIFileProcessor} workflow.
  *
- * <p>This class is available to {@link AIFileProcessor} workflows and integrates
- * with the {@link Genai} provider to signal task completion or application
- * termination through specialized control-flow exceptions.</p>
+ * <p>The tool infrastructure exposes the annotated methods to the AI provider.
+ * Invoking a tool signals task completion or application termination by throwing
+ * the corresponding control-flow exception; the workflow host is responsible for
+ * handling that signal.</p>
  *
  * @author Viktor Tovstyi
  */
@@ -31,7 +32,9 @@ public class CommandSpecFunctionTools implements FunctionTools {
 
 	/**
 	 * Requests application termination by throwing a {@link ProcessTerminationException}.
-	 * The exception carries the supplied message and exit code for handling by the host.
+	 * The exception carries the supplied message and exit code for handling by the
+	 * workflow host. When omitted by the caller, the tool infrastructure supplies the
+	 * annotation-defined defaults for {@code message} and {@code exitCode}.
 	 *
 	 * <p>The {@code projectDir} argument is supplied by the tool infrastructure as
 	 * invocation context and is not used when constructing the termination request.</p>
@@ -53,7 +56,8 @@ public class CommandSpecFunctionTools implements FunctionTools {
 
 	/**
 	 * Completes the current task by throwing an {@link EndTaskException}. The host
-	 * remains active and can accept subsequent tasks.
+	 * remains active and can accept subsequent tasks. When no message is supplied,
+	 * the tool infrastructure uses its annotation-defined default message.
 	 *
 	 * @param message human-readable message describing task completion
 	 * @return never returns normally because it always signals task completion

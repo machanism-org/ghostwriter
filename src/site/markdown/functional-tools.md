@@ -164,14 +164,14 @@ Use this when you need an inventory of project files beyond the immediate conten
 
 ### `get-recursive-folder-list`
 
-Lists the immediate children of a project-relative directory and returns their project-relative paths. Despite its name, the current implementation does not recurse into nested directories and does not filter out files. The result is limited by `max-count` to keep responses manageable; when the directory has no children, the tool returns an explanatory message.
+Recursively lists subdirectories beneath a project-relative directory and returns their project-relative paths. Files and the requested root directory itself are excluded. The result is limited by `max-count` to keep responses manageable; when no subdirectories are found, the tool returns an explanatory message.
 
-Use this to inspect the direct contents of a directory when those implementation-specific results are appropriate.
+Use this to inspect a project's folder structure without listing files.
 
 **Input parameters**
 
-- `dir` - Optional path to the directory to inspect. Defaults to an empty path, representing the project directory.
-- `max-count` - Optional maximum number of returned entries. Defaults to `50`; exceeding the limit raises an error.
+- `dir` - Optional path to the root directory to scan. Defaults to an empty path, representing the project directory.
+- `max-count` - Optional maximum number of returned folders. Defaults to `50`; exceeding the limit raises an error.
 
 ### `write-file`
 
@@ -230,7 +230,7 @@ Use this to identify which files contain guidance-driven instructions before pro
 
 ### `process-files-with-guidance-tag`
 
-Processes files with guidance tags using the configured model. The tool scans matching files in the project or root context and applies guidance processing to each discovered file.
+Processes files with guidance tags using the configured model. This tool is supported for `ActProcessor` workflows. It scans matching files in the project context and applies guidance processing to each discovered file.
 
 It can run synchronously and return the processing report immediately, or asynchronously and return a `process-id` for later retrieval. Optional properties can override processing configuration, and property values may include runtime placeholders resolved by the application.
 
@@ -239,7 +239,7 @@ It can run synchronously and return the processing report immediately, or asynch
 **Input parameters**
 
 - `properties` - Optional processing properties and configuration overrides.
-- `path` - Optional scan path or pattern. Supports raw directory names, `glob:` patterns, and `regex:` patterns.
+- `path` - Optional scan path or pattern. Supports raw directory names, `glob:` patterns, and `regex:` patterns. Defaults to `${project_dir}`.
 - `async` - Optional boolean flag. When `true`, processing runs in the background and returns a `process-id`. When `false`, the tool waits for completion. Defaults to `false`.
 
 ### `get-process-guidance-tag-files-result`

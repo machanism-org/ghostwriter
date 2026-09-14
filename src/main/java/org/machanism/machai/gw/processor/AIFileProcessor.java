@@ -122,8 +122,14 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
  */
 public class AIFileProcessor extends AbstractFileProcessor {
 
+	/**
+	 * Delimiter that marks the beginning and end of YAML prompt front matter.
+	 */
 	private static final String FRONT_MATTER_MARKER = "---";
 
+	/**
+	 * Logger for processing lifecycle, diagnostic, and included-content messages.
+	 */
 	private static final Logger logger = LoggerFactory.getLogger(AIFileProcessor.class);
 
 	/**
@@ -339,6 +345,9 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * <li>{@code enabledTools} (String or List&lt;?&gt;) - Configures which
 	 * toolkits or tools should be enabled for the AI provider. Defined via the
 	 * constant {@link #ENABLED_TOOLS_PARAM_NAME}.</li>
+	 * <li>Any additional YAML key/value properties are copied into the layered
+	 * configurator and can therefore participate in configuration substitution;
+	 * they do not otherwise change provider execution.</li>
 	 * <li>Other YAML properties are retained as prompt configuration values and
 	 * string values may be resolved through the active configurator before they are
 	 * used. Properties not recognized by the processor are available for
@@ -542,6 +551,19 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return prompt;
 	}
 
+	/**
+	 * Removes a leading, complete YAML front-matter block from a prompt.
+	 * <p>
+	 * The prompt is trimmed before inspection. If it does not begin with the
+	 * front-matter delimiter, or does not contain a closing delimiter, its trimmed
+	 * content is returned unchanged.
+	 * </p>
+	 *
+	 * @param prompt the prompt from which leading front matter is removed; must not
+	 *               be {@code null}
+	 * @return the prompt content after the closing delimiter, or the trimmed input
+	 *         when no complete leading front matter exists
+	 */
 	static String removeFrontMatterData(String prompt) {
 		prompt = prompt.trim();
 		if (prompt.startsWith(FRONT_MATTER_MARKER)) {
@@ -556,6 +578,17 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return prompt;
 	}
 
+	/**
+	 * Resolves configuration placeholders in a parsed front-matter value.
+	 * <p>
+	 * Strings are resolved against this processor's configurator. Lists are copied
+	 * with the same resolution applied recursively to each element; other YAML
+	 * value types are returned unchanged.
+	 * </p>
+	 *
+	 * @param value the parsed YAML value, which may be {@code null}
+	 * @return the resolved string or list, or the original non-string value
+	 */
 	private Object resolveInputParamValue(Object value) {
 		if (value instanceof String) {
 			return Substitutor.replace((String) value, getConfigurator());
@@ -602,6 +635,9 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * <li>{@code "PROCESS_MODE"} - The current interaction mode, returning
 	 * {@code "INTERACTIVE"} if the execution is interactive, otherwise
 	 * {@code "NOT-INTERACTIVE"}.</li>
+	 * <li>{@code "OS_NAME"} - The operating-system name reported by the runtime,
+	 * allowing consumers of the processing metadata to identify the execution
+	 * environment.</li>
 	 * </ul>
 	 * 
 	 * <p>
@@ -639,6 +675,23 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return jsonString;
 	}
 
+	/**
+	 * Executes the provider and, when interactive mode is enabled, processes the
+	 * next user command or follow-up prompt.
+	 * <p>
+	 * The exit command terminates processing, the continue command returns the
+	 * current response, and the non-interactive command disables further input.
+	 * Any other input is submitted to the provider and processing recurses until a
+	 * command is received or input is unavailable.
+	 * </p>
+	 *
+	 * @param file the file associated with the current processing operation
+	 * @param provider the configured provider to execute and, if needed, receive a
+	 *                 follow-up prompt
+	 * @return the current or final provider response
+	 * @throws ProcessTerminationException if the interactive exit command is
+	 *                                     entered
+	 */
 	private String perform(File file, Genai provider) {
 		String perform = provider.perform();
 		if (interactive) {
@@ -867,7 +920,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 	/**
 	 * Reads UTF-8 text content from the given HTTP or HTTPS URL.
-	 * 
+	 *
 	 * @param urlString the URL to read
 	 * @return the response content as text
 	 * @throws java.io.IOException if the URL cannot be read
@@ -949,10 +1002,12 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	/**
 	 * Resolves the effective scan directory and converts it into a glob expression
 	 * when required.
-	 * 
+	 *
 	 * @param projectDir the base project directory
 	 * @param path       the configured scan directory
 	 * @return the resolved path matcher expression
+	 * @throws IllegalArgumentException if the resolved path is outside the project
+	 *                                  directory
 	 */
 	String parsePath(File projectDir, String path) {
 		File pathFile = new File(path);

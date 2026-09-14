@@ -20,6 +20,12 @@ import org.slf4j.LoggerFactory;
  * It is intended for use with {@link ActProcessor} and integrates with the
  * {@link Genai} provider.
  * </p>
+ * <p>
+ * Both operations signal control-flow changes by throwing their corresponding
+ * exception; callers must therefore allow those exceptions to propagate to the
+ * act-processing workflow rather than treating these methods as ordinary
+ * business operations.
+ * </p>
  *
  * @author Viktor Tovstyi
  */
@@ -59,13 +65,13 @@ public class ActSpecFunctionTools implements FunctionTools {
 	 * execution and restarting the same episode while preserving its context.
 	 * <p>
 	 * This method can re-execute an episode after a validation failure or when
-	 * additional user input is required. When {@code message} is non-empty, it is
-	 * emitted to the configured log before repetition is requested. The method does
-	 * not return normally.
+	 * additional user input is required. When {@code message} is non-null and
+	 * non-empty, it is emitted to the configured log before repetition is requested.
+	 * The method does not return normally.
 	 * </p>
 	 *
-	 * @param message a non-null custom response message to log before repeating
-	 *                the episode; if empty, no message is logged
+	 * @param message a custom response message to log before repeating the episode;
+	 *                {@code null} and empty messages are not logged
 	 * @throws RepeatEpisodeException always thrown to signal the episode should be
 	 *                                repeated
 	 */
@@ -73,7 +79,7 @@ public class ActSpecFunctionTools implements FunctionTools {
 			+ "episode, preserving the context.")
 	public void repeateEpisode(
 			@Param(name = "message", description = "A custom response message to output before repeating the episode.", defaultValue = "") String message) {
-		if (!message.isEmpty()) {
+		if (message != null && !message.isEmpty()) {
 			logger.info(AIFileProcessor.LOG_OUTPUT_PREFIX, message);
 		}
 		throw new RepeatEpisodeException();

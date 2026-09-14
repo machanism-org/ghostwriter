@@ -2,7 +2,12 @@ package org.machanism.machai.gw.processor;
 
 /*@guidance: >>> ${guidances}/def-class-javadoc.md */
 /**
- * Central constants used by Ghostwriter configuration and runtime processing.
+ * Defines property names and shared formatting values used by Ghostwriter
+ * configuration and runtime processing.
+ * <p>
+ * This utility class is not instantiable; its members provide the canonical
+ * keys used to read configuration and the fixed values used while processing
+ * projects and formatting output.
  */
 public final class GWConstants {
 

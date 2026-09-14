@@ -33,7 +33,7 @@ import com.fasterxml.jackson.databind.JsonNode;
  *
  * <p>
  * Tools in this installer are intended for host-integrated use where the host
- * controls the base working directory. All path provided to these tools are
+ * controls the base working directory. All paths provided to these tools are
  * interpreted relative to the working directory supplied by the
  * provider/runtime.
  * </p>
@@ -311,23 +311,16 @@ public class FileFunctionTools implements FunctionTools {
 	 * This AI functional tool reads a file and returns its text content.
 	 * </p>
 	 *
-	 * <p>
-	 * Expected parameters:
-	 * </p>
-	 * <ol>
-	 * <li>{@link JsonNode} containing {@code file_path}</li>
-	 * <li>{@link File} working directory</li>
-	 * </ol>
-	 * 
 	 * @param filePath     file to read, relative to {@code projectDir}
 	 * @param charsetName  character set used to decode the file
 	 * @param projectDir   project root used to resolve the file
 	 * @param configurator configuration used to substitute URL and header values
-	 * @return the file contents as text
+	 * @return the complete file contents as text
 	 * @throws IOException              if the path is not a regular file or cannot
 	 *                                  be read
 	 * @throws IllegalArgumentException if the requested path is invalid or outside
-	 *                                  {@code projectDir}
+	 *                                  {@code projectDir}, or {@code charsetName}
+	 *                                  does not identify a supported character set
 	 */
 	@Tool(name = "read-file", description = "Read the contents of a file from the disk.")
 	public String readFile(@Param(name = "file-path", description = "The path to the file to be read.") File filePath,

@@ -10,18 +10,17 @@
     <P>
       Ghostwriter is an advanced documentation engine that automatically scans,
       analyzes, and assembles project documentation using embedded guidance tags
-      and AI-powered synthesis. It supports all types of project files,
-      including source code, documentation, project site content, and other
-      relevant files.
+      and AI-powered synthesis. It supports all types of project files, including
+      source code, documentation, project site content, and other relevant files.
     </P>
 
     <P>
-      The API is organized as a processing pipeline. Processors identify project
+      The API provides a project-aware processing pipeline. Processors discover
       files and workflow context, resolve configuration and prompts, and invoke
       generative-AI providers. Format-specific reviewers extract embedded
-      guidance from supported file types. Functional AI tools provide controlled
-      access to project files, commands, web content, reusable acts, and
-      project-scoped workflow state.
+      guidance, while functional AI tools provide controlled access to project
+      files, commands, web content, reusable Acts, and project-scoped workflow
+      state.
     </P>
 
     <H2>Architecture</H2>
@@ -31,43 +30,48 @@
            ALT="Class diagram showing Ghostwriter processors coordinating reviewers and functional AI tools to process project files and workflows.">
     </P>
     <P>
-      The diagram summarizes the principal types and their relationships:
-      processor classes orchestrate guidance and act workflows, reviewers supply
-      file-format-specific guidance extraction, and tool providers expose the
-      controlled operations used by those workflows.
+      The diagram summarizes the principal types and their relationships.
+      Processor classes orchestrate guidance and Act workflows; reviewers supply
+      file-format-specific guidance extraction; and tool providers expose the
+      controlled operations used by those workflows. The processor layer also
+      supplies traversal, configuration, prompt inclusion, provider selection,
+      and ordered episode execution around the project layout.
     </P>
 
     <H2>Packages</H2>
     <DL>
       <DT><A HREF="org/machanism/machai/gw/processor/package-summary.html">org.machanism.machai.gw.processor</A></DT>
       <DD>
-        Provides the project-aware processing pipeline. It processes files,
-        folders, modules, and path-pattern matches; resolves configuration and
-        prompt settings; discovers and applies inline guidance; and runs
-        reusable TOML-defined Acts and ordered episode workflows. Processors
-        can select providers and tools through prompt metadata, include prompt
-        content from project-relative or web locations, and report the results
-        of guidance-driven processing.
+        Provides project-file processors and the command-line workflow. It
+        discovers modules and files, supports recursive traversal and path
+        matching, resolves providers and prompts, expands project-relative or
+        web prompt inclusions, and processes files, folders, modules, and
+        patterns. Guidance processing selects format reviewers and records
+        reports; Act processing loads inherited TOML definitions and executes
+        ordered, selected, repeated, or navigated episodes with workflow
+        metadata.
       </DD>
 
       <DT><A HREF="org/machanism/machai/gw/reviewer/package-summary.html">org.machanism.machai.gw.reviewer</A></DT>
       <DD>
-        Provides format-specific reviewers that locate <CODE>@guidance</CODE>
-        instructions in Java, HTML/XML, Markdown, PlantUML, Python, TypeScript,
-        and dedicated guidance text files and turn them into prompt fragments.
-        Reviewers apply each format's comment conventions, preserve relative
-        project-file context, and return no fragment when relevant guidance is
-        absent.
+        Provides the file-format-specific review layer. Its service-provider
+        interface and implementations locate <CODE>@guidance</CODE> instructions
+        in Java, HTML/XML, Markdown, PlantUML, Python, TypeScript, and dedicated
+        guidance text files, then turn them into localized prompt fragments.
+        Reviewers apply each format's comment conventions, preserve project-
+        relative file context, read source content as UTF-8, and return no
+        fragment when relevant guidance is absent.
       </DD>
 
       <DT><A HREF="org/machanism/machai/gw/tools/package-summary.html">org.machanism.machai.gw.tools</A></DT>
       <DD>
-        Provides Functional AI Tools and workflow infrastructure for controlled
-        file, command, web, act, guidance, and project-context operations,
-        including command safety checks, patch application, bounded command-log
-        access, and workflow navigation controls. Tool groups expose annotated
-        operations and reusable prompt templates to AI-driven workflows while
-        keeping project paths and execution context controlled.
+        Provides the Functional AI Tools and workflow infrastructure used by
+        providers. Tool groups expose controlled file, command, web, Act,
+        guidance, and project-context operations, including file editing,
+        validated patch application, command safety checks, bounded command-log
+        access, asynchronous result polling, and workflow navigation. Prompt
+        templates and tool metadata allow AI-driven workflows to use these
+        operations while project paths and execution context remain controlled.
       </DD>
     </DL>
 
@@ -77,9 +81,10 @@
       a named Act against a project layout. The processor selects reviewers for
       candidate files, passes the resulting instructions to the configured AI
       provider, and registers the appropriate tool providers for the workflow.
-      The tools package supplies the project-scoped operations that the provider
-      can invoke while the reviewers package keeps guidance extraction consistent
-      with each file format.
+      The tools package supplies project-scoped operations that the provider can
+      invoke, while the reviewers package keeps guidance extraction consistent
+      with each file format. Package-level documentation provides the detailed
+      contracts and relationships for each part of this pipeline.
     </P>
   </BODY>
 </HTML>

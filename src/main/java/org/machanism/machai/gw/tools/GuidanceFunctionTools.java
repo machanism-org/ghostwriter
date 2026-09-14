@@ -45,12 +45,15 @@ import org.slf4j.LoggerFactory;
  * <li>Retrieving the results of asynchronous processing by process ID</li>
  * <li>Supplying prompt templates for guidance tag processing</li>
  * </ul>
+ * </p>
  * <p>
- * GuidanceFunctionTools integrates with the {@link Genai} provider and supports
+ * This implementation integrates with the {@link Genai} provider and supports
  * both custom and built-in project workflows. It manages asynchronous execution
  * and result retrieval using temporary files and process IDs. Methods in this
  * class are typically invoked by an AI provider or workflow engine to enable
- * dynamic, tool-augmented project automation involving guidance tags.
+ * dynamic, tool-augmented project automation involving guidance tags. Asynchronous
+ * reports are serialized below the application temporary directory and can be
+ * retrieved with the process identifier returned when processing starts.
  * </p>
  *
  * @author Viktor Tovstyi
@@ -78,7 +81,10 @@ public class GuidanceFunctionTools implements FunctionTools {
 	/** Response-map key for an asynchronous guidance execution status. */
 	private static final String STATUS_KEY = "status";
 
-	/** Resource bundle supplying prompt templates for generators. */
+	/**
+	 * Resource bundle that supplies prompt templates exposed through {@link Prompt}
+	 * methods in this tool provider.
+	 */
 	final ResourceBundle mcpPromptBundle = ResourceBundle.getBundle("mcp-prompts");
 
 	/**
@@ -157,6 +163,10 @@ public class GuidanceFunctionTools implements FunctionTools {
 
 	/**
 	 * Runs guidance processing in the background and persists its report.
+	 * <p>
+	 * Any failure is logged because this method runs outside the caller's execution
+	 * context; callers observe an unavailable result until a report is written.
+	 * </p>
 	 *
 	 * @param processor  configured guidance processor
 	 * @param projectDir project directory to scan
@@ -176,8 +186,9 @@ public class GuidanceFunctionTools implements FunctionTools {
 	/**
 	 * Serializes a guidance-processing report to its temporary result file.
 	 *
-	 * @param tempFile destination temporary file
-	 * @param result   report to serialize
+	 * @param tempFile destination temporary file; its parent directory must exist
+	 * @param result   report to serialize, including the outcome for every processed
+	 *                 file
 	 * @throws IOException if the report cannot be written
 	 */
 	private void writeGuidanceResult(File tempFile, List<Map<String, Object>> result) throws IOException {
@@ -211,15 +222,11 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 *                   "${project_dir}".
 	 * @param config     The configuration object for property resolution and
 	 *                   default values.
-	 * @return A map containing:
-	 *         <ul>
-	 *         <li><b>process_id</b>: The unique identifier for the asynchronous
-	 *         operation.</li>
-	 *         <li><b>status</b>: "processing" to indicate the operation is running
-	 *         asynchronously.</li>
-	 *         </ul>
-	 * @throws IOException If there is an error initializing the processor or
-	 *                     creating the temp file.
+	 * @return In asynchronous mode, a map containing the unique {@code process_id}
+	 *         and a {@code status} of {@code "processing"}; in synchronous mode,
+	 *         the complete guidance-processing report.
+	 * @throws IOException If there is an error scanning files or initializing the
+	 *                     processing configuration.
 	 */
 	@Tool(name = "process-files-with-guidance-tag", description = "Scans files for embedded guidance-tag directives (marginalia such as `@guidance` comments) "
 			+ "and processes each matching file using the configured AI model to apply the requested guidance. "
@@ -295,27 +302,21 @@ public class GuidanceFunctionTools implements FunctionTools {
 
 	/**
 	 * Retrieves the result of a previously started guidance tag file processing by
-	 * its GUID.
+	 * its process identifier.
 	 * <p>
 	 * This method reconstructs the path to the temporary file where the result was
-	 * stored, using the provided GUID and the system's temporary directory. If the
-	 * result file exists, it reads and returns the result. If the file does not
+	 * stored, using the provided process identifier and the system's temporary
+	 * directory. If the result file exists, it reads and returns the result. If the
+	 * file does not
 	 * exist, it returns a status indicating that the result is still processing or
 	 * unavailable.
 	 * </p>
 	 *
-	 * @param processId The GUID returned when the processing was started. Used to
-	 *                  identify the result file.
-	 * @return A map containing:
-	 *         <ul>
-	 *         <li><b>guid</b>: The provided GUID.</li>
-	 *         <li><b>status</b>: "done" if the result is available, "processing"
-	 *         otherwise.</li>
-	 *         <li><b>result</b>: The list of file and guidance tag entries if
-	 *         available.</li>
-	 *         <li><b>message</b>: An informational message if the result is not
-	 *         ready.</li>
-	 *         </ul>
+	 * @param processId The process identifier returned when processing was started;
+	 *                  used to identify the result file.
+	 * @return A map containing the provided {@code process_id}, a {@code status},
+	 *         and either the completed {@code result} or a {@code message} when the
+	 *         result is not yet available.
 	 * @throws IOException If there is an error reading the result from the temp
 	 *                     file.
 	 */
@@ -357,9 +358,12 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 * bundle and is intended for use by the guidance-tag processing workflow.
 	 * </p>
 	 *
-	 * @param projectDir The root folder of the project, or the root folder
-	 *                   containing projects to scan.
-	 * @param path       The scanning path or pattern used to select files.
+	 * @param projectDir The root folder of the project, or the parent folder
+	 *                   containing projects to scan. The value is accepted for the
+	 *                   prompt contract and is resolved by its caller.
+	 * @param path       The scanning path or pattern used to select files. The value
+	 *                   is accepted for the prompt contract and is resolved by its
+	 *                   caller.
 	 * @return The prompt template for processing files with guidance tags.
 	 */
 	@Prompt(name = "process-guidance-tags", description = "Processes files with guidance tags using the configured model.")

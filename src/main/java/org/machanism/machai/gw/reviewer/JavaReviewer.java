@@ -18,15 +18,24 @@ import org.machanism.machai.project.layout.ProjectLayout;
 /**
  * {@link Reviewer} implementation for Java source files ({@code .java}).
  *
- * <p>This reviewer reads Java source as UTF-8 and detects the presence of the
+ * <p>The reviewer reads source files as UTF-8 and detects the presence of the
  * {@link GuidanceProcessor#GUIDANCE_TAG_NAME @guidance} tag in either block ({@code /* ... *&#47;})
- * or line ({@code // ...}) comments.
+ * or line ({@code // ...}) comments. A matching file is converted into the
+ * localized prompt fragment appropriate for its kind of Java source file.
  *
- * <p>When processing {@code package-info.java}, the reviewer emits a package-level prompt fragment that only
- * includes path context; for other Java files it emits a prompt fragment containing the full file content.
+ * <p>When processing {@code package-info.java}, the reviewer emits a
+ * package-level prompt fragment containing path context only. For all other
+ * Java files, it emits a prompt fragment containing the complete file content.
  */
 public class JavaReviewer implements Reviewer {
 
+	/**
+	 * Localized prompt templates used to construct review requests for Java
+	 * source files.
+	 *
+	 * <p>The bundle is loaded using the default locale and must provide the
+	 * {@code java_file} and {@code java_package_info_file} message keys.
+	 */
 	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
 	/**
@@ -46,6 +55,7 @@ public class JavaReviewer implements Reviewer {
 	 * @param guidancesFile the Java file to analyze
 	 * @return a formatted prompt fragment, or {@code null} when the file does not contain guidance
 	 * @throws IOException if an error occurs while reading the file
+	 * @throws IllegalArgumentException if the file cannot be decoded as UTF-8
 	 */
 	@Override
 	public String perform(File projectDir, File guidancesFile) throws IOException {

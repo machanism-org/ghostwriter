@@ -40,7 +40,7 @@ import net.htmlparser.jericho.Source;
  * This tool set exposes two main functions:
  * </p>
  * <ul>
- * <li><b>{@code get_web_content}</b> – Fetches web page content over HTTP(S)
+ * <li><b>{@code get-web-content}</b> – Fetches web page content over HTTP(S)
  * via GET, optionally returning plain text or content selected via a CSS
  * selector.</li>
  * <li><b>{@code call_rest_api}</b> – Executes a generic REST call using an
@@ -163,6 +163,8 @@ public class WebFunctionTools implements FunctionTools {
 		String path;
 		if (uri.toString().startsWith("file:///")) {
 			path = StringUtils.substringAfter(uri, "file:///");
+		} else if (uri.toString().startsWith("file:./")) {
+			path = StringUtils.substringAfter(uri, "file:./");
 		} else if (uri.toString().startsWith("file://./")) {
 			path = StringUtils.substringAfter(uri, "file://./");
 		} else {

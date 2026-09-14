@@ -100,6 +100,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * remote act-location prefixes; non-URL locations are resolved from the project
  * root.</li>
  * </ul>
+ * <p>
+ * Episode prompts may also declare {@code enabledTools: auto} in YAML front
+ * matter. In that mode, a provider selects the applicable tools from the
+ * episode context and caches the selection for that act episode. A YAML
+ * {@code auto} mapping may supply additional constraints for that selection.
+ * </p>
  * <h2>Examples</h2>
  * 
  * <pre>

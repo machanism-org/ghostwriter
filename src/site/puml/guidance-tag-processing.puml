@@ -56,7 +56,8 @@ repeat :next eligible child;
   if (match(file, projectDir)?) then (yes)
 
     partition "Guidance extraction (parseFile)" {
-      :extension = FilenameUtils.getExtension(file);
+      :if file is regular: extension =
+      FilenameUtils.getExtension(file);
       :reviewer = getReviewerForExtension(extension);
       if (reviewer == null?) then (yes)
         :guidance = null
@@ -65,7 +66,8 @@ repeat :next eligible child;
         :guidance = reviewer.perform(projectDir, file);
         note right
           The extension-specific Reviewer extracts
-          @guidance: comment content. The processor
+          @guidance: comment content (or returns null).
+          The processor
           does not alter marker comments itself.
         end note
       endif
@@ -85,14 +87,13 @@ repeat :next eligible child;
 
       |#EDF7ED|process(...) -> provider|
       partition "process(...)" {
-        :assemble prompts =
-        instructions (or guidance_sys_instructions),
+        :assemble system instructions,
         processInfo (file path, mode, OS), and
         extracted guidance + guidance_rules
         OR the default prompt;
         :extract YAML front matter (gw.model,
-        enabledTools); resolve substitutions and
-        >>> includes; configure enabled tools;
+        enabledTools); resolve public substitutions
+        and >>> includes; configure enabled tools;
         :send prompts to Genai provider
         (AIFileProcessor);
         :perform = provider output;
@@ -116,6 +117,19 @@ repeat :next eligible child;
 
 repeat while (more eligible children?) is (yes)
 ->no;
+
+if (project directory matches and default prompt configured?) then (yes)
+  :process project directory with the default prompt;
+  note right
+    This folder-level fallback is handled by
+    processParentFiles() after child traversal.
+  end note
+  if (perform is not blank?) then (yes)
+    :log provider output;
+  endif
+else (no)
+  :no folder-level fallback;
+endif
 
 |#E8EEF7|GuidanceProcessor|
 :getReport() returns guidance-mode report entries

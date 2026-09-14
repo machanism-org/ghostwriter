@@ -274,7 +274,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 * @param projectLayout project layout
 	 * @param file          file currently being processed
 	 * @param guidance      extracted guidance and/or default guidance
-	 * @return provider output
+	 * @return provider output, or {@code null} when the provider produces no result
 	 */
 	@Override
 	public String process(ProjectLayout projectLayout, File file, String guidance) {

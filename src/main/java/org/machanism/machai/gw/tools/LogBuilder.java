@@ -71,8 +71,9 @@ public class LogBuilder {
 	 */
 	private final String logId;
 	/**
-	 * Optional marker indicating that appended content should also be persisted.
-	 * The directory itself is not used to construct the log path.
+	 * Optional project directory marker indicating that appended content should also
+	 * be persisted. The directory itself is not used to construct the log path;
+	 * persistence is enabled only when this value and {@link #logId} are non-null.
 	 */
 	private final File projectDir;
 	/**
@@ -166,8 +167,8 @@ public class LogBuilder {
 	 * Returns the path to the log file for the given log identifier.
 	 *
 	 * <p>
-	 * The log file is located in the system temporary directory under
-	 * {@code gw-command-logs}. Parent directories are created if necessary.
+	 * The log file is located beneath the runtime temporary directory in the
+	 * supplied {@code folder}. Parent directories are created if necessary.
 	 * </p>
 	 *
 	 * @param folder the directory beneath the runtime temporary directory
@@ -195,7 +196,8 @@ public class LogBuilder {
 	 * callers can inspect {@link #getReport()} for the truncation status.
 	 * </p>
 	 *
-	 * @return retained text (possibly with a truncation prefix)
+	 * @return retained text; when truncation occurred, the returned value omits the
+	 *         discarded leading content
 	 */
 	public String getTail() {
 		return sb.toString();

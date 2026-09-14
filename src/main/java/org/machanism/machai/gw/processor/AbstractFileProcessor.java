@@ -52,7 +52,10 @@ import org.machanism.machai.project.layout.ProjectLayout;
  */
 public abstract class AbstractFileProcessor extends ProjectProcessor {
 
-	/** Root scanning directory for the current documentation run. */
+	/**
+	 * Root directory used to calculate project-relative paths during the current
+	 * processing run.
+	 */
 	private File rootDir;
 
 	/**
@@ -62,22 +65,38 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 */
 	private File path;
 
-	/** Degree of concurrency for module processing. */
+	/**
+	 * Number of worker threads used for module processing. A value greater than
+	 * one enables concurrent module processing.
+	 */
 	private int threads;
 
-	/** Whether module discovery/recursion is disabled for the current run. */
+	/**
+	 * Indicates whether module discovery and recursive module processing are
+	 * disabled for the current run.
+	 */
 	private boolean nonRecursive;
 
-	/** Optional matcher used to limit module/file processing to a subset. */
+	/**
+	 * Optional matcher that limits file or module processing to matching paths.
+	 */
 	private PathMatcher pathMatcher;
 
-	/** Optional list of path patterns or exact paths to exclude. */
+	/**
+	 * Optional exact paths or path-pattern expressions excluded from traversal.
+	 */
 	private String[] excludes;
 
-	/** Configuration source used to initialize providers. */
+	/**
+	 * Layered, mutable configuration source supplied to processor
+	 * implementations.
+	 */
 	private final MutableConfigurator configurator;
 
-	/** Timeout for module processing worker pool shutdown, in minutes. */
+	/**
+	 * Maximum number of minutes to await module worker-pool termination before
+	 * forcing shutdown.
+	 */
 	private long moduleThreadTimeoutMinutes = 60;
 
 	/**
@@ -99,6 +118,8 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * @param projectDir the directory containing the project or module to scan
 	 * @throws IOException if a subclass encounters an error while reading or
 	 *                     processing files
+	 * @throws IllegalStateException if concurrent module processing fails or is
+	 *                               interrupted
 	 */
 	@Override
 	public void scanFolder(File projectDir) throws IOException {
@@ -426,7 +447,8 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * Processes a project layout for documentation gathering.
 	 *
 	 * @param projectLayout layout describing sources, tests, docs, and modules
-	 * @throws IOException if project files cannot be listed or processed
+	 * @throws IllegalArgumentException if project files cannot be listed or
+	 *                                  processed
 	 */
 	@Override
 	public void processFolder(ProjectLayout projectLayout) throws IOException {

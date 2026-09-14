@@ -36,12 +36,12 @@ Guidance tags help automate routine work such as improving documentation, creati
 
 ## How it works
 
-![](images/guidance-tag-processing-overview.png)
+![Overview of Guided File Processing: Ghostwriter finds guidance in project files, prepares one context per file, and sends it to the selected AI service for review.](images/guidance-tag-processing-overview.png)
 
 1. Add an `@guidance:` tag in a supported file, or add a folder instruction file named `@guidance.txt`.
 2. Run Ghostwriter and choose a project folder and, optionally, a scan path.
 3. Ghostwriter—not the AI—finds matching supported files that contain guidance and gives each file its own processing context. If your run is configured with default guidance, matching files can instead use that default instruction.
-4. A file-type-aware reviewer recognizes the tag and provides the relevant instruction, file information, and, where appropriate, file content to the processing request.
+4. A file-type-aware reviewer recognizes the tag and provides the relevant instruction and file information to the processing request. Markdown and HTML/XML reviewers require the tag in an HTML/XML comment and supply the complete file content. The Java reviewer accepts block or line comments and supplies the complete source (with special package-level handling for `package-info.java`). TypeScript and Python reviewers accept their supported comment or string forms and supply the non-blank instruction they find. PlantUML files are reviewed when they contain the marker and supply the complete file content. The `@guidance.txt` reviewer uses that file's complete contents as the instruction for its folder.
 5. Ghostwriter combines this material with its standard processing rules and sends it to your configured GenAI provider. Review the result, then revise the tag and run again if needed.
 
 This follows the Guided File Processing approach: natural-language instructions are treated as maintainable project assets. AI is useful for routine enrichment—explaining existing code, adding examples, or organizing text—but it cannot know your project-specific intent unless you state it in the guidance.
@@ -63,12 +63,12 @@ Reviewers recognize these built-in file types:
 | Java | `java` | A block or `//` comment |
 | TypeScript | `ts` | A block or `//` comment |
 | Python | `py` | A `#` comment or triple-quoted string |
-| PlantUML | `puml` | Include the marker, normally in a PlantUML comment |
+| PlantUML | `puml` | Include the marker in the diagram (a PlantUML comment is the usual choice) |
 | Folder instruction | exactly `@guidance.txt` | Put the instruction in that file |
 
 An ordinary `.txt` file is not an inline-guidance file: text files have no comment syntax. `@guidance.txt` is the exception and represents guidance for its folder. Java's `package-info.java` can also provide package-level guidance.
 
-The exact comment format matters. For example, the Markdown and HTML reviewers look for an HTML comment, while the Java reviewer accepts a normal block or line comment. Tags are retained in the source so they can be found in a later run.
+The exact comment format matters. For example, the Markdown and HTML reviewers look for an HTML comment, the Java reviewer accepts a block or line comment, and the TypeScript and Python reviewers extract non-blank text from their supported line, block, or triple-quoted forms. The PlantUML reviewer checks for the marker and includes the complete file when it is present. `@guidance.txt` is identified by its exact filename rather than by an inline marker. Tags are retained in the source so they can be found in a later run.
 
 ## Practical usage
 
@@ -151,7 +151,7 @@ The model selection applies to the run. Run separate scans when different folder
 
 ## What happens during a run?
 
-`GuidanceProcessor` selects a reviewer by file extension. If no reviewer supports the file, Ghostwriter normally leaves it alone; a configured default instruction is the exception for matching files. A reviewer verifies that guidance is present and builds the material for that file. Markdown, HTML/XML, Java, and PlantUML reviewers provide the file content with its project-relative path; Python and TypeScript reviewers provide the non-blank instruction they find with that context. The special text reviewer reads the full contents of `@guidance.txt` and identifies its folder.
+`GuidanceProcessor` loads reviewers through Java's service-provider mechanism and selects one by normalized file extension. The built-in reviewers cover Markdown (`.md`), HTML/HTML fragments/XML (`.html`, `.htm`, `.xml`), Java (`.java`), TypeScript (`.ts`), Python (`.py`), PlantUML (`.puml`), and the exact folder file `@guidance.txt` (handled through `.txt`). If no reviewer supports the file, Ghostwriter normally leaves it alone; a configured default instruction is the exception for matching files. A reviewer checks for the marker in the comment or string style it supports and builds the material for that file. Markdown, HTML/XML, Java, and PlantUML reviewers provide file content with project-relative context; Python and TypeScript reviewers provide the non-blank instruction they find with that context. Java `package-info.java` receives package-level context, while the text reviewer reads the full contents of `@guidance.txt` and identifies its parent folder.
 
 Ghostwriter then invokes the configured provider with the standard instructions and the reviewer material. Its optional functional tools can inspect and modify files, run commands and examine logs, or obtain web information. Tools that modify files, run commands, or make network requests must be enabled and controlled by your settings.
 

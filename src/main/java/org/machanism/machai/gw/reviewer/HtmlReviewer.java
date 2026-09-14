@@ -14,15 +14,25 @@ import org.machanism.machai.project.layout.ProjectLayout;
 
 /*@guidance: >>> ${guidances}/def-class-javadoc.md  */
 /**
- * {@link Reviewer} implementation for HTML and XML files ({@code .html}, {@code .htm}, {@code .xml}).
+ * A {@link Reviewer} implementation for HTML and XML files with the
+ * {@code .html}, {@code .htm}, or {@code .xml} extension.
  *
- * <p>Guidance is expected to appear in an HTML/XML comment block (for example
- * {@code <!-- @guidance ... -->}).
+ * <p>The reviewer reads the complete file as UTF-8 text and looks for the
+ * configured guidance tag inside an HTML/XML comment. When guidance is found,
+ * it creates a localized prompt containing the file name, its path relative to
+ * the project directory, and the complete file content.
+ *
+ * <p>Guidance is expected to appear in an HTML/XML comment block, for example
+ * {@code <!-- @guidance ... -->}. Files without such a comment are not
+ * reviewable by this implementation.
  */
 public class HtmlReviewer implements Reviewer {
 
 	/**
 	 * Localized prompt templates used to construct review requests for HTML and XML files.
+	 *
+	 * <p>The {@code html_file} resource must accept the file name, project-relative
+	 * path, and complete file content, in that order.
 	 */
 	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 

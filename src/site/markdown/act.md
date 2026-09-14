@@ -45,6 +45,10 @@ Acts sit on top of `AIFileProcessor`: `ActProcessor` loads and combines the TOML
 
 For a broader introduction to this style of automation, see [Act-Driven Workflows (ADW)](https://machanism.org/act/index.html). To learn how modules and individual project files are traversed and processed while an act's episodes run, see [Module & Project File Processing during Act Steps](#module--project-file-processing-by-act).
 
+### Key operations
+
+For users invoking an act through Ghostwriter, the important operation is `ActProcessor.setAct(...)`: it accepts an act name, optional request text, and optional episode selector, then loads and configures the workflow. `ActProcessor.getResults()` returns the responses collected during the run. Internally, `ActProcessor` delegates each episode to `AIFileProcessor.process(...)`; that processor prepares the prompt, context, model, and tools before calling the AI provider. These operations separate a repeatable workflow definition (the TOML file) from the project-specific work performed in each run.
+
 ### What happens when an act runs
 
 At a high level, `ActProcessor.setAct(...)` interprets the act name, optional request text, and optional episode selection. It then loads the TOML definition (and any parent definition), applies defaults and configuration, and prepares the episodes. During project traversal, `ActProcessor` runs each selected episode for each matching file. For each episode, `AIFileProcessor.process(...)` adds project and execution information, reads YAML front matter, resolves permitted tools and runtime substitutions, and sends the resulting instructions and prompt to the configured AI provider. The collected provider responses are available from `ActProcessor.getResults()`.
@@ -192,6 +196,8 @@ Set `gw.interactive = true` when the act should operate as a chat. Interactive m
 - Enter any other text to send it as the next chat prompt.
 
 These are literal command values: `AIFileProcessor.CONTINUE_SPECIAL_PROMPT_COMMAND` is `>`, and `AIFileProcessor.EXIT_SPECIAL_PROMPT_COMMAND` is `.`. Enter the character by itself after a response, not as part of a longer request.
+
+The source guidance also asks about an empty value written as ``. No constant or command is associated with that empty value in `AIFileProcessor`, so there is no runtime value to enter or document; use the named commands above instead.
 
 Interactive input requires an environment that supports it. The base `AIFileProcessor` does not read a console by itself: an embedding command-line or UI implementation must provide the next input. In a non-interactive execution environment, acts proceed without chat input; use a predefined non-interactive act when the task must run unattended.
 

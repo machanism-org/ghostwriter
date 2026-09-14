@@ -9,7 +9,11 @@ package org.machanism.machai.gw.tools;
  * while preserving the applicable workflow context. This exception represents
  * an expected workflow decision rather than a processing failure.</p>
  *
+ * <p>The exception has a fixed diagnostic message because the signal carries
+ * control-flow intent rather than error details.</p>
+ *
  * @author Viktor Tovstyi
+ * @see RuntimeException
  */
 public class RepeatEpisodeException extends RuntimeException {
 	/**

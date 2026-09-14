@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
  * <li>Retrieving the result of a previously started Act by process ID</li>
  * <li>Supplying prompt templates for Act execution</li>
  * </ul>
+ * </p>
  * <p>
  * Acts are reusable, named workflows or actions defined in the project or
  * classpath. This class supports both custom and built-in Act definitions, and
@@ -83,9 +84,10 @@ public class ActFunctionTools implements FunctionTools {
 	 * @param actName      The name of the Act to load.
 	 * @param projectDir   The project directory containing custom Act definitions.
 	 * @param configurator The configuration used to locate custom Act definitions.
-	 * @return A map containing the matching custom and/or built-in Act details, or
-	 *         a message indicating that the Act was not found.
+	 * @return A map containing the matching custom and/or built-in Act details.
 	 * @throws IOException If an error occurs while loading an Act definition.
+	 * @throws FileNotFoundException If no custom or built-in definition matches the
+	 *                               requested Act name.
 	 */
 	@Tool(name = "get-act-details", description = "Loads the details of a specific Act template, including its instructions, input template, and "
 			+ "configuration options. Useful for inspecting or editing Act definitions.")
@@ -145,7 +147,7 @@ public class ActFunctionTools implements FunctionTools {
 	/**
 	 * Writes the Act completion banner when INFO logging is enabled.
 	 *
-	 * @param actName completed Act name
+	 * @param actName completed Act name; used in the lifecycle log message
 	 */
 	private void logActCompletion(String actName) {
 		if (logger.isInfoEnabled()) {
@@ -323,7 +325,8 @@ public class ActFunctionTools implements FunctionTools {
 	 * name. The returned template is resolved from the MCP prompt resource bundle.
 	 *
 	 * @param actName The name of the Act to perform.
-	 * @return The prompt template used to perform the Act.
+	 * @return The prompt template used to perform the Act. The template is loaded
+	 *         from the {@code process_act} resource-bundle entry.
 	 */
 	@Prompt(name = "Perform Act", description = "Executes the specified act based on the provided name parameter.")
 	public String actPrompts(@Param(name = "name", description = "The name of the Act to perform.") String actName) {

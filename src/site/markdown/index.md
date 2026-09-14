@@ -67,6 +67,10 @@ Ghostwriter resolves runtime settings, scans a selected project scope, and route
 
 The architecture separates command-line startup and configuration from scanning, AI orchestration, guidance handling, workflow execution, and format-specific review. These services are supported by focused tool adapters and provider management, so local project operations and remote AI services can evolve independently. Users invoke the command-line interface; it selects the processing mode and coordinates these services against project content and optional remote resources.
 
+### Project Structure Overview
+
+The project is organized as a command-line application with a shared processing core. Startup resolves configuration and selects either guidance processing or Act execution. Both modes scan the project and delegate AI-assisted work to format-aware reviewers. Provider management and tool registration connect that processing core to the configured model and to controlled capabilities for files, commands, web resources, Acts, guidance, and shared context. External project content, remote resources, and the GenAI provider remain outside the application boundary, allowing the same processing flow to be used locally or in automation.
+
 ![Ghostwriter component diagram](./images/c4-diagram.png)
 
 ## Machai Ghostwriter vs. Other Tools
@@ -147,19 +151,19 @@ Ghostwriter requires Java 8 or later. Functional processing also requires an ava
 
 ## Configuration
 
-Command-line values take precedence over properties loaded from the selected configuration file. Run `java -jar gw.jar --help` to print the complete CLI syntax, descriptions, and examples.
+Command-line values take precedence over properties loaded from the selected configuration file. Run `java -jar gw.jar --help` to print the complete CLI syntax, descriptions, and examples. The scan target is a positional argument; it may be a relative path, a directory, a `glob:` pattern, or a `regex:` pattern. If no target is supplied, the configured path is used, falling back to `.`.
 
 ### Command-Line Options
 
 | Option | Description | Default value |
 |---|---|---|
-| `-h`, `--help` | Print help and exit without processing. | Disabled |
+| `-h`, `--help` | Print help and exit without processing. | Not enabled |
 | `-d <dir>`, `--projectDir <dir>` | Set the project directory used for processing. | Configured `projectDir`, otherwise the current user directory |
-| `-c <file>`, `--config <file>` | Select a configuration properties file. | `gw.properties` in the project directory, unless configured through the system property |
+| `-c <file>`, `--config <file>` | Select a configuration properties file. Relative paths are resolved from the startup project directory. | The default `gw.properties`, or the file named by the `config` system property |
 | `-t <n>`, `--threads <n>` | Set concurrent processing threads; higher values can improve throughput but increase resource and provider use. | Configured `threads`, otherwise processor default |
-| `-m <provider:model>`, `--model <provider:model>` | Select the GenAI provider and model, for example `OpenAI:gpt-5.1`. | Configured model |
-| `-i [text]`, `--instructions [text]` | Set system instructions. When used without text, prompt for the instructions on standard input. | Configured `instructions` |
-| `-e <list>`, `--excludes <list>` | Supply comma-separated directories or patterns to skip. | Configured exclusions |
+| `-m <provider:model>`, `--model <provider:model>` | Select the GenAI provider and model, for example `OpenAI:gpt-5.1`. | Configured model, otherwise unset |
+| `-i [text]`, `--instructions [text]` | Set system instructions. When used without text, prompt for the instructions on standard input. | Configured `instructions`, otherwise unset |
+| `-e <list>`, `--excludes <list>` | Supply comma-separated directories or patterns to skip. | Configured exclusions, otherwise unset |
 | `-as <dir>`, `--acts <dir>` | Set the directory containing predefined Act prompt files. | Configured Acts location |
 | `-a [name]`, `--act [name]` | Enable interactive Act mode and optionally select the Act; prompts for a name when supplied without one. | Guidance mode; configured Act when applicable |
 

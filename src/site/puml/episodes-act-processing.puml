@@ -35,7 +35,7 @@ note right
   directory itself is processed.
 end note
 
-:Take next matching file;
+:Process each matching file in turn;
 
 if (Specific episodes were requested?) then (yes)
   :Begin with the selected episodes;
@@ -56,8 +56,8 @@ note right
   repeat an episode, jump to another one, or end this file.
 end note
 
-:Collect results and continue
-with the next matching file;
+:Collect results from the file
+and continue with the next match;
 note right
   When every matching file is complete,
   collect the overall results.

@@ -383,7 +383,7 @@ public final class Ghostwriter {
 	 * Lines ending with {@code GWConstants.MULTIPLE_LINES_BREAKER} are treated as
 	 * continued: the breaker is stripped and a line separator is appended, and
 	 * reading continues on the next line. Reading stops at the first line that does
-	 * not end with the breaker.
+	 * not end with the breaker, or when the input source is exhausted.
 	 * </p>
 	 *
 	 * @param scanner scanner reading standard input
@@ -557,8 +557,8 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Writes a prompt message to the console when available. If no {@link Console}
-	 * is attached (e.g., input is redirected), no output is produced.
+	 * Writes a prompt message to the console when available, or to standard output
+	 * when no {@link Console} is attached (e.g., when input is redirected).
 	 *
 	 * @param console console instance, may be {@code null}
 	 * @param message message to print, followed by {@code ": "}
@@ -790,6 +790,12 @@ public final class Ghostwriter {
 	 * </p>
 	 */
 	private static final class RuntimeSettings {
+		/**
+		 * Creates an empty settings holder for values resolved during CLI startup.
+		 */
+		private RuntimeSettings() {
+		}
+
 		/**
 		 * Configured AI provider/model identifier (e.g. {@code "OpenAI:gpt-5.1"}), or
 		 * {@code null}.
