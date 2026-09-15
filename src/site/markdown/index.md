@@ -73,44 +73,52 @@ The project is organized as a command-line application with a shared processing 
 
 ![Ghostwriter component diagram](./images/c4-diagram.png)
 
-## Machai Ghostwriter vs. Other Tools
+### Machai Ghostwriter vs. Other Tools
 
-[OpenHands](https://github.com/All-Hands-AI/OpenHands) is the closest comparable tool because it is an extensible AI software-development agent that can perform repository-level tasks through tools and can be used in automated development workflows. Both tools go beyond inline completion by operating on a project as a whole, integrating with external services, and supporting automation. Ghostwriter is distinguished by its file-embedded GDP guidance and its ADW model, which make instructions and reusable workflow definitions first-class project artifacts.
+The closest widely known tool to Machai Ghostwriter is **Claude Code**. Both can operate across repositories, use tools, and assist with multi-file changes rather than only inline code completion. Claude Code is the nearest comparison because it supports agentic command-line workflows and project-level reasoning, but Ghostwriter is more specifically designed for repeatable project-wide automation driven by repository-embedded guidance, Maven/CLI execution, and reusable acts.
 
-**Key similarities**
+#### Key similarities
 
-- Both support agentic, multi-file project work rather than only code completion.
-- Both can be extended with tools and incorporated into automated engineering workflows.
-- Both can use an AI model to inspect project context and make coordinated changes.
+- Both support multi-file, repository-level work.
+- Both go beyond autocomplete and can perform task-oriented engineering workflows.
+- Both can be used from command-line-oriented environments.
+- Both rely on configurable LLM-backed execution and tool-assisted context gathering.
 
-**Key differences**
+#### Key differences
 
-- Ghostwriter processes all relevant project-file types through guidance-bearing artifacts; OpenHands is primarily an autonomous software-development environment and agent platform.
-- Ghostwriter keeps durable `@guidance` instructions in the governed file and provides Act definitions for repeatable workflows; OpenHands emphasizes task-driven agent execution.
-- Ghostwriter's CLI scans configurable paths and patterns, making narrowly scoped documentation and content processing straightforward in CI/CD jobs.
+- **Persistent guidance:** Ghostwriter stores maintenance instructions in project files through `@guidance` directives; Claude Code is primarily session- and prompt-driven.
+- **Repeatable batch execution:** Ghostwriter is optimized for scanning paths, glob patterns, and regex targets, making it suitable for scheduled repository maintenance and CI/CD jobs.
+- **Documentation-first automation:** Ghostwriter explicitly targets documentation, project site content, diagrams, configuration, and source code as first-class project artifacts.
+- **Reusable acts:** Ghostwriter supports predefined act workflows for repeatable automation with controlled tool access.
+- **Build ecosystem fit:** Ghostwriter is distributed as a Java CLI and can be integrated into Maven-oriented delivery and automation flows.
 
-Tabnine, GitHub Copilot, Claude Code, and Cursor are highly effective developer-assistance tools, but their central experiences are code completion, chat, IDE assistance, or interactive coding agents. Claude Code can perform broad repository tasks, while Copilot and Cursor increasingly support agentic edits; however, Ghostwriter specifically combines project-wide scanning with persistent custom guidance and documentation-oriented processing.
+#### Brief comparison with popular tools
+
+Tabnine and GitHub Copilot focus primarily on editor-based completions and developer assistance. Cursor provides a richer AI-native IDE experience for interactive codebase edits. Claude Code provides the closest command-line, repository-aware agent workflow. Ghostwriter differs by treating project guidance and documentation maintenance as repeatable repository automation rather than an interactive coding session.
 
 | Tool | Project-wide automation | Custom guidance | CI/CD integration | Documentation generation |
-|---|---|---|---|---|
-| **Machai Ghostwriter** | Yes — path-scoped scans and Acts | Yes — embedded directives and instructions | Yes — CLI-oriented | Yes — a primary use case across project files |
-| OpenHands | Yes — agent tasks and tools | Yes — task prompts and configuration | Yes — automation/deployment integrations | Yes — task-dependent |
-| Tabnine | Limited — primarily developer/IDE workflows | Limited — organization and chat context | Limited | Limited |
-| GitHub Copilot | Yes — agent features and repository workflows | Yes — repository instructions and prompts | Yes — GitHub ecosystem workflows | Yes — chat/agent-assisted |
-| Claude Code | Yes — terminal-based repository tasks | Yes — project instructions and prompts | Yes — scriptable terminal workflow | Yes — agent-assisted |
-| Cursor | Yes — interactive multi-file agent edits | Yes — rules and prompts | Limited — primarily IDE-centered | Yes — agent-assisted |
+|---|---:|---:|---:|---:|
+| Machai Ghostwriter | Yes | Yes, via embedded `@guidance` and acts | Yes, CLI/Maven-friendly | Yes, first-class focus |
+| Claude Code | Yes | Yes, prompt/session and project instructions | Possible, command-line oriented | Yes, prompt-driven |
+| GitHub Copilot | Limited | Limited to editor/chat context and repository instructions | Limited, mainly GitHub ecosystem features | Yes, interactive/prompt-driven |
+| Cursor | Yes, interactive | Yes, IDE rules and prompts | Limited, IDE-centered | Yes, interactive/prompt-driven |
+| Tabnine | Limited | Limited | Limited | Limited |
 
-Machai Ghostwriter is unique in treating guidance-tagged project files and Act-driven workflows as the durable control plane for AI automation across code, documentation, websites, and other repository content.
+Machai Ghostwriter is unique because it combines repository-embedded guidance, broad project-file support, reusable act workflows, and CI/CD-friendly batch execution into a governed automation model for keeping code, documentation, diagrams, and configuration aligned.
 
 ## Key Features
 
-- Scans project directories, individual paths, and `glob:` or `regex:` patterns.
-- Processes embedded `@guidance` directives in supported Java, Markdown, PlantUML, HTML, Python, TypeScript, and text artifacts.
-- Provides Guidance mode for file-local instructions and Act mode for reusable, episode-driven workflows.
-- Supports configurable AI provider/model selection, system instructions, exclusions, project directory, and concurrency.
-- Offers registered tools for project files, security-checked commands, web content, REST APIs, project context, and nested workflow execution.
-- Resolves local and remote resources and can use shared context between workflow episodes.
-- Packages as a Java CLI for local use and repeatable CI/CD automation.
+- Scans directories, glob patterns, and regex-based targets.
+- Detects embedded `@guidance` directives in repository files.
+- Processes source code, documentation, project site content, configuration, diagrams, and other relevant artifacts.
+- Integrates with configurable GenAI providers and models.
+- Supports additional system instructions from plain text, URLs, files, or standard input.
+- Applies exclusion rules for selective processing.
+- Provides Act mode for reusable and ad-hoc prompt workflows.
+- Supports configurable concurrency.
+- Can log LLM request inputs for diagnostics and auditing.
+- Records usage statistics at the end of processing.
+- Fits both local development and CI/CD automation scenarios.
 
 ## Getting Started
 
