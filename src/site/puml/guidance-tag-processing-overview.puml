@@ -1,34 +1,42 @@
 ' @guidance:
 ' Create or update the PlantUML diagram describing how files tagged with the
-' @guidance marker are processed. This is a SEPARATE way of using Ghostwriter
-' and is NOT part of the Act/episode functionality.
+' @guidance marker are processed.
 ' Keep this diagram simple: a short linear flow with one decision point,
 ' minimal notes, and no swimlane color-partitions.
 
 @startuml
-title Ghostwriter - @guidance Tag File Processing (standalone mode, not an Act)
+title Ghostwriter - @guidance Tag Processing Overview
 
 skinparam ArrowColor #333333
 skinparam ActivityBackgroundColor #F5F7FA
 skinparam ActivityBorderColor #4A6FA5
 skinparam ActivityDiamondBackgroundColor #FFF3CD
+skinparam NoteBackgroundColor #EDF7ED
 
 start
 
-:Scan files in the selected project scope;
-:Select the next file and its extension reviewer;
+:Scan and filter project files;
 
-if (Reviewer found and file has "@guidance:"?) then (yes)
-  :Extract the guidance text;
-  :Build and send the standalone guidance prompt;
-  :Apply the response and record it in the guidance report;
-  note right
-    The "@guidance:" comment remains in the file.
-  end note
+:Select a reviewer by file extension
+and extract the @guidance comment;
+note right
+  Reviewers recognize guidance embedded
+  in comments for each supported file type.
+end note
+
+if (Guidance found?) then (yes)
+  :Compose the processing prompt;
+  :Send it to the configured AI provider;
+  :Record the processing report;
 else (no)
-  :Skip file;
+  :Skip the file;
 endif
 
 stop
+
+legend right
+  @guidance processing is a standalone file flow,
+  separate from Act episode processing.
+endlegend
 
 @enduml
