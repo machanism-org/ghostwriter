@@ -75,7 +75,7 @@ The project is organized as a command-line application with a shared processing 
 
 ### Machai Ghostwriter vs. Other Tools
 
-The closest widely known tool to Machai Ghostwriter is **Claude Code**. Both can operate across repositories, use tools, and assist with multi-file changes rather than only inline code completion. Claude Code is the nearest comparison because it supports agentic command-line workflows and project-level reasoning, but Ghostwriter is more specifically designed for repeatable project-wide automation driven by repository-embedded guidance, Maven/CLI execution, and reusable acts.
+The closest widely known tool to Machai Ghostwriter is **Claude Code**. Both can operate across repositories, use extensible tool integrations, and assist with multi-file changes rather than only inline code completion. Claude Code is the nearest comparison because it supports agentic command-line workflows, project-level reasoning, automation-friendly invocation, and extensibility through tools and MCP servers. Ghostwriter is more specifically designed for repeatable project-wide automation driven by repository-embedded guidance, Maven/CLI execution, reusable acts, and a configurable tool registry.
 
 #### Key similarities
 
@@ -83,6 +83,7 @@ The closest widely known tool to Machai Ghostwriter is **Claude Code**. Both can
 - Both go beyond autocomplete and can perform task-oriented engineering workflows.
 - Both can be used from command-line-oriented environments.
 - Both rely on configurable LLM-backed execution and tool-assisted context gathering.
+- Both can be extended with additional tools and MCP-based integrations.
 
 #### Key differences
 
@@ -90,6 +91,7 @@ The closest widely known tool to Machai Ghostwriter is **Claude Code**. Both can
 - **Repeatable batch execution:** Ghostwriter is optimized for scanning paths, glob patterns, and regex targets, making it suitable for scheduled repository maintenance and CI/CD jobs.
 - **Documentation-first automation:** Ghostwriter explicitly targets documentation, project site content, diagrams, configuration, and source code as first-class project artifacts.
 - **Reusable acts:** Ghostwriter supports predefined act workflows for repeatable automation with controlled tool access.
+- **Extensibility model:** Ghostwriter combines registered function tools, selectable per-prompt tool sets, and reusable acts; Claude Code centers extensibility on tools, hooks, skills, subagents, and MCP servers.
 - **Build ecosystem fit:** Ghostwriter is distributed as a Java CLI and can be integrated into Maven-oriented delivery and automation flows.
 
 #### Brief comparison with popular tools
