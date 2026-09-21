@@ -66,8 +66,8 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	private File path;
 
 	/**
-	 * Number of worker threads used for module processing. A value greater than
-	 * one enables concurrent module processing.
+	 * Number of worker threads used for module processing. A value greater than one
+	 * enables concurrent module processing.
 	 */
 	private int threads;
 
@@ -88,8 +88,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	private String[] excludes;
 
 	/**
-	 * Layered, mutable configuration source supplied to processor
-	 * implementations.
+	 * Layered, mutable configuration source supplied to processor implementations.
 	 */
 	private final MutableConfigurator configurator;
 
@@ -116,8 +115,8 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * found modules and files.
 	 *
 	 * @param projectDir the directory containing the project or module to scan
-	 * @throws IOException if a subclass encounters an error while reading or
-	 *                     processing files
+	 * @throws IOException           if a subclass encounters an error while reading
+	 *                               or processing files
 	 * @throws IllegalStateException if concurrent module processing fails or is
 	 *                               interrupted
 	 */
@@ -147,7 +146,8 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * @param projectLayout layout for the parent project directory
 	 * @param modules       relative paths of the modules to process
 	 * @throws IllegalStateException if a module cannot be processed or the calling
-	 *                               thread is interrupted while waiting for a module
+	 *                               thread is interrupted while waiting for a
+	 *                               module
 	 */
 	void processModulesMultiThreaded(ProjectLayout projectLayout, List<String> modules) {
 		ExecutorService executor = Executors.newFixedThreadPool(threads);
@@ -235,9 +235,10 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * </p>
 	 * <ol>
 	 * <li>If the {@code file} is {@code null}, returns {@code false}.</li>
-	 * <li>If the file is excluded by the project layout, returns {@code false}.</li>
-	 * <li>If no matcher is configured, includes only the explicitly configured
-	 * scan path.</li>
+	 * <li>If the file is excluded by the project layout, returns
+	 * {@code false}.</li>
+	 * <li>If no matcher is configured, includes only the explicitly configured scan
+	 * path.</li>
 	 * <li>Uses {@code pathMatcher} to check if the relative path matches the
 	 * configured pattern.</li>
 	 * <li>If it does not match and {@code path} is not {@code null}, performs a
@@ -301,7 +302,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 *
 	 * @param projectLayout project layout
 	 * @throws IOException if a subclass encounters an error while processing parent
- *                     files
+	 *                     files
 	 */
 	protected void processParentFiles(ProjectLayout projectLayout) throws IOException {
 		// To be implemented by subclasses if needed

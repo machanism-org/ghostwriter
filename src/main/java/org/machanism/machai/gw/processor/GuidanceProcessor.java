@@ -3,6 +3,7 @@ package org.machanism.machai.gw.processor;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -175,6 +176,9 @@ public class GuidanceProcessor extends AIFileProcessor {
 	@Override
 	protected boolean match(File file, ProjectLayout projectLayout) {
 		File projectDir = projectLayout.getProjectDir();
+		if (getPathMatcher() != null && getPath() == null) {
+			return getPathMatcher().matches(file.toPath());
+		}
 		if (getPathMatcher() == null) {
 			return getDefaultPrompt() == null || Objects.equals(file, projectDir);
 		}
@@ -218,8 +222,17 @@ public class GuidanceProcessor extends AIFileProcessor {
 	@Override
 	protected void processParentFiles(ProjectLayout projectLayout) throws IOException {
 		File projectDir = projectLayout.getProjectDir();
-		List<File> children = listFiles(projectDir);
 
+		List<File> children = projectLayout.listFiles(projectDir);
+		if (children == null || children.isEmpty()) {
+			File[] listedChildren = projectDir.listFiles();
+			if (listedChildren != null && listedChildren.length > 0) {
+				children = new ArrayList<>(Arrays.asList(listedChildren));
+			}
+			if (children == null) {
+				children = new ArrayList<>();
+			}
+		}
 		children.removeIf(child -> isModuleDir(projectLayout, child) || !match(child, projectLayout));
 
 		for (File child : children) {
@@ -256,15 +269,28 @@ public class GuidanceProcessor extends AIFileProcessor {
 			String processInfo = getProcessInfo(projectLayout, file);
 			if (guidance != null) {
 				perform = process(projectLayout, file, getInstructions(), processInfo, guidanceRules, guidance);
+				perform = defaultReport(projectLayout, file, perform);
 
 			} else if (getDefaultPrompt() != null) {
 				perform = process(projectLayout, file, getInstructions(), processInfo, getDefaultPrompt());
+				perform = defaultReport(projectLayout, file, perform);
 			}
 		}
 
 		if (StringUtils.isNoneBlank(perform)) {
 			logger.info(AIFileProcessor.LOG_OUTPUT_PREFIX, perform);
+			Map<String, Object> resultMap = new HashMap<>();
+			resultMap.put("file", ProjectLayout.getRelativePath(getRootDir(), file));
+			resultMap.put("message", perform);
+			getReport().add(resultMap);
 		}
+	}
+
+	private String defaultReport(ProjectLayout projectLayout, File file, String perform) {
+		if (StringUtils.isBlank(perform)) {
+			perform = "processed";
+		}
+		return perform;
 	}
 
 	/**
