@@ -38,6 +38,12 @@ Ghostwriter resolves runtime configuration, scans a selected project scope, and 
 
 The architecture separates command-line startup and configuration from file scanning, AI orchestration, guidance handling, workflow execution, and format-specific review. Tool adapters provide file, command, web, workflow, guidance, and project-context capabilities, while provider management connects the configured AI service to those enabled tools.
 
+## Project Structure
+
+Ghostwriter is organized around a command-line entry point that loads runtime configuration and selects either Guidance or Act processing. A shared file-processing core traverses the selected project scope, applies path matching and exclusions, and delegates work to AI orchestration. Guidance processing discovers directives and invokes format-aware reviewers, while Act processing loads reusable workflows, coordinates episodes, and shares project context between steps.
+
+Provider management connects the processing core to the configured GenAI service. Registered tool adapters expose controlled operations for project files, approved commands, web and REST resources, workflow execution, guidance processing, and shared context. This separation keeps local project access, workflow control, content review, and remote model interaction independently maintainable.
+
 ## Key Features
 
 - Scans project directories, individual paths, and `glob:` or `regex:` patterns.
