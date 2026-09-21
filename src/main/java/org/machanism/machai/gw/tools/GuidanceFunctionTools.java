@@ -24,7 +24,6 @@ import org.machanism.machai.ai.tools.Prompt;
 import org.machanism.machai.ai.tools.SupportedFor;
 import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.gw.processor.AIFileProcessor;
-import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.GWConstants;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
@@ -51,14 +50,15 @@ import org.slf4j.LoggerFactory;
  * both custom and built-in project workflows. It manages asynchronous execution
  * and result retrieval using temporary files and process IDs. Methods in this
  * class are typically invoked by an AI provider or workflow engine to enable
- * dynamic, tool-augmented project automation involving guidance tags. Asynchronous
- * reports are serialized below the application temporary directory and can be
- * retrieved with the process identifier returned when processing starts.
+ * dynamic, tool-augmented project automation involving guidance tags.
+ * Asynchronous reports are serialized below the application temporary directory
+ * and can be retrieved with the process identifier returned when processing
+ * starts.
  * </p>
  *
  * @author Viktor Tovstyi
  */
-@SupportedFor(ActProcessor.class)
+@SupportedFor(excludes = GuidanceProcessor.class)
 public class GuidanceFunctionTools implements FunctionTools {
 
 	/**
@@ -119,35 +119,29 @@ public class GuidanceFunctionTools implements FunctionTools {
 			+ "guidance-tag processing (e.g., 'process guidance tags'). Do not invoke for normal tasks, "
 			+ "test fixing, or file inspection.")
 	public Map<File, List<File>> getGuidanceTaggedFiles(
-			@Param(name = "root-dir", description = "The absolute path to the root project directory, or to a parent "
-					+ "folder containing multiple projects/modules. This defines the outer boundary for the scan; "
-					+ "all file lookups and path resolutions are performed relative to this directory.") String rootDir,
 			@Param(name = "path", description = "The scanning path or pattern used to select candidate files to "
 					+ "inspect for @guidance tags. Provide a path relative to 'project_dir'. If an absolute path is "
 					+ "given, it must still fall within 'root_dir'. Supported forms: a plain relative directory "
 					+ "name, a glob pattern (e.g., \"glob:**/*.java\"), or a regex pattern "
 					+ "(e.g., \"regex:^.*/[^/]+\\.java$\"). Only files matching this pattern are scanned for "
 					+ "@guidance tags — files outside the pattern are skipped entirely, regardless of their content.", defaultValue = "glob:**/*.*") String path,
-			@Param(name = "project-dir", description = "The specific project (or module) directory to scan for "
-					+ "@guidance-tagged files. Must reside within 'root_dir'. When 'root_dir' spans multiple "
-					+ "projects, this parameter narrows the scan to a single project so results can be grouped "
-					+ "and attributed correctly.") File projectDir,
+			File projectDir,
 			Configurator configurator)
 			throws IOException {
 		Map<File, List<File>> map = new HashMap<>();
 
 		String model = configurator.get(GWConstants.MODEL_PROP_NAME, null);
-		AIFileProcessor processor = new GuidanceProcessor(new File(rootDir), model, configurator) {
+		AIFileProcessor processor = new GuidanceProcessor(projectDir, model, configurator) {
 			/**
-			 * Records a guidance-tagged file under the directory of its project rather
-			 * than applying its guidance instructions.
+			 * Records a guidance-tagged file under the directory of its project rather than
+			 * applying its guidance instructions.
 			 *
 			 * @param projectLayout layout that identifies the file's project
 			 * @param file          guidance-tagged file found during the scan
-			 * @param instructions  extracted guidance instructions, which are not
-			 *                      processed by this discovery-only implementation
-			 * @param prompts       optional prompts associated with the file, which are
-			 *                      not used by this discovery-only implementation
+			 * @param instructions  extracted guidance instructions, which are not processed
+			 *                      by this discovery-only implementation
+			 * @param prompts       optional prompts associated with the file, which are not
+			 *                      used by this discovery-only implementation
 			 * @return {@code null}, because discovery produces no processed-file result
 			 */
 			@Override
@@ -187,8 +181,8 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 * Serializes a guidance-processing report to its temporary result file.
 	 *
 	 * @param tempFile destination temporary file; its parent directory must exist
-	 * @param result   report to serialize, including the outcome for every processed
-	 *                 file
+	 * @param result   report to serialize, including the outcome for every
+	 *                 processed file
 	 * @throws IOException if the report cannot be written
 	 */
 	private void writeGuidanceResult(File tempFile, List<Map<String, Object>> result) throws IOException {
@@ -244,18 +238,18 @@ public class GuidanceFunctionTools implements FunctionTools {
 			+ "`status` of `processing`, and the final report is written to a temporary file for later retrieval "
 			+ "once the background task completes.")
 	public Object processGuidanceTagFiles(
-			@Param(name = "project-dir", description = "The project dir.") File projectDir,
-			@Param(name = "properties", description = "Act properties.", defaultValue = Param.NULL) Map<String, String> properties,
+			@Param(name = "properties", description = "Guidance processing properties.", defaultValue = Param.NULL) Map<String, String> properties,
 			@Param(name = "path", description = "Specifies the scanning path or pattern used to locate files to process. "
 					+ "Use a relative path with respect to the current project directory. "
 					+ "If an absolute path is provided, it must be located within the root project directory. "
 					+ "Supported patterns: raw directory names, glob patterns (e.g., \"glob:**/*.java\"), or regex "
 					+ "patterns (e.g., \"regex:^.*/[^/]+\\.java$\"). Defaults to the project directory itself, meaning "
-					+ "the entire project is scanned.", defaultValue = "${project_dir}") String path,
+					+ "the entire project is scanned.", defaultValue = ".") String path,
 			@Param(name = "async", description = "Controls the execution mode. If true, processing runs in the "
 					+ "background and the tool immediately returns a `process_id` and `status` for later polling — "
 					+ "useful for MCP server execution or long-running scans that shouldn't block the caller. "
 					+ "If false, the tool blocks until processing completes and returns the full report directly.", defaultValue = "false") boolean async,
+			File projectDir,
 			Configurator config)
 			throws IOException {
 
@@ -307,9 +301,8 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 * This method reconstructs the path to the temporary file where the result was
 	 * stored, using the provided process identifier and the system's temporary
 	 * directory. If the result file exists, it reads and returns the result. If the
-	 * file does not
-	 * exist, it returns a status indicating that the result is still processing or
-	 * unavailable.
+	 * file does not exist, it returns a status indicating that the result is still
+	 * processing or unavailable.
 	 * </p>
 	 *
 	 * @param processId The process identifier returned when processing was started;
@@ -361,15 +354,15 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 * @param projectDir The root folder of the project, or the parent folder
 	 *                   containing projects to scan. The value is accepted for the
 	 *                   prompt contract and is resolved by its caller.
-	 * @param path       The scanning path or pattern used to select files. The value
-	 *                   is accepted for the prompt contract and is resolved by its
-	 *                   caller.
+	 * @param path       The scanning path or pattern used to select files. The
+	 *                   value is accepted for the prompt contract and is resolved
+	 *                   by its caller.
 	 * @return The prompt template for processing files with guidance tags.
 	 */
 	@Prompt(name = "process-guidance-tags", description = "Processes files with guidance tags using the configured model.")
 	public String getGuidancePrompt(
-			@Param(name = "project-dir", description = "The root folder of the project or the root folder of projects to scan.") String projectDir,
-			@Param(name = "path", description = "Scanning path or pattern.", defaultValue = "${project_dir}") String path) {
+			@Param(name = "path", description = "Scanning path or pattern.", defaultValue = Param.NULL) String path,
+			File projectDir) {
 		return mcpPromptBundle.getString("process_guidance");
 	}
 }
