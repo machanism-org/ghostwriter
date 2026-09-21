@@ -86,28 +86,18 @@ public class FileFunctionTools implements FunctionTools {
 	 *                                  canonicalized, or the requested path is
 	 *                                  outside {@code projectDir}
 	 */
-	@Tool(name = "list-files-in-directory", description = "List files and directories in a specified folder, grouped by type.")
+	@Tool(name = "list-files-in-directory", description = "List files and directories in a specified folder recursively, grouped by type.")
 	public Map<String, List<String>> listFiles(
-			@Param(name = "dir-path", description = "The path to the directory to list contents of.", defaultValue = ".") File dirPath,
-			@Param(name = "project-dir", description = "The project dir.") File projectDir) {
+			@Param(name = "path", description = "The path to the directory to list contents of.", defaultValue = ".") File dirPath,
+			File projectDir) {
 
 		File directory = getFile(dirPath, projectDir);
 
 		List<String> directories = new ArrayList<>();
 		List<String> files = new ArrayList<>();
 
-		if (directory.isDirectory()) {
-			File[] listFiles = directory.listFiles();
-			if (listFiles != null) {
-				for (File file : listFiles) {
-					String relativePath = getRelativePath(projectDir, file, true);
-					if (file.isDirectory()) {
-						directories.add(relativePath);
-					} else if (file.isFile()) {
-						files.add(relativePath);
-					}
-				}
-			}
+		if (directory.exists() && directory.isDirectory()) {
+			collectRecursive(directory, projectDir, directories, files);
 		}
 
 		Map<String, List<String>> result = new HashMap<>();
@@ -117,6 +107,21 @@ public class FileFunctionTools implements FunctionTools {
 		return result;
 	}
 
+	private void collectRecursive(File currentDir, File projectDir, List<String> directories, List<String> files) {
+		File[] listFiles = currentDir.listFiles();
+		if (listFiles != null) {
+			for (File file : listFiles) {
+				String relativePath = getRelativePath(projectDir, file, true);
+				if (file.isDirectory()) {
+					directories.add(relativePath);
+					collectRecursive(file, projectDir, directories, files);
+				} else if (file.isFile()) {
+					files.add(relativePath);
+				}
+			}
+		}
+	}
+
 	/**
 	 * Lists files recursively in a directory up to a specified maximum limit.
 	 *
@@ -124,7 +129,7 @@ public class FileFunctionTools implements FunctionTools {
 	 * This AI functional tool returns the files discovered below a directory.
 	 * </p>
 	 *
-	 * @param dir        the relative or absolute path of the directory to scan
+	 * @param path        the relative or absolute path of the directory to scan
 	 * @param maxCount   the maximum number of files allowed in the result; throws
 	 *                   an error if exceeded
 	 * @param projectDir the root project directory context
@@ -136,31 +141,47 @@ public class FileFunctionTools implements FunctionTools {
 	 */
 	@Tool(name = "get-recursive-file-list", description = "List files recursively in a directory (includes files in subdirectories).")
 	public Object getRecursiveFiles(
-			@Param(name = "dir", description = "Path to the folder to list contents recursively.", defaultValue = "") File dir,
+			@Param(name = "path", description = "Path to the folder to list contents recursively.", defaultValue = "") File path,
 			@Param(name = "max-count", description = "The maximum number of files allowed in the results. Used to prevent overly large context payloads.", defaultValue = "50") int maxCount,
-			@Param(name = "project-dir", description = "The project dir.") File projectDir) {
-		File directory = getFile(dir, projectDir);
+			File projectDir) {
 
-		List<File> listFiles = ProjectLayout.listFiles(directory);
-		List<String> files = new ArrayList<>();
-		Object result;
-		if (!listFiles.isEmpty()) {
-			for (File file : listFiles) {
-				files.add(getRelativePath(projectDir, file, true));
-			}
-			if (files.size() > maxCount) {
-				throw new IllegalArgumentException(
-						String.format(
-								"Result is too long. The number of discovered files (%d) exceeds the allowed limit of %d.",
-								files.size(), maxCount));
-			}
-			result = files;
+		File targetDir = getFile(path, projectDir);
 
-		} else {
-			result = "No files found in directory.";
+		if (targetDir == null || !targetDir.exists()) {
+			return "No files found in directory.";
 		}
 
-		return result;
+		if (!targetDir.isDirectory()) {
+			throw new IllegalArgumentException("The specified path is not a directory: " + path);
+		}
+
+		List<String> filePaths = new ArrayList<>();
+		collectFilesRecursive(targetDir, projectDir, filePaths, maxCount);
+
+		if (filePaths.isEmpty()) {
+			return "No files found in the specified directory.";
+		}
+
+		return filePaths;
+	}
+
+	private void collectFilesRecursive(File currentDir, File projectDir, List<String> filePaths, int maxCount) {
+		File[] listFiles = currentDir.listFiles();
+		if (listFiles != null) {
+			// Sort or process deterministically if needed, e.g., alphabetical order
+			for (File file : listFiles) {
+				if (file.isDirectory()) {
+					collectFilesRecursive(file, projectDir, filePaths, maxCount);
+				} else if (file.isFile()) {
+					if (filePaths.size() >= maxCount) {
+						throw new IllegalArgumentException(
+								"Discovered file count exceeds the allowed limit of " + maxCount);
+					}
+					String relativePath = getRelativePath(projectDir, file, true);
+					filePaths.add(relativePath);
+				}
+			}
+		}
 	}
 
 	/**

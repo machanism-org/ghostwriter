@@ -232,7 +232,13 @@ public final class PatchApplier {
         }
         int fileIndex = matchIndex;
         for (String hunkLine : hunk.lines) {
-            fileIndex = applyPatchLine(resultLines, parsePatchLine(hunkLine), fileIndex);
+            PatchLine patchLine = parsePatchLine(hunkLine);
+            if (patchLine.operation == '-') {
+                if (fileIndex >= resultLines.size() || !resultLines.get(fileIndex).equals(patchLine.content)) {
+                    throw new IOException("Patch removal does not match file content at index: " + fileIndex);
+                }
+            }
+            fileIndex = applyPatchLine(resultLines, patchLine, fileIndex);
         }
     }
 
