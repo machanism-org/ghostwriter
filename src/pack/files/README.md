@@ -148,7 +148,7 @@ java -jar gw.jar "glob:**/*.md" -d /work/my-project \
 java -jar gw.jar src --instructions
 
 # Run an Act from a local directory
-java -jar gw.jar . --acts ./acts --act "Summarize the repository"
+java -jar gw.jar . --acts ./src/acts --act "> Summarize the repository"
 ```
 
 ### Windows examples
