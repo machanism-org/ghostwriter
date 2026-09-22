@@ -85,7 +85,8 @@ public class ActFunctionTools implements FunctionTools {
 	 * @param projectDir   The project directory containing custom Act definitions.
 	 * @param configurator The configuration used to locate custom Act definitions.
 	 * @return A map containing the matching custom and/or built-in Act details.
-	 * @throws IOException If an error occurs while loading an Act definition.
+	 * @throws IOException           If an error occurs while loading an Act
+	 *                               definition.
 	 * @throws FileNotFoundException If no custom or built-in definition matches the
 	 *                               requested Act name.
 	 */
@@ -181,7 +182,8 @@ public class ActFunctionTools implements FunctionTools {
 			@Param(name = "act-name", description = "The name of the Act to perform.") String actName,
 			@Param(name = "project-dir", description = "The project directory.") File projectDir,
 			@Param(name = "properties", description = "Required configuration parameters needed to execute the Act, overriding any default values.", defaultValue = Param.NULL) Map<String, String> properties,
-			@Param(name = "async", description = "If true, the function tool will be executed asynchronously (useful for MCP server execution). If false, it will be executed synchronously.", defaultValue = "false") boolean async,
+			@Param(name = "async", description = "If true (default), the function tool will be executed asynchronously as a long-running action (useful for MCP server execution)."
+					+ " If false, it will be executed synchronously.", defaultValue = "true") boolean async,
 			Configurator config)
 			throws IOException {
 
@@ -287,10 +289,10 @@ public class ActFunctionTools implements FunctionTools {
 	 *         <li><b>message</b>: An informational message if the result is not
 	 *         ready.</li>
 	 *         </ul>
-	 * @throws IOException If there is an error reading the result from the temporary
-	 *                     file.
-	 * @throws ClassNotFoundException If the serialized result contains an unavailable
-	 *                                class.
+	 * @throws IOException            If there is an error reading the result from
+	 *                                the temporary file.
+	 * @throws ClassNotFoundException If the serialized result contains an
+	 *                                unavailable class.
 	 */
 	@Tool(name = "get-act-result", description = "Retrieves the result of a previously started Act by process ID.")
 	public Map<String, Object> getActResult(

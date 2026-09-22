@@ -248,7 +248,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 			@Param(name = "async", description = "Controls the execution mode. If true, processing runs in the "
 					+ "background and the tool immediately returns a `process_id` and `status` for later polling — "
 					+ "useful for MCP server execution or long-running scans that shouldn't block the caller. "
-					+ "If false, the tool blocks until processing completes and returns the full report directly.", defaultValue = "false") boolean async,
+					+ "If false, the tool blocks until processing completes and returns the full report directly.", defaultValue = "true") boolean async,
 			File projectDir,
 			Configurator config)
 			throws IOException {

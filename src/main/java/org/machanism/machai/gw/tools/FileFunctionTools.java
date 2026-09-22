@@ -23,9 +23,6 @@ import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.Tool;
-import org.machanism.machai.project.layout.ProjectLayout;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 /*@guidance: >>> ${guidances}/def-class-javadoc.md */
 /**
