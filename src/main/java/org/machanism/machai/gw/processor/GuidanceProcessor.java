@@ -18,6 +18,7 @@ import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.gw.reviewer.Reviewer;
 import org.machanism.machai.gw.tools.CommandFunctionTools;
+import org.machanism.machai.gw.tools.CommandSpecFunctionTools;
 import org.machanism.machai.gw.tools.FileFunctionTools;
 import org.machanism.machai.gw.tools.WebFunctionTools;
 import org.machanism.machai.project.layout.ProjectLayout;
@@ -393,12 +394,16 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 * @param instructions provider system instructions
 	 * @param prompts      prompts to provide to the provider
 	 * @param provider     configured GenAI provider
-	 * @param tools        requested tool class names or the {@code "auto"} shortcut
+	 * @param tools        requested tool class names 
 	 */
 	@Override
 	protected void applyTools(String instructions, String[] prompts, Genai provider, String[] tools) {
-		if (tools != null && tools.length != 0 && tools[0].equals("auto")) {
-			tools = new String[] { CommandFunctionTools.class.getName(), FileFunctionTools.class.getName(),
+
+		if (tools == null) {
+			tools = new String[] { 
+					CommandFunctionTools.class.getName(), 
+					CommandSpecFunctionTools.class.getName(), 
+					FileFunctionTools.class.getName(),
 					WebFunctionTools.class.getName() };
 		}
 		super.applyTools(instructions, prompts, provider, tools);
