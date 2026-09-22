@@ -47,6 +47,10 @@ Execute these steps strictly in order:
    *(Perform these executions sequentially for each group)*.
 6. **Report Summary:** Once all executions are complete, output a final status report.
 
+# Special User INstruction
+
+${public.prompt}
+
 # Output Format (Strictly Plain Text, No Markdown)
 Do not use Markdown code blocks (do not use ```), bolding (**), or markdown list markers. Provide a plain-text summary using this exact format:
 
@@ -60,7 +64,6 @@ Group: [Name]
 Files: [List of files]
 Message: [Commit message]
 
-${public.prompt}
 '''
 
 # =========================
@@ -77,6 +80,7 @@ interactive = true
 
 [default]
 gw.path = "glob:."
+public.prompt = "No special instructions."
 
 # =========================
 # Functional Tool Command Section
