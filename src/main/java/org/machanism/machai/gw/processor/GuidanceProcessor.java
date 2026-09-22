@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.ServiceLoader;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -104,6 +105,8 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 * entry contains the relative file path and the provider message.
 	 */
 	private final List<Map<String, Object>> report = new ArrayList<>();
+
+	private final AtomicInteger processedFilesCounter = new AtomicInteger(0);
 
 	/**
 	 * Constructs a new {@code GuidanceProcessor} for processing files with guidance
@@ -239,6 +242,10 @@ public class GuidanceProcessor extends AIFileProcessor {
 			processFile(projectLayout, child);
 		}
 
+		processDefaultGuidance(projectLayout, projectDir);
+	}
+
+	private void processDefaultGuidance(ProjectLayout projectLayout, File projectDir) {
 		boolean match = match(projectDir, projectLayout);
 
 		if (match && getDefaultPrompt() != null) {
@@ -287,9 +294,13 @@ public class GuidanceProcessor extends AIFileProcessor {
 	}
 
 	private String defaultReport(ProjectLayout projectLayout, File file, String perform) {
+
 		if (StringUtils.isBlank(perform)) {
-			perform = "processed";
+			perform = "OK";
 		}
+
+		processedFilesCounter.incrementAndGet();
+
 		return perform;
 	}
 
@@ -391,6 +402,12 @@ public class GuidanceProcessor extends AIFileProcessor {
 		super.applyTools(instructions, prompts, provider, tools);
 	}
 
+	@Override
+	public void scanDocuments(File projectDir, String path) throws IOException {
+		super.scanDocuments(projectDir, path);
+		logger.info("Total files processed: {}", getProcessedFiles());
+	}
+
 	/**
 	 * Returns the mutable list of processing results collected so far.
 	 *
@@ -398,6 +415,15 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 */
 	public List<Map<String, Object>> getReport() {
 		return report;
+	}
+
+	/**
+	 * Returns the total number of files processed.
+	 *
+	 * @return the current count of processed files
+	 */
+	public int getProcessedFiles() {
+		return processedFilesCounter.get();
 	}
 
 }
