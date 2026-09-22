@@ -8,7 +8,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
+import org.machanism.machai.ai.tools.SupportedFor;
 import org.machanism.machai.ai.tools.Tool;
+import org.machanism.machai.gw.processor.GuidanceProcessor;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,6 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  * @author Viktor Tovstyi
  */
+@SupportedFor(excludes = GuidanceProcessor.class)
 public class ProjectContextFunctionTools implements FunctionTools {
 
 	/**

@@ -79,6 +79,7 @@ public class FileFunctionTools implements FunctionTools {
 	 *         </ul>
 	 *         If the specified path is not a directory or is empty, the respective
 	 *         lists will be empty.
+	 * @throws IOException
 	 * @throws IllegalArgumentException if either path is {@code null}, cannot be
 	 *                                  canonicalized, or the requested path is
 	 *                                  outside {@code projectDir}
@@ -86,7 +87,7 @@ public class FileFunctionTools implements FunctionTools {
 	@Tool(name = "list-files-in-directory", description = "List files and directories in a specified folder recursively, grouped by type.")
 	public Map<String, List<String>> listFiles(
 			@Param(name = "path", description = "The path to the directory to list contents of.", defaultValue = ".") File dirPath,
-			File projectDir) {
+			File projectDir) throws IOException {
 
 		File directory = getFile(dirPath, projectDir);
 
@@ -126,12 +127,13 @@ public class FileFunctionTools implements FunctionTools {
 	 * This AI functional tool returns the files discovered below a directory.
 	 * </p>
 	 *
-	 * @param path        the relative or absolute path of the directory to scan
+	 * @param path       the relative or absolute path of the directory to scan
 	 * @param maxCount   the maximum number of files allowed in the result; throws
 	 *                   an error if exceeded
 	 * @param projectDir the root project directory context
 	 * @return a {@link List} of relative file path strings, or a message string
 	 *         indicating no files were found
+	 * @throws IOException
 	 * @throws IllegalArgumentException if the number of discovered files exceeds
 	 *                                  {@code maxCount}, or if the requested path
 	 *                                  is invalid or outside {@code projectDir}
@@ -140,7 +142,7 @@ public class FileFunctionTools implements FunctionTools {
 	public Object getRecursiveFiles(
 			@Param(name = "path", description = "Path to the folder to list contents recursively.", defaultValue = "") File path,
 			@Param(name = "max-count", description = "The maximum number of files allowed in the results. Used to prevent overly large context payloads.", defaultValue = "50") int maxCount,
-			File projectDir) {
+			File projectDir) throws IOException {
 
 		File targetDir = getFile(path, projectDir);
 
@@ -196,6 +198,7 @@ public class FileFunctionTools implements FunctionTools {
 	 * @param projectDir project root used to resolve the directory
 	 * @return project-relative folder paths as a list, or a message when none are
 	 *         found
+	 * @throws IOException
 	 * @throws IllegalArgumentException if the number of discovered folders exceeds
 	 *                                  {@code maxCount}, or if the requested path
 	 *                                  is invalid or outside {@code projectDir}
@@ -204,7 +207,8 @@ public class FileFunctionTools implements FunctionTools {
 	public Object getRecursiveFolders(
 			@Param(name = "dir", description = "Path to the root folder to recursively list sub-directories for. Returns directories only, no files.", defaultValue = "") File dir,
 			@Param(name = "max-count", description = "The maximum number of folders allowed in the results. Used to prevent overly large context payloads.", defaultValue = "50") int maxCount,
-			@Param(name = "project-dir", description = "The project root directory.") File projectDir) {
+			@Param(name = "project-dir", description = "The project root directory.") File projectDir)
+			throws IOException {
 
 		File directory = getFile(dir, projectDir);
 
@@ -214,33 +218,20 @@ public class FileFunctionTools implements FunctionTools {
 
 		List<String> folderPaths = new ArrayList<>();
 
-		try {
-			// Use Files.walk to traverse directories recursively
-			List<Path> paths = Files.walk(directory.toPath())
-					.filter(Files::isDirectory)
-					.filter(p -> !p.equals(directory.toPath())) // Exclude the root directory itself if needed
-					.collect(Collectors.toList());
+		List<Path> paths = Files.walk(directory.toPath())
+				.filter(Files::isDirectory)
+				.filter(p -> !p.equals(directory.toPath()))
+				.collect(Collectors.toList());
 
-			if (paths.isEmpty()) {
-				return "No folders found in directory.";
-			}
+		if (paths.size() > maxCount) {
+			throw new IllegalArgumentException(
+					String.format(
+							"Result is too long. The number of discovered folders (%d) exceeds the allowed limit of %d.",
+							paths.size(), maxCount));
+		}
 
-			if (paths.size() > maxCount) {
-				throw new IllegalArgumentException(
-						String.format(
-								"Result is too long. The number of discovered folders (%d) exceeds the allowed limit of %d.",
-								paths.size(), maxCount));
-			}
-
-			for (Path path : paths) {
-				folderPaths.add(getRelativePath(projectDir, path.toFile(), true));
-			}
-
-		} catch (Exception e) {
-			if (e instanceof IllegalArgumentException) {
-				throw (IllegalArgumentException) e;
-			}
-			throw new RuntimeException("Error traversing directories: " + e.getMessage(), e);
+		for (Path path : paths) {
+			folderPaths.add(getRelativePath(projectDir, path.toFile(), true));
 		}
 
 		return folderPaths;
@@ -258,6 +249,7 @@ public class FileFunctionTools implements FunctionTools {
 	 * @param charsetName character set used to encode the content
 	 * @param projectDir  project root used to resolve the file
 	 * @return a success message or an error message when writing fails
+	 * @throws IOException
 	 * @throws IllegalArgumentException if the requested path is invalid or outside
 	 *                                  {@code projectDir}
 	 */
@@ -266,22 +258,14 @@ public class FileFunctionTools implements FunctionTools {
 			@Param(name = "file-path", description = "The path to the file you want to write to or create.") File filePath,
 			@Param(name = "text", description = "The content to be written into the file or used as replacement.") String text,
 			@Param(name = "charset-name", description = "The name of the requested charset.", defaultValue = DEFAULT_CHARSET) String charsetName,
-			@Param(name = "project-dir", description = "The project dir.") File projectDir) {
-		String result;
+			@Param(name = "project-dir", description = "The project dir.") File projectDir) throws IOException {
 		File file = getFile(filePath, projectDir);
-		try {
-			if (file.exists()) {
-				writeFileContent(file, text, charsetName);
-				return "File updated successfully: " + filePath;
-			}
-
-			return writeNewFile(file, text, charsetName, filePath);
-
-		} catch (IOException e) {
-			result = e.getMessage();
+		if (file.exists()) {
+			writeFileContent(file, text, charsetName);
+			return "File updated successfully: " + filePath;
 		}
 
-		return result;
+		return writeNewFile(file, text, charsetName, filePath);
 	}
 
 	/**
@@ -368,28 +352,23 @@ public class FileFunctionTools implements FunctionTools {
 	 * @param filePath   requested file or directory
 	 * @param projectDir project root
 	 * @return canonical file located under the project root
+	 * @throws IOException
 	 * @throws IllegalArgumentException if a path is invalid or escapes the root
 	 */
-	File getFile(File filePath, File projectDir) {
+	File getFile(File filePath, File projectDir) throws IOException {
 		if (filePath == null || projectDir == null) {
 			throw new IllegalArgumentException("File path and project directory must not be null.");
 		}
 
-		try {
-			File baseDir = projectDir.getCanonicalFile();
-			File candidate = filePath.isAbsolute() ? filePath : new File(baseDir, filePath.getPath());
-			File canonicalCandidate = candidate.getCanonicalFile();
-			Path basePath = baseDir.toPath();
-			Path candidatePath = canonicalCandidate.toPath();
-			if (!candidatePath.startsWith(basePath)) {
-				throw new IllegalArgumentException("Access denied: file path is outside the project root.");
-			}
-			// Sonar java:S2083: canonicalize before the containment check to block ../ and
-			// symlink escapes.
-			return canonicalCandidate;
-		} catch (IOException e) {
-			throw new IllegalArgumentException("Unable to resolve file path within the project root.", e);
+		File baseDir = projectDir.getCanonicalFile();
+		File candidate = filePath.isAbsolute() ? filePath : new File(baseDir, filePath.getPath());
+		File canonicalCandidate = candidate.getCanonicalFile();
+		Path basePath = baseDir.toPath();
+		Path candidatePath = canonicalCandidate.toPath();
+		if (!candidatePath.startsWith(basePath)) {
+			throw new IllegalArgumentException("Access denied: file path is outside the project root.");
 		}
+		return canonicalCandidate;
 	}
 
 	/**

@@ -20,9 +20,11 @@ import org.machanism.macha.core.commons.configurator.Substitutor;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.Prompt;
+import org.machanism.machai.ai.tools.SupportedFor;
 import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.GWConstants;
+import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +57,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Viktor Tovstyi
  */
+@SupportedFor(excludes = GuidanceProcessor.class)
 public class ActFunctionTools implements FunctionTools {
 
 	/** Directory below the runtime temporary directory that stores Act results. */

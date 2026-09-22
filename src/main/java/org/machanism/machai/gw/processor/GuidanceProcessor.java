@@ -341,6 +341,8 @@ public class GuidanceProcessor extends AIFileProcessor {
 		String userInstructions = super.getInstructions();
 		if (userInstructions != null) {
 			instructions = String.format(instructions, "# User Instruction\n\n" + userInstructions);
+		} else {
+			instructions = String.format(instructions, "");
 		}
 
 		return instructions;
