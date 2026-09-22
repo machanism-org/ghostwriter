@@ -226,4 +226,8 @@
 		<url>https://github.com/machanism-org/ghostwriter.git</url>
 	</scm>
 
+	<issueManagement>
+		<url>https://github.com/machanism-org/ghostwriter/issues</url>
+	</issueManagement>
+
 </project>
