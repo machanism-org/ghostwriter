@@ -418,7 +418,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				}
 
 				applyTools(instructions, prompts, provider, tools);
-
+				
 				provider.setProjectDir(projectDir);
 
 				provider.instructions(instructions);
