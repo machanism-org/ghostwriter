@@ -84,7 +84,7 @@ public class FileFunctionTools implements FunctionTools {
 	 *                                  canonicalized, or the requested path is
 	 *                                  outside {@code projectDir}
 	 */
-	@Tool(name = "list-files-in-directory", description = "List files and directories in a specified folder recursively, grouped by type.")
+	@Tool(name = "list_files_in_directory", description = "List files and directories in a specified folder recursively, grouped by type.")
 	public Map<String, List<String>> listFiles(
 			@Param(name = "path", description = "The path to the directory to list contents of.", defaultValue = ".") File dirPath,
 			File projectDir) throws IOException {
@@ -138,10 +138,10 @@ public class FileFunctionTools implements FunctionTools {
 	 *                                  {@code maxCount}, or if the requested path
 	 *                                  is invalid or outside {@code projectDir}
 	 */
-	@Tool(name = "get-recursive-file-list", description = "List files recursively in a directory (includes files in subdirectories).")
+	@Tool(name = "get_recursive_file_list", description = "List files recursively in a directory (includes files in subdirectories).")
 	public Object getRecursiveFiles(
 			@Param(name = "path", description = "Path to the folder to list contents recursively.", defaultValue = "") File path,
-			@Param(name = "max-count", description = "The maximum number of files allowed in the results. Used to prevent overly large context payloads.", defaultValue = "50") int maxCount,
+			@Param(name = "max_count", description = "The maximum number of files allowed in the results. Used to prevent overly large context payloads.", defaultValue = "50") int maxCount,
 			File projectDir) throws IOException {
 
 		File targetDir = getFile(path, projectDir);
@@ -203,11 +203,11 @@ public class FileFunctionTools implements FunctionTools {
 	 *                                  {@code maxCount}, or if the requested path
 	 *                                  is invalid or outside {@code projectDir}
 	 */
-	@Tool(name = "get-recursive-folder-list", description = "Recursively lists only the folder structure (directories) within a directory. Does not include files.")
+	@Tool(name = "get_recursive_folder_list", description = "Recursively lists only the folder structure (directories) within a directory. Does not include files.")
 	public Object getRecursiveFolders(
 			@Param(name = "dir", description = "Path to the root folder to recursively list sub-directories for. Returns directories only, no files.", defaultValue = "") File dir,
-			@Param(name = "max-count", description = "The maximum number of folders allowed in the results. Used to prevent overly large context payloads.", defaultValue = "50") int maxCount,
-			@Param(name = "project-dir", description = "The project root directory.") File projectDir)
+			@Param(name = "max_count", description = "The maximum number of folders allowed in the results. Used to prevent overly large context payloads.", defaultValue = "50") int maxCount,
+			File projectDir)
 			throws IOException {
 
 		File directory = getFile(dir, projectDir);
@@ -253,12 +253,12 @@ public class FileFunctionTools implements FunctionTools {
 	 * @throws IllegalArgumentException if the requested path is invalid or outside
 	 *                                  {@code projectDir}
 	 */
-	@Tool(name = "write-file", description = "Write changes to a file on the file system, either by replacing content at specific positions or writing the full content.")
+	@Tool(name = "write_file", description = "Write changes to a file on the file system, either by replacing content at specific positions or writing the full content.")
 	public String writeFile(
-			@Param(name = "file-path", description = "The path to the file you want to write to or create.") File filePath,
+			@Param(name = "path", description = "The path to the file you want to write to or create.") File filePath,
 			@Param(name = "text", description = "The content to be written into the file or used as replacement.") String text,
-			@Param(name = "charset-name", description = "The name of the requested charset.", defaultValue = DEFAULT_CHARSET) String charsetName,
-			@Param(name = "project-dir", description = "The project dir.") File projectDir) throws IOException {
+			@Param(name = "charset", description = "The name of the requested charset.", defaultValue = DEFAULT_CHARSET) String charsetName,
+			File projectDir) throws IOException {
 		File file = getFile(filePath, projectDir);
 		if (file.exists()) {
 			writeFileContent(file, text, charsetName);
@@ -324,10 +324,10 @@ public class FileFunctionTools implements FunctionTools {
 	 *                                  {@code projectDir}, or {@code charsetName}
 	 *                                  does not identify a supported character set
 	 */
-	@Tool(name = "read-file", description = "Read the contents of a file from the disk.")
-	public String readFile(@Param(name = "file-path", description = "The path to the file to be read.") File filePath,
-			@Param(name = "charset-name", description = "the name of the requested charset.", defaultValue = DEFAULT_CHARSET) String charsetName,
-			@Param(name = "project-dir", description = "The project dir.") File projectDir, Configurator configurator)
+	@Tool(name = "read_file", description = "Read the contents of a file from the disk.")
+	public String readFile(@Param(name = "path", description = "The path to the file to be read.") File filePath,
+			@Param(name = "charset", description = "the name of the requested charset.", defaultValue = DEFAULT_CHARSET) String charsetName,
+			File projectDir, Configurator configurator)
 			throws IOException {
 		String result;
 
@@ -431,7 +431,7 @@ public class FileFunctionTools implements FunctionTools {
 	 * @return a success message, or a failure message containing the underlying
 	 *         error detail
 	 */
-	@Tool(name = "apply-patch-to-file", description = "Use this tool to update a part of a file efficiently "
+	@Tool(name = "apply_patch_to_file", description = "Use this tool to update a part of a file efficiently "
 			+ "by applying a targeted diff patch. Supports two formats:\n"
 			+ "1. Standard Unified Diff (as produced by `diff -u` or `git diff`) containing @@ coordinates (e.g., '@@ -12,4 +12,18 @@').\n"
 			+ "2. Simplified Search-and-Replace Diff containing a plain '@@' header with exact line-matching blocks "
@@ -440,8 +440,8 @@ public class FileFunctionTools implements FunctionTools {
 	public String applyPatchToFile(
 			@Param(name = "file", description = "The path to the file to be patched.") File file,
 			@Param(name = "patch", description = "The unified diff patch to apply.") String patch,
-			@Param(name = "charset-name", description = "The name of the requested charset.", defaultValue = DEFAULT_CHARSET) String charsetName,
-			@Param(name = "project-dir", description = "The project dir.") File projectDir) {
+			@Param(name = "charset", description = "The name of the requested charset.", defaultValue = DEFAULT_CHARSET) String charsetName,
+			File projectDir) {
 		try {
 			List<String> patchLines = Arrays.asList(patch.split("\\r?\\n"));
 			file = getFile(file, projectDir);

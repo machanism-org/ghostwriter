@@ -118,7 +118,7 @@ public class CommandFunctionTools implements FunctionTools {
 	 * @throws ErrorResultException if command execution, output collection, or the
 	 *                              command itself fails
 	 */
-	@Tool(name = "run-sys-command", description = "Executes a system command for operation system: `${OS_NAME}` while ensuring safe execution.\n"
+	@Tool(name = "run_sys_command", description = "Executes a system command for operation system: `${OS_NAME}` while ensuring safe execution.\n"
 			+ "Only explicitly allowed commands can be executed for security reasons.\n"
 			+ "Supports setting environment variables, working directory, output tail size, and character encoding.")
 	public Object executeCommand(
@@ -127,9 +127,9 @@ public class CommandFunctionTools implements FunctionTools {
 					+ "If omitted, the subprocess inherits the current process environment.", defaultValue = Param.NULL) Map<String, String> properties,
 			@Param(name = "dir", description = "The working directory for the subprocess. Must be a relative path within the project directory. "
 					+ "If omitted, the current project directory is used.", defaultValue = ".") String dir,
-			@Param(name = "tail-result-size", description = "The maximum number of characters to display from the end of the command output.", defaultValue = DEFAULT_RESULT_TAIL_SIZE) int tailResultSize,
-			@Param(name = "charset-name", description = "The character encoding to use for reading command output.", defaultValue = DEFAULT_CHARSET) String charsetName,
-			@Param(name = "project-dir", description = "The project dir.") File projectDir, Configurator configurator)
+			@Param(name = "tail_result_size", description = "The maximum number of characters to display from the end of the command output.", defaultValue = DEFAULT_RESULT_TAIL_SIZE) int tailResultSize,
+			@Param(name = "charset", description = "The character encoding to use for reading command output.", defaultValue = DEFAULT_CHARSET) String charsetName,
+			File projectDir, Configurator configurator)
 			throws IOException {
 		String logId = Long.toHexString(RANDOM.nextLong());
 		command = Substitutor.replace(command, configurator);
@@ -241,14 +241,14 @@ public class CommandFunctionTools implements FunctionTools {
 	 * @throws IllegalArgumentException if {@code charsetName} is not a supported
 	 *                                  character set
 	 */
-	@Tool(name = "get-log-chunk", description = "Extracts a log fragment from a command execution. "
+	@Tool(name = "get_log_chunk", description = "Extracts a log fragment from a command execution. "
 			+ "Use this to retrieve earlier log data if only the end of the output was previously retrieved "
 			+ "(for example, to page through the log or scroll up).")
 	public Object getPreviousLogChunk(
-			@Param(name = "command-log-id", description = "The identifier of the command execution session.") String logId,
-			@Param(name = "tail-result-size", description = "The size of the log fragment to extract in characters.", defaultValue = DEFAULT_RESULT_TAIL_SIZE) int tailResultSize,
-			@Param(name = "current-tail-offset", description = "The offset or position in the log where the current tail result starts.") int currentTailOffset,
-			@Param(name = "charset-name", description = "The character encoding to use for reading log output.", defaultValue = DEFAULT_CHARSET) String charsetName)
+			@Param(name = "command_log_id", description = "The identifier of the command execution session.") String logId,
+			@Param(name = "tail_result_size", description = "The size of the log fragment to extract in characters.", defaultValue = DEFAULT_RESULT_TAIL_SIZE) int tailResultSize,
+			@Param(name = "current_tail_offset", description = "The offset or position in the log where the current tail result starts.") int currentTailOffset,
+			@Param(name = "charset", description = "The character encoding to use for reading log output.", defaultValue = DEFAULT_CHARSET) String charsetName)
 			throws IOException {
 
 		Path logPath = LogBuilder.getCommandLogPath(LOG_FOLDER, logId);
@@ -285,7 +285,7 @@ public class CommandFunctionTools implements FunctionTools {
 	 * @throws IllegalArgumentException if {@code charsetName} is not a supported
 	 *                                  character set or {@code regexp} is invalid
 	 */
-	@Tool(name = "get-log-matches", description = "Searches the command log for all text matching the provided regular expression (regexp).\n"
+	@Tool(name = "get_log_matches", description = "Searches the command log for all text matching the provided regular expression (regexp).\n"
 			+ "Use this to extract specific patterns, error messages, or any custom content from the log output of a command execution.\n"
 			+ "\n"
 			+ "**Instructions:**\n"
@@ -294,9 +294,9 @@ public class CommandFunctionTools implements FunctionTools {
 			+ "- Optionally specify the character encoding for reading the log file.\n"
 			+ "- The tool returns a list of all matching text segments from the log.")
 	public Object getLogMatches(
-			@Param(name = "command-log-id", description = "The identifier of the command execution session.") String logId,
+			@Param(name = "command_log_id", description = "The identifier of the command execution session.") String logId,
 			@Param(name = "regexp", description = "The Java regular expression to search for in the log.") String regexp,
-			@Param(name = "charset-name", description = "The character encoding to use for reading log output.", defaultValue = DEFAULT_CHARSET) String charsetName)
+			@Param(name = "charset", description = "The character encoding to use for reading log output.", defaultValue = DEFAULT_CHARSET) String charsetName)
 			throws IOException {
 
 		Path logPath = LogBuilder.getCommandLogPath(LOG_FOLDER, logId);

@@ -55,7 +55,7 @@ class ActFunctionToolsTest {
             Mockito.when(mock.getActProperties()).thenReturn(new HashMap<>());
             Mockito.when(mock.getResults()).thenReturn(Collections.singletonList("ok"));
         })) {
-            Object result = tools.performAct("demo", tempDir.toFile(), overrides, false, configurator);
+            Object result = tools.performAct("demo", overrides, false, tempDir.toFile(), configurator);
 
             assertEquals(Collections.singletonList("ok"), result);
 

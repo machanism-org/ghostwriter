@@ -93,11 +93,11 @@ public class ActFunctionTools implements FunctionTools {
 	 * @throws FileNotFoundException If no custom or built-in definition matches the
 	 *                               requested Act name.
 	 */
-	@Tool(name = "get-act-details", description = "Loads the details of a specific Act template, including its instructions, input template, and "
+	@Tool(name = "get_act_details", description = "Loads the details of a specific Act template, including its instructions, input template, and "
 			+ "configuration options. Useful for inspecting or editing Act definitions.")
 	public Object getActDetails(
-			@Param(name = "act-name", description = "The name of the Act to load.") String actName,
-			@Param(name = "project-dir", description = "The project dir.") File projectDir,
+			@Param(name = "name", description = "The name of the Act to load.") String actName,
+			File projectDir,
 			Configurator configurator)
 			throws IOException {
 		actName = StringUtils.substringBefore(actName, "#");
@@ -180,13 +180,13 @@ public class ActFunctionTools implements FunctionTools {
 	 *         execution) or a process ID and status (for asynchronous execution).
 	 * @throws IOException If an error occurs during Act processing.
 	 */
-	@Tool(name = "perform-act", description = "Performs the specified Act by name immediately. Execute this tool directly upon user request to run the predefined action or workflow without requiring any additional actions or confirmation.")
+	@Tool(name = "perform_act", description = "Performs the specified Act by name immediately. Execute this tool directly upon user request to run the predefined action or workflow without requiring any additional actions or confirmation.")
 	public Object performAct(
-			@Param(name = "act-name", description = "The name of the Act to perform.") String actName,
-			@Param(name = "project-dir", description = "The project directory.") File projectDir,
+			@Param(name = "name", description = "The name of the Act to perform.") String actName,
 			@Param(name = "properties", description = "Required configuration parameters needed to execute the Act, overriding any default values.", defaultValue = Param.NULL) Map<String, String> properties,
 			@Param(name = "async", description = "If true (default), the function tool will be executed asynchronously as a long-running action (useful for MCP server execution)."
 					+ " If false, it will be executed synchronously.", defaultValue = "true") boolean async,
+			File projectDir,
 			Configurator config)
 			throws IOException {
 
@@ -297,9 +297,9 @@ public class ActFunctionTools implements FunctionTools {
 	 * @throws ClassNotFoundException If the serialized result contains an
 	 *                                unavailable class.
 	 */
-	@Tool(name = "get-act-result", description = "Retrieves the result of a previously started Act by process ID.")
+	@Tool(name = "get_act_result", description = "Retrieves the result of a previously started Act by process ID.")
 	public Map<String, Object> getActResult(
-			@Param(name = "process-id", description = "The process_id returned when the Act was started.") String processId)
+			@Param(name = "process_id", description = "The process_id returned when the Act was started.") String processId)
 			throws IOException, ClassNotFoundException {
 		Map<String, Object> response = new HashMap<>();
 

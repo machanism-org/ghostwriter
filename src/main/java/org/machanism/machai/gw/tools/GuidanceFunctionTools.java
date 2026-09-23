@@ -114,7 +114,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 *         of files with guidance tags found in that directory.
 	 * @throws IOException if an I/O error occurs during scanning.
 	 */
-	@Tool(name = "get-guidance-tagged-files", description = "Scans and groups files containing @guidance tags by project directory. "
+	@Tool(name = "get_guidance_tagged_files", description = "Scans and groups files containing @guidance tags by project directory. "
 			+ "Not a general search tool. Use ONLY as the first step when the user explicitly requests "
 			+ "guidance-tag processing (e.g., 'process guidance tags'). Do not invoke for normal tasks, "
 			+ "test fixing, or file inspection.")
@@ -222,7 +222,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 * @throws IOException If there is an error scanning files or initializing the
 	 *                     processing configuration.
 	 */
-	@Tool(name = "process-guidance-tagged-files", description = "Scans files for guidance-tag directives (e.g., `@guidance`) "
+	@Tool(name = "process_guidance_tagged_files", description = "Scans files for guidance-tag directives (e.g., `@guidance`) "
 			+ "relative to project_dir and applies the configured AI model. Uses model from properties or project default, "
 			+ "applies execution properties with placeholder resolution, and supports synchronous blocking "
 			+ "or asynchronous execution (returning a process_id for background status tracking).")
@@ -305,9 +305,9 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 * @throws IOException If there is an error reading the result from the temp
 	 *                     file.
 	 */
-	@Tool(name = "get-guidance-tagged-files-process-result", description = "Retrieves the result of a previously started guidance tag file processing by GUID.")
+	@Tool(name = "get_guidance_tagged_files_process_result", description = "Retrieves the result of a previously started guidance tag file processing by GUID.")
 	public Object getProcessGuidanceTagFilesResult(
-			@Param(name = "process-id", description = "The GUID returned when the processing was started.") String processId)
+			@Param(name = "process_id", description = "The GUID returned when the processing was started.") String processId)
 			throws IOException {
 
 		String tempDir = ProjectLayout.getTempDir();

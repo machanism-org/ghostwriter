@@ -74,9 +74,9 @@
  * workflow may read a source file, apply a targeted patch, and run an allowed
  * verification command:</p>
  * <pre>
- * read-file(file-path: "src/main/java/Example.java")
- * apply-patch-to-file(file: "src/main/java/Example.java", patch: patchText)
- * run-sys-command(command: "mvn test", dir: ".")
+ * read_file(path: "src/main/java/Example.java")
+ * apply_patch_to_file(file: "src/main/java/Example.java", patch: patchText)
+ * run_sys_command(command: "mvn test", dir: ".")
  * </pre>
  *
  * <p>Callers must provide values matching each operation's {@code @Param}

@@ -40,7 +40,7 @@ import net.htmlparser.jericho.Source;
  * This tool set exposes two main functions:
  * </p>
  * <ul>
- * <li><b>{@code get-web-content}</b> – Fetches web page content over HTTP(S)
+ * <li><b>{@code get_web_content}</b> – Fetches web page content over HTTP(S)
  * via GET, optionally returning plain text or content selected via a CSS
  * selector.</li>
  * <li><b>{@code call_rest_api}</b> – Executes a generic REST call using an
@@ -112,16 +112,16 @@ public class WebFunctionTools implements FunctionTools {
 	 * @throws IOException              if the target file cannot be read or the HTTP
 	 *                                  request cannot be completed
 	 */
-	@Tool(name = "get-web-content", description = "Fetches the content of a web page using an HTTP GET request or reads a project-scoped file. The URL may include user credentials in the userInfo format "
+	@Tool(name = "get_web_content", description = "Fetches the content of a web page using an HTTP GET request or reads a project-scoped file. The URL may include user credentials in the userInfo format "
 			+ "(e.g., https://user:password@host/path) for basic authentication, or use the file:// scheme with a relative path resolved against the project directory.")
 	public String getWebContent(
 			@Param(name = "url", description = "The URL of the web page or file to fetch. Supports userInfo format (e.g., https://user:password@host/path) for basic authentication, and file:// scheme using a relative path resolved against project-dir (e.g., file://path/to/file).") String url,
 			@Param(name = "headers", description = "Specifies HTTP header properties. If null, no additional headers are sent.", defaultValue = "") Map<String, String> headers,
 			@Param(name = "timeout", description = "The maximum time in milliseconds to wait for the HTTP response. If not specified, a default timeout will be used.", defaultValue = "0") int timeout,
-			@Param(name = "charset-name", description = "The name of the character set to use when decoding the response content.", defaultValue = DEFAULT_CHARSET) String charsetName,
-			@Param(name = "text-only", description = "Use for HTML content only: If true, only the plain text content of the web page is returned (HTML tags are stripped). If false, the HTML content of the web page is returned.", defaultValue = "false") boolean textOnly,
+			@Param(name = "charset", description = "The name of the character set to use when decoding the response content.", defaultValue = DEFAULT_CHARSET) String charsetName,
+			@Param(name = "text_only", description = "Use for HTML content only: If true, only the plain text content of the web page is returned (HTML tags are stripped). If false, the HTML content of the web page is returned.", defaultValue = "false") boolean textOnly,
 			@Param(name = "selector", description = "Use for HTML content only: If provided, extracts and returns only the content matching the specified CSS selector. If textOnly is also true, returns only the text of the selected elements; otherwise, returns their HTML.", defaultValue = "") String selector,
-			@Param(name = "project-dir", description = "The project dir.") File projectDir, Configurator configurator)
+			File projectDir, Configurator configurator)
 			throws IOException {
 		String requestId = Long.toHexString(RANDOM.nextLong());
 
@@ -370,7 +370,7 @@ public class WebFunctionTools implements FunctionTools {
 	 * @throws IOException              if the URL connection cannot be opened,
 	 *                                  configured, or its response cannot be read
 	 */
-	@Tool(name = "call-rest-api", description = "Executes a REST API call to the specified URL using the given HTTP method. The URL may include user credentials in "
+	@Tool(name = "call_rest_api", description = "Executes a REST API call to the specified URL using the given HTTP method. The URL may include user credentials in "
 			+ "the userInfo format (e.g., https://user:password@host/path) for basic authentication.")
 	public String callRestApi(
 			@Param(name = "url", description = "The URL of the REST endpoint. Supports userInfo format (e.g., https://user:password@host/path) for basic authentication.") String url,
@@ -378,8 +378,8 @@ public class WebFunctionTools implements FunctionTools {
 			@Param(name = "headers", description = "Specifies HTTP header properties. If null, no additional headers are sent.", defaultValue = Param.NULL) Map<String, String> headers,
 			@Param(name = "body", description = "The request body to send (for POST, PUT, PATCH, etc.).", defaultValue = "") String body,
 			@Param(name = "timeout", description = "The maximum time in milliseconds to wait for the HTTP response. If not specified, a default timeout will be used.", defaultValue = "0") int timeout,
-			@Param(name = "charset-name", description = "The name of the character set to use when decoding the response content.", defaultValue = DEFAULT_CHARSET) String charsetName,
-			@Param(name = "project-dir", description = "The project dir.") File projectDir, Configurator configurator)
+			@Param(name = "charset", description = "The name of the character set to use when decoding the response content.", defaultValue = DEFAULT_CHARSET) String charsetName,
+			File projectDir, Configurator configurator)
 			throws IOException {
 		String requestId = Long.toHexString(RANDOM.nextLong());
 		url = Substitutor.replace(url, configurator);
