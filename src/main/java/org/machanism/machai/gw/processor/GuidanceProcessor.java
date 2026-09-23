@@ -90,6 +90,16 @@ public class GuidanceProcessor extends AIFileProcessor {
 	public static final String GUIDANCE_TAG_NAME = "@" + "guidance:";
 
 	/**
+	 * Fully qualified names of the built-in function-tool implementations enabled
+	 * when a provider has not been configured with any tools.
+	 */
+	private static final String[] DEFAULT_TOOLS = {
+			CommandFunctionTools.class.getName(),
+			FileFunctionTools.class.getName(),
+			WebFunctionTools.class.getName()
+	};
+
+	/**
 	 * Resource bundle that supplies the default system instructions and guidance
 	 * rules used when no explicit instructions are configured.
 	 */
@@ -106,6 +116,9 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 */
 	private final List<Map<String, Object>> report = new ArrayList<>();
 
+	/**
+	 * Number of files for which processing has been attempted successfully.
+	 */
 	private final AtomicInteger processedFilesCounter = new AtomicInteger(0);
 
 	/**
@@ -245,6 +258,13 @@ public class GuidanceProcessor extends AIFileProcessor {
 		processDefaultGuidance(projectLayout, projectDir);
 	}
 
+	/**
+	 * Processes the project directory with the configured default prompt when the
+	 * directory matches the active scan criteria.
+	 *
+	 * @param projectLayout project layout used for matching and processing
+	 * @param projectDir    project directory to process
+	 */
 	private void processDefaultGuidance(ProjectLayout projectLayout, File projectDir) {
 		boolean match = match(projectDir, projectLayout);
 
@@ -293,6 +313,17 @@ public class GuidanceProcessor extends AIFileProcessor {
 		}
 	}
 
+	/**
+	 * Normalizes an empty provider response and increments the processed-file
+	 * counter.
+	 *
+	 * @param projectLayout project layout associated with the file; retained for
+	 *                     processing-context compatibility
+	 * @param file          file being counted; retained for processing-context
+	 *                     compatibility
+	 * @param perform       provider response
+	 * @return the provider response, or {@code "OK"} when it is blank
+	 */
 	private String defaultReport(ProjectLayout projectLayout, File file, String perform) {
 
 		if (StringUtils.isBlank(perform)) {
@@ -401,15 +432,20 @@ public class GuidanceProcessor extends AIFileProcessor {
 		super.applyTools(instructions, prompts, provider, tools);
 
 		if (provider.getToolNames().isEmpty()) {
-			tools = new String[] {
-					CommandFunctionTools.class.getName(),
-					FileFunctionTools.class.getName(),
-					WebFunctionTools.class.getName() };
-			
+			tools = DEFAULT_TOOLS;
 			super.applyTools(instructions, prompts, provider, tools);
 		}
 	}
 
+	/**
+	 * Scans the requested project location and logs the number of files processed
+	 * after the scan completes.
+	 *
+	 * @param projectDir project directory to scan
+	 * @param path       optional file or directory path relative to the project
+	 *                   directory
+	 * @throws IOException if the scan cannot be completed
+	 */
 	@Override
 	public void scanDocuments(File projectDir, String path) throws IOException {
 		super.scanDocuments(projectDir, path);
