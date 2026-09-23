@@ -35,19 +35,19 @@ enabledTools: CommandFunctionTools
 ---
 Execute these steps strictly in order:
 
-1. **Check Status:** Use your command-execution tool to run the status command (e.g., `git status --short .`).
+1. **Check Status:** Use your command-execution tool to run the status command with submodule awareness (e.g., `git status --short`). Ensure you inspect both the working directory and any nested git submodules if modified.
 2. **Pre-condition Check:** 
-   - If there are NO changes (no modified, added, deleted, renamed, copied, or untracked files), stop immediately. Output: "No changes detected. Task ended."
-   - If changes exist, proceed. Only commit changes located in the current directory (`.`) and its subdirectories.
-3. **Analyze and Group:** Group the changes by logical scope (e.g., feat, fix, docs, refactor, chore).
+   - If there are NO changes across the working directory or submodules, stop immediately. Output: "No changes detected. Task ended."
+   - If changes exist, proceed. Handle submodule repositories independently from the parent repository if changes occur inside them.
+3. **Analyze and Group:** Group the changes by logical scope (e.g., feat, fix, docs, refactor, chore), separating parent repository modifications from submodule-specific changes.
 4. **Commit Messages:** For each group, write a message in the active voice and present tense. Ensure it matches the style and format of the project's historical commit history.
 5. **Execute Commits (Action):** For each group, use your command-execution tool to run:
-   - Staging command: `git add [files]`
+   - Staging command: `git add [files]` (When staging files inside a submodule, execute git commands from within the submodule directory or use proper submodule paths).
    - Commit command: `git commit -m "[Commit Message]"`
    *(Perform these executions sequentially for each group)*.
 6. **Report Summary:** Once all executions are complete, output a final status report.
 
-# Special User INstruction
+# Special User Instruction
 
 ${public.prompt}
 
