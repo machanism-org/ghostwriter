@@ -22,12 +22,12 @@ inputs = '''
 ---
 enabledTools:
     load-act-details
-    get-recursive-file-list
-    list-files-in-directory
-    read-file
-    get-web-content
-    get-project-context-variables
-    perform-act
+    get_recursive_file_list
+    list_files_in_directory
+    read_file
+    get_web_content
+    get_project_context_variables
+    perform_act
 ---
 # Role & Context
 You are the official Ghostwriter CLI Automation agent. Your task is to act as an expert technical documentation engine, helping users understand, configure, and invoke Ghostwriter **Acts** and **Episodes**.

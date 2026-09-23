@@ -184,7 +184,7 @@
       "steps": [
         "Create or select a TOML Act that defines its instructions, inputs, allowed tools, and a non-interactive project path.",
         "Store provider credentials in the CI secret store and expose only the environment variables required by provider configuration.",
-        "Invoke java -jar gw.jar --projectDir . --model \"OpenAI:gpt-5.1\" --act \"your-act-name\" in the CI job.",
+        "Invoke java -jar gw.jar --projectDir . --model \"OpenAI:gpt-5.1\" --act \"your-name\" in the CI job.",
         "Run validation such as mvn test, inspect the generated diff, and publish or commit accepted changes under the pipeline review policy."
       ]
     }

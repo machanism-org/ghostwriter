@@ -26,7 +26,7 @@
       <action dev="dev" type="add">Act and Configuration Enhancements: Implemented support for episode parameters.</action>
       <action dev="dev" type="add">Act and Configuration Enhancements: Implemented default property value processing for act configuration sections.</action>
       <action dev="dev" type="add">Act and Configuration Enhancements: Added fallback and mutable configurator support for more flexible runtime configuration.</action>
-      <action dev="dev" type="fix">Function Tool Execution: Fixed get_recursive_file_list, tool calls through ToolsProvider, perform_act result returns, load_act_details, path parameter naming, return values, end-task handling, act lookup diagnostics, and log chunk naming.</action>
+      <action dev="dev" type="fix">Function Tool Execution: Fixed get_recursive_file_list, tool calls through ToolsProvider, perform_act result returns, load_act_details, path parameter naming, return values, end_task handling, act lookup diagnostics, and log chunk naming.</action>
       <action dev="dev" type="fix">Runtime Reliability: Fixed model override handling, asynchronous act and guidance execution, stacktrace output, request session parameter naming, web content fetching, and error handling behavior.</action>
     </release>
   </body>
