@@ -113,7 +113,7 @@ class GuidanceFunctionToolsWorkflowTest {
 					Mockito.when(mock.getReport()).thenReturn(expected);
 				})) {
 			// Act
-			Object result = tools.processGuidanceTagFiles(properties, "glob:**/*.java", false,
+			Object result = tools.processGuidanceTagFiles(null, properties, "glob:**/*.java", false,
 					projectDirectory.toFile(), config);
 
 			// Assert
@@ -138,7 +138,7 @@ class GuidanceFunctionToolsWorkflowTest {
 				(mock, context) -> Mockito.when(mock.getReport()).thenReturn(expected))) {
 			// Act
 			@SuppressWarnings("unchecked")
-			Map<String, Object> response = (Map<String, Object>) tools.processGuidanceTagFiles(
+			Map<String, Object> response = (Map<String, Object>) tools.processGuidanceTagFiles(null,
 					null, "glob:**/*.txt", true, projectDirectory.toFile(), config);
 
 			// Assert

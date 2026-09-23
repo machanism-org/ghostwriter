@@ -114,7 +114,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 *         of files with guidance tags found in that directory.
 	 * @throws IOException if an I/O error occurs during scanning.
 	 */
-	@Tool(name = "get-files-with-guidance-tags", description = "GDP discovery tool: Scans and groups files containing @guidance tags by project directory. "
+	@Tool(name = "get-guidance-tagged-files", description = "Scans and groups files containing @guidance tags by project directory. "
 			+ "Not a general search tool. Use ONLY as the first step when the user explicitly requests "
 			+ "guidance-tag processing (e.g., 'process guidance tags'). Do not invoke for normal tasks, "
 			+ "test fixing, or file inspection.")
@@ -222,22 +222,13 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 * @throws IOException If there is an error scanning files or initializing the
 	 *                     processing configuration.
 	 */
-	@Tool(name = "process-files-with-guidance-tag", description = "Scans files for embedded guidance-tag directives (marginalia such as `@guidance` comments) "
-			+ "and processes each matching file using the configured AI model to apply the requested guidance. "
-			+ "Files are discovered by scanning the location described by `path`, resolved relative to `project_dir` "
-			+ "(or the project's root directory when `path` is omitted or absolute). "
-			+ "The model used for processing is resolved in the following order: (1) a `model` entry inside "
-			+ "`properties`, if provided; (2) the default model configured for the current project/session. "
-			+ "Any other entries supplied in `properties` are applied to the execution configuration before "
-			+ "processing starts, and their values may reference existing configuration placeholders (e.g. `${...}`), "
-			+ "which are resolved prior to being applied. "
-			+ "Execution can run either synchronously or asynchronously, controlled by the `async` parameter: "
-			+ "in synchronous mode, the tool blocks until all matched files have been processed and returns the "
-			+ "full processing report immediately; in asynchronous mode (recommended for MCP server usage or "
-			+ "long-running scans), the tool starts a background task, immediately returns a `process_id` and a "
-			+ "`status` of `processing`, and the final report is written to a temporary file for later retrieval "
-			+ "once the background task completes.")
+	@Tool(name = "process-guidance-tagged-files", description = "Scans files for guidance-tag directives (e.g., `@guidance`) "
+			+ "relative to project_dir and applies the configured AI model. Uses model from properties or project default, "
+			+ "applies execution properties with placeholder resolution, and supports synchronous blocking "
+			+ "or asynchronous execution (returning a process_id for background status tracking).")
 	public Object processGuidanceTagFiles(
+			@Param(name = "instructions", description = "Optional global guidance instructions or prompt overrides applied during file processing. "
+					+ "If provided, these instructions take precedence or supplement the directives embedded within the scanned files.", defaultValue = Param.NULL) String instructions,
 			@Param(name = "properties", description = "Guidance processing properties.", defaultValue = Param.NULL) Map<String, String> properties,
 			@Param(name = "path", description = "Specifies the scanning path or pattern used to locate files to process. "
 					+ "Use a relative path with respect to the current project directory. "
@@ -269,6 +260,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 		}
 
 		final GuidanceProcessor processor = new GuidanceProcessor(projectDir, model, configurator);
+		processor.setInstructions(instructions);
 
 		if (async) {
 			final String processId = UUID.randomUUID().toString();
@@ -313,7 +305,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 * @throws IOException If there is an error reading the result from the temp
 	 *                     file.
 	 */
-	@Tool(name = "get-process-guidance-tag-files-result", description = "Retrieves the result of a previously started guidance tag file processing by GUID.")
+	@Tool(name = "get-guidance-tagged-files-process-result", description = "Retrieves the result of a previously started guidance tag file processing by GUID.")
 	public Object getProcessGuidanceTagFilesResult(
 			@Param(name = "process-id", description = "The GUID returned when the processing was started.") String processId)
 			throws IOException {
