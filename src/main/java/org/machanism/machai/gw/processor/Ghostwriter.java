@@ -205,10 +205,13 @@ public final class Ghostwriter {
 	 * can continue.
 	 * </p>
 	 *
-	 * @param cmd        parsed command line, used to resolve an explicit configuration file
-	 * @param projectDir project directory used as the base for a relative configuration file
+	 * @param cmd        parsed command line, used to resolve an explicit
+	 *                   configuration file
+	 * @param projectDir project directory used as the base for a relative
+	 *                   configuration file
 	 * @param config     configuration source to populate
-	 * @throws IOException if an explicitly selected configuration file cannot be loaded
+	 * @throws IOException if an explicitly selected configuration file cannot be
+	 *                     loaded
 	 */
 	private static void initializeConfiguration(CommandLine cmd, String projectDir, PropertiesConfigurator config)
 			throws IOException {
@@ -674,7 +677,7 @@ public final class Ghostwriter {
 	 * @param excludes  exclude patterns, or {@code null} to leave unset
 	 */
 	private static void applyExcludes(AIFileProcessor processor, String[] excludes) {
-		if (excludes == null) {
+		if (excludes == null || excludes.length == 0) {
 			return;
 		}
 		if (LOGGER.isInfoEnabled()) {
