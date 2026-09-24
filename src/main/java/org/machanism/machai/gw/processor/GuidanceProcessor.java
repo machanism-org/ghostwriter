@@ -192,14 +192,17 @@ public class GuidanceProcessor extends AIFileProcessor {
 	@Override
 	protected boolean match(File file, ProjectLayout projectLayout) {
 		File projectDir = projectLayout.getProjectDir();
+		boolean result = false;
+
 		if (getPathMatcher() != null && getPath() == null) {
-			return getPathMatcher().matches(file.toPath());
-		}
-		if (getPathMatcher() == null) {
-			return getDefaultPrompt() == null || Objects.equals(file, projectDir);
+			result = getPathMatcher().matches(file.toPath());
+		} else if (getPathMatcher() == null) {
+			result = getDefaultPrompt() == null || Objects.equals(file, projectDir);
+		} else {
+			result = super.match(file, projectLayout);
 		}
 
-		return super.match(file, projectLayout);
+		return result && shouldIncludeInListFiles(projectDir, file);
 	}
 
 	/**
@@ -318,9 +321,9 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 * counter.
 	 *
 	 * @param projectLayout project layout associated with the file; retained for
-	 *                     processing-context compatibility
+	 *                      processing-context compatibility
 	 * @param file          file being counted; retained for processing-context
-	 *                     compatibility
+	 *                      compatibility
 	 * @param perform       provider response
 	 * @return the provider response, or {@code "OK"} when it is blank
 	 */
