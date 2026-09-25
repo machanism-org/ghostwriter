@@ -19,6 +19,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.UsageStatistics;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
+import org.machanism.machai.gw.tools.EndTaskException;
 import org.machanism.machai.gw.tools.ProcessTerminationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -463,6 +464,8 @@ public final class Ghostwriter {
 			AIFileProcessor processor = createProcessor(scanner, config, cmd, settings);
 			applyCommonSettings(processor, settings);
 			handleExitCode(processPathectories(processor, settings.paths, settings.projectDir));
+		} catch (EndTaskException e) {
+			LOGGER.info(e.getMessage());
 		} catch (IOException e) {
 			LOGGER.error("I/O error occurred during file processing: {}", e.getMessage(), e);
 		}

@@ -139,8 +139,8 @@ public class ActProcessor extends AIFileProcessor {
 	final ResourceBundle actBundle = ResourceBundle.getBundle("act-bundle");
 
 	/**
-	 * Prefix used to identify the serialized act and episode metadata injected
-	 * into an episode prompt.
+	 * Prefix used to identify the serialized act and episode metadata injected into
+	 * an episode prompt.
 	 */
 	private static final String ACT_EXECUTION_INFORMATION_PREFIX = "The current act execution information: ";
 
@@ -327,7 +327,11 @@ public class ActProcessor extends AIFileProcessor {
 		}
 
 		String episodeSelection = StringUtils.substringAfterLast(name, EPISODE_DELIMETER);
-		name = StringUtils.substringBeforeLast(name, EPISODE_DELIMETER);
+		name = StringUtils.trim(StringUtils.substringBeforeLast(name, EPISODE_DELIMETER));
+
+		if (EXIT_SPECIAL_PROMPT_COMMAND.equals(name)) {
+			throw new EndTaskException("Operation cancelled by user.");
+		}
 
 		episodes.setName(name);
 
