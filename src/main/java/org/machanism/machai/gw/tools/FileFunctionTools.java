@@ -314,19 +314,20 @@ public class FileFunctionTools implements FunctionTools {
 	 * </p>
 	 *
 	 * @param filePath     file to read, relative to {@code projectDir}
-	 * @param charsetName  character set used to decode the file
+	 * @param charsetName  the name of the requested charset used to decode the file
+	 * @param maxFileSize  the maximum allowed character length of the file content
 	 * @param projectDir   project root used to resolve the file
 	 * @param configurator configuration used to substitute URL and header values
 	 * @return the complete file contents as text
-	 * @throws IOException              if the path is not a regular file or cannot
-	 *                                  be read
-	 * @throws IllegalArgumentException if the requested path is invalid or outside
-	 *                                  {@code projectDir}, or {@code charsetName}
+	 * @throws IOException              if the file does not exist, is a directory, or cannot be read
+	 * @throws IllegalArgumentException if the file content length exceeds the allowed {@code maxFileSize} limit, 
+	 *                                  the requested path is invalid or outside {@code projectDir}, or {@code charsetName}
 	 *                                  does not identify a supported character set
 	 */
 	@Tool(name = "read_file", description = "Read the contents of a file from the disk.")
 	public String readFile(@Param(name = "path", description = "The path to the file to be read.") File filePath,
-			@Param(name = "charset", description = "the name of the requested charset.", defaultValue = DEFAULT_CHARSET) String charsetName,
+			@Param(name = "charset", description = "The name of the requested charset.", defaultValue = DEFAULT_CHARSET) String charsetName,
+			@Param(name = "max_file_size", description = "The maximum allowed character length of the file content.", defaultValue = "100000") int maxFileSize,
 			File projectDir, Configurator configurator)
 			throws IOException {
 		String result;
@@ -337,12 +338,20 @@ public class FileFunctionTools implements FunctionTools {
 
 		filePath = getFile(filePath, projectDir);
 		if (!filePath.isFile()) {
-			String detail = filePath.isDirectory() ? "is a directory" : "does not exist";
-			throw new IOException(String.format("Expected a file, but '%s' %s.", filePath, detail));
+			String detail = filePath.isDirectory() ? "is a directory, not a file" : "does not exist or cannot be accessed";
+			throw new IOException(String.format("Failed to read file: '%s' %s.", filePath, detail));
 		}
 		try (FileInputStream io = new FileInputStream(filePath)) {
 			result = IOUtils.toString(io, charsetName);
 		}
+
+		if (result.length() > maxFileSize) {
+			throw new IllegalArgumentException(
+					String.format(
+							"File size exceeds the allowed limit: content length is %d characters, but the maximum allowed limit is %d characters.",
+							result.length(), maxFileSize));
+		}
+
 		return result;
 	}
 
