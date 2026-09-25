@@ -189,7 +189,7 @@ public final class Ghostwriter {
 		if (LOGGER.isInfoEnabled()) {
 			// Sonar java:S2629: avoid formatting the banner when INFO is disabled.
 			String version = Objects.toString(Ghostwriter.class.getPackage().getImplementationVersion(), "DEVELOPMENT");
-			LOGGER.info("{}", StringUtils.center(" Starting Ghostwriter CLI " + version + " (Machanism.org/Machai) ",
+			LOGGER.info("{}", StringUtils.center(" Starting Ghostwriter CLI " + version + " (machanism.org/machai) ",
 					GWConstants.LOG_LINE_LENGTH, "-"));
 		}
 	}
@@ -230,12 +230,12 @@ public final class Ghostwriter {
 				conf = configFileName;
 			}
 
-			File configFile = new File(conf);
+			File configFile = new File(conf.trim());
 			if (!configFile.isAbsolute()) {
 				configFile = new File(projectDir, conf);
 			}
-			config.setConfiguration(configFile.getAbsolutePath());
 			LOGGER.info("Configuration: {}", configFile);
+			config.setConfiguration(configFile.getAbsolutePath());
 
 		} catch (IOException e) {
 			if (configFileName != null) {
