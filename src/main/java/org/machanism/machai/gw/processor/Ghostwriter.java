@@ -235,13 +235,21 @@ public final class Ghostwriter {
 			if (!configFile.isAbsolute()) {
 				configFile = new File(projectDir, conf);
 			}
-			LOGGER.info("Configuration: {}", configFile);
-			config.setConfiguration(configFile.getAbsolutePath());
 
-		} catch (IOException e) {
+			String configPath = configFile.getAbsolutePath();
+
 			if (configFileName != null) {
-				throw e;
+				LOGGER.info("Configuration: {}", configPath);
+			} else if (configFile.exists()) {
+				LOGGER.info("Configuration: {} (default)", configPath);
+			} else {
+				LOGGER.info("Configuration: {} (default, not found)", configPath);
 			}
+
+			if (configFileName != null || configFile.exists()) {
+				config.setConfiguration(configPath);
+			}
+
 		} catch (RuntimeException e) {
 			LOGGER.warn("Failed to initialize configuration.", e);
 		}
