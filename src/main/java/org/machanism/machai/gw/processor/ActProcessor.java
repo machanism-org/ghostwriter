@@ -573,7 +573,7 @@ public class ActProcessor extends AIFileProcessor {
 
 		} else {
 			String base = actsLocation.endsWith("/") ? actsLocation : actsLocation + "/";
-			String uriString = Strings.CS.endsWithAny(name, TOML_EXTENSION, "") ? name : base + name + TOML_EXTENSION;
+			String uriString = Strings.CS.endsWithAny(name, TOML_EXTENSION) ? name : base + name + TOML_EXTENSION;
 			path = URI.create(uriString).toURL().toString();
 		}
 
