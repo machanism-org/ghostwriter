@@ -258,43 +258,48 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 			return false;
 		}
 
-		if (projectLayout.isExcludedPath(file)) {
-			return false;
+		if (path != null) {
+			return this.path != null && this.path.equals(file);
 		}
 
-		if (pathMatcher == null) {
-			return this.path != null && this.path.equals(file);
+		if (projectLayout.isExcludedPath(file)) {
+			return false;
 		}
 
 		if (this.path != null && ProjectLayout.getRelativePath(this.path, file) == null) {
 			return false;
 		}
 
-		String relativeProjectDir = ProjectLayout.getRelativePath(getRootDir(), projectDir);
-		String relativePath = ProjectLayout.getRelativePath(projectDir, file);
+		if (pathMatcher != null) {
 
-		if (relativeProjectDir == null || relativePath == null) {
-			return false;
+			String relativeProjectDir = ProjectLayout.getRelativePath(getRootDir(), projectDir);
+			String relativePath = ProjectLayout.getRelativePath(projectDir, file);
+
+			if (relativeProjectDir == null || relativePath == null) {
+				return false;
+			}
+
+			String relativeScanPart = "./".equals(relativePath) ? "" : relativePath;
+			String matchingPath = relativeProjectDir.isEmpty() ? relativePath + "."
+					: relativeProjectDir + File.separator + relativeScanPart;
+
+			Path pathToMatch = new File(matchingPath).toPath();
+			boolean result = pathMatcher.matches(pathToMatch) || pathMatcher.matches(new File(relativePath).toPath());
+			if (result || this.path == null) {
+				return result;
+			}
+
+			relativePath = ProjectLayout.getRelativePath(this.path, file);
+			if (relativePath == null) {
+				return false;
+			}
+
+			Path scanFilePath = this.path.toPath().resolve(relativePath);
+			String relatedToRoot = ProjectLayout.getRelativePath(rootDir, scanFilePath.toFile());
+			return relatedToRoot != null && pathMatcher.matches(new File(relatedToRoot).toPath());
 		}
 
-		String relativeScanPart = "./".equals(relativePath) ? "" : relativePath;
-		String matchingPath = relativeProjectDir.isEmpty() ? relativePath + "."
-				: relativeProjectDir + File.separator + relativeScanPart;
-
-		Path pathToMatch = new File(matchingPath).toPath();
-		boolean result = pathMatcher.matches(pathToMatch) || pathMatcher.matches(new File(relativePath).toPath());
-		if (result || this.path == null) {
-			return result;
-		}
-
-		relativePath = ProjectLayout.getRelativePath(this.path, file);
-		if (relativePath == null) {
-			return false;
-		}
-
-		Path scanFilePath = this.path.toPath().resolve(relativePath);
-		String relatedToRoot = ProjectLayout.getRelativePath(rootDir, scanFilePath.toFile());
-		return relatedToRoot != null && pathMatcher.matches(new File(relatedToRoot).toPath());
+		return false;
 	}
 
 	/**
