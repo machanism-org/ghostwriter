@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -530,7 +532,7 @@ public class ActProcessor extends AIFileProcessor {
 			String actsLocation, File rootDir) throws IOException {
 
 		TomlParseResult toml = null;
-		if (isAbsolute(name)) {
+		if (new File(name).isAbsolute()) {
 			toml = loadActToml(name);
 		} else if (actsLocation != null) {
 			String absolutePath = getAbsolutePath(name, actsLocation, rootDir);
@@ -572,7 +574,7 @@ public class ActProcessor extends AIFileProcessor {
 
 		} else {
 			String base = actsLocation.endsWith("/") ? actsLocation : actsLocation + "/";
-			String uriString = Strings.CS.endsWith(name, TOML_EXTENSION) ? name : base + name + TOML_EXTENSION;
+			String uriString = Strings.CS.endsWithAny(name, TOML_EXTENSION, "") ? name : base + name + TOML_EXTENSION;
 			path = URI.create(uriString).toURL().toString();
 		}
 
@@ -592,24 +594,18 @@ public class ActProcessor extends AIFileProcessor {
 		if (!Strings.CS.startsWithAny(name, HTTP_PREFIX, HTTPS_PREFIX)) {
 			File file = new File(name);
 			if (file.exists()) {
-				toml = Toml.parse(file.toPath());
+				if (name.endsWith(TOML_EXTENSION)) {
+					toml = Toml.parse(file.toPath());
+				} else {
+					String content = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
+					toml = Toml.parse("inputs = '''\n" + content + "\n'''");
+				}
 			}
 		} else {
 			URI uri = URI.create(name);
 			toml = Toml.parse(uri.toURL().openStream());
 		}
 		return toml;
-	}
-
-	/**
-	 * Determines whether the supplied act reference should be treated as an
-	 * explicit TOML path.
-	 *
-	 * @param name act reference to inspect
-	 * @return {@code true} if the reference already ends with {@code .toml}
-	 */
-	private static boolean isAbsolute(String name) {
-		return Strings.CS.endsWith(name, TOML_EXTENSION);
 	}
 
 	/**
