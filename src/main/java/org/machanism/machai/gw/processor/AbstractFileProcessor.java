@@ -258,7 +258,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 			return false;
 		}
 
-		if (path != null) {
+		if (path != null && pathMatcher == null) {
 			return this.path != null && this.path.equals(file);
 		}
 
