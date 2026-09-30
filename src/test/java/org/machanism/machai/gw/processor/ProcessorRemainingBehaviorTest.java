@@ -26,9 +26,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.macha.core.commons.configurator.LayeredConfigurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.ai.manager.GenaiProviderManager;
+import org.machanism.machai.ai.manager.ProcessProviderManager;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
-import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.provider.ProcessProvider;
 import org.machanism.machai.gw.tools.ProcessTerminationException;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.mockito.MockedStatic;
@@ -44,15 +44,15 @@ class ProcessorRemainingBehaviorTest {
     void interactiveProcessing_handlesContinueDisableAndFollowUpCommands() {
         // Arrange
         ProjectLayout layout = layout();
-        Genai provider = mock(Genai.class);
+        ProcessProvider provider = mock(ProcessProvider.class);
         when(provider.perform()).thenReturn("first", "second");
         InteractiveProcessor processor = new InteractiveProcessor(tempDir.toFile(), "model", "follow-up");
         processor.setInteractive(true);
 
         // Act
         String result;
-        try (MockedStatic<GenaiProviderManager> providers = Mockito.mockStatic(GenaiProviderManager.class)) {
-            providers.when(() -> GenaiProviderManager.getProvider(anyString(), any(LayeredConfigurator.class)))
+        try (MockedStatic<ProcessProviderManager> providers = Mockito.mockStatic(ProcessProviderManager.class)) {
+            providers.when(() -> ProcessProviderManager.getProvider(anyString(), any(LayeredConfigurator.class)))
                     .thenReturn(provider);
             result = processor.process(layout, tempDir.resolve("input.txt").toFile(), "prompt");
         }
@@ -67,14 +67,14 @@ class ProcessorRemainingBehaviorTest {
     @Test
     void interactiveProcessing_exitCommandTerminatesSuccessfully() {
         // Arrange
-        Genai provider = mock(Genai.class);
+        ProcessProvider provider = mock(ProcessProvider.class);
         when(provider.perform()).thenReturn("response");
         InteractiveProcessor processor = new InteractiveProcessor(tempDir.toFile(), "model", ".");
         processor.setInteractive(true);
 
         // Act + Assert
-        try (MockedStatic<GenaiProviderManager> providers = Mockito.mockStatic(GenaiProviderManager.class)) {
-            providers.when(() -> GenaiProviderManager.getProvider(anyString(), any(LayeredConfigurator.class)))
+        try (MockedStatic<ProcessProviderManager> providers = Mockito.mockStatic(ProcessProviderManager.class)) {
+            providers.when(() -> ProcessProviderManager.getProvider(anyString(), any(LayeredConfigurator.class)))
                     .thenReturn(provider);
             ProcessTerminationException exception = assertThrows(ProcessTerminationException.class,
                     () -> processor.process(layout(), tempDir.resolve("input.txt").toFile(), "prompt"));

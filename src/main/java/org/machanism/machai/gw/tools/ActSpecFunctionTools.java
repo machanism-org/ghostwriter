@@ -1,6 +1,6 @@
 package org.machanism.machai.gw.tools;
 
-import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.provider.ProcessProvider;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.SupportedFor;
@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
  * This {@link FunctionTools} implementation registers tools for moving to a
  * requested episode and for repeating the current episode in a project workflow.
  * It is intended for use with {@link ActProcessor} and integrates with the
- * {@link Genai} provider.
+ * {@link ProcessProvider} provider.
  * </p>
  * <p>
  * Both operations signal control-flow changes by throwing their corresponding

@@ -27,8 +27,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.apache.commons.text.StringSubstitutor;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.manager.GenaiProviderManager;
-import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.manager.ProcessProviderManager;
+import org.machanism.machai.ai.provider.ProcessProvider;
 import org.machanism.machai.gw.tools.EndTaskException;
 import org.machanism.machai.gw.tools.MoveToEpisodeException;
 import org.machanism.machai.project.layout.ProjectLayout;
@@ -1054,7 +1054,7 @@ public class ActProcessor extends AIFileProcessor {
 	 * @param tools        configured tool names or automatic-selection marker
 	 */
 	@Override
-	protected void applyTools(String instructions, String[] prompts, Genai provider, String[] tools) {
+	protected void applyTools(String instructions, String[] prompts, ProcessProvider provider, String[] tools) {
 		if (tools != null && tools.length != 0 && isAutoToolSelection(tools[0])
 				&& prompts.length > 1
 				&& Strings.CS.startsWith(prompts[1], ACT_EXECUTION_INFORMATION_PREFIX)) {
@@ -1109,7 +1109,7 @@ public class ActProcessor extends AIFileProcessor {
 
 			tools = autoToolsMap.computeIfAbsent(inputId, key -> {
 				try {
-					Genai provider = GenaiProviderManager.getProvider(getModel(), getConfigurator());
+					ProcessProvider provider = ProcessProviderManager.getProvider(getModel(), getConfigurator());
 					super.applyTools(null, null, provider, null);
 
 					String toolSearch = actBundle.getString("tool_search");

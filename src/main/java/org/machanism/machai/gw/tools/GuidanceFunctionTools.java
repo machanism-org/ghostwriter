@@ -17,7 +17,7 @@ import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.LayeredConfigurator;
 import org.machanism.macha.core.commons.configurator.MutableConfigurator;
 import org.machanism.macha.core.commons.configurator.Substitutor;
-import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.provider.ProcessProvider;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.Prompt;
@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  * </ul>
  * </p>
  * <p>
- * This implementation integrates with the {@link Genai} provider and supports
+ * This implementation integrates with the {@link ProcessProvider} provider and supports
  * both custom and built-in project workflows. It manages asynchronous execution
  * and result retrieval using temporary files and process IDs. Methods in this
  * class are typically invoked by an AI provider or workflow engine to enable

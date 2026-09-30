@@ -28,9 +28,9 @@ import org.apache.commons.lang3.SystemUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.LayeredConfigurator;
 import org.machanism.macha.core.commons.configurator.Substitutor;
-import org.machanism.machai.ai.manager.GenaiProviderManager;
+import org.machanism.machai.ai.manager.ProcessProviderManager;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
-import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.provider.ProcessProvider;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.machanism.machai.gw.tools.ProcessTerminationException;
@@ -59,7 +59,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
  *  - Describe the functionality provided by the getProcessInfo() method.
  */
 /**
- * File processor that drives a configured {@link Genai} provider with
+ * File processor that drives a configured {@link ProcessProvider} provider with
  * project-aware context, prompt metadata, optional external prompt inclusions,
  * public configuration substitution, and function-tool registration.
  * <p>
@@ -325,7 +325,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * <li>Resolves the GenAI model configuration (falling back to the default
 	 * configured model if not explicitly overridden in prompt metadata via
 	 * {@code gw.model}).</li>
-	 * <li>Instantiates the target {@code Genai} provider and registers enabled
+	 * <li>Instantiates the target {@code ProcessProvider} provider and registers enabled
 	 * toolkits and custom function tools.</li>
 	 * <li>Constructs system instructions by combining default bundle instructions
 	 * with any custom parameters passed to {@code instructions}.</li>
@@ -396,7 +396,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				conf.set(GWConstants.MODEL_PROP_NAME, this.model);
 
 				logger.info("Processing path: `{}`, Model: `{}`", file, requestedModel);
-				Genai provider = GenaiProviderManager.getProvider(requestedModel, conf);
+				ProcessProvider provider = ProcessProviderManager.getProvider(requestedModel, conf);
 
 				if (provider == null) {
 					throw new IllegalArgumentException("`" + GWConstants.MODEL_PROP_NAME + "` is required.");
@@ -457,7 +457,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * @param tools        the selected tool names, or {@code null} for the default
 	 *                     set
 	 */
-	protected void applyTools(String instructions, String[] prompts, Genai provider, String[] tools) {
+	protected void applyTools(String instructions, String[] prompts, ProcessProvider provider, String[] tools) {
 		functionToolsLoader.applyTools(provider, tools, getClass());
 		functionTools.forEach(ft -> provider.addTools(ft, tools));
 	}
@@ -692,7 +692,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * @throws ProcessTerminationException if the interactive exit command is
 	 *                                     entered
 	 */
-	private String perform(File file, Genai provider) {
+	private String perform(File file, ProcessProvider provider) {
 		String perform = provider.perform();
 		if (interactive) {
 			if (StringUtils.isNoneBlank(perform)) {

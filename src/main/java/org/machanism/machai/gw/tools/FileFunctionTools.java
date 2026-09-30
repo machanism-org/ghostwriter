@@ -19,14 +19,14 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.IOUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.Substitutor;
-import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.provider.ProcessProvider;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.Tool;
 
 /*@guidance: >>> ${guidances}/def-class-javadoc.md */
 /**
- * Installs file-system tools into a {@link Genai}.
+ * Installs file-system tools into a {@link ProcessProvider}.
  *
  * <p>
  * Tools in this installer are intended for host-integrated use where the host

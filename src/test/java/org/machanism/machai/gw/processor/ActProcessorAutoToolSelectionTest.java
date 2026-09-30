@@ -17,8 +17,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.ai.manager.GenaiProviderManager;
-import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.manager.ProcessProviderManager;
+import org.machanism.machai.ai.provider.ProcessProvider;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
@@ -33,15 +33,15 @@ class ActProcessorAutoToolSelectionTest {
         // Arrange
         ActProcessor processor = new ActProcessor(tempDir.toFile(), "test-model", new PropertiesConfigurator());
         episodes(processor).setName("review");
-        Genai selector = mock(Genai.class);
-        Genai target = mock(Genai.class);
+        ProcessProvider selector = mock(ProcessProvider.class);
+        ProcessProvider target = mock(ProcessProvider.class);
         when(selector.perform()).thenReturn("{\"enabledTools\":[\"read_file\",\"get_web_content\"]}");
         String[] prompts = { "instructions", "The current act execution information: {\"CURRENT_EPISODE_ID\":2}",
                 "Review the implementation." };
 
         // Act
-        try (MockedStatic<GenaiProviderManager> providers = Mockito.mockStatic(GenaiProviderManager.class)) {
-            providers.when(() -> GenaiProviderManager.getProvider(anyString(), any(Configurator.class))).thenReturn(selector);
+        try (MockedStatic<ProcessProviderManager> providers = Mockito.mockStatic(ProcessProviderManager.class)) {
+            providers.when(() -> ProcessProviderManager.getProvider(anyString(), any(Configurator.class))).thenReturn(selector);
             invokeApplyTools(processor, target, prompts);
             invokeApplyTools(processor, target, prompts);
         }
@@ -65,8 +65,8 @@ class ActProcessorAutoToolSelectionTest {
         assertEquals("local only", invokeString(processor, "getAutoToolSelectionQuery", "{auto=local only}"));
     }
 
-    private static void invokeApplyTools(ActProcessor processor, Genai provider, String[] prompts) throws Exception {
-        Method method = ActProcessor.class.getDeclaredMethod("applyTools", String.class, String[].class, Genai.class,
+    private static void invokeApplyTools(ActProcessor processor, ProcessProvider provider, String[] prompts) throws Exception {
+        Method method = ActProcessor.class.getDeclaredMethod("applyTools", String.class, String[].class, ProcessProvider.class,
                 String[].class);
         method.setAccessible(true);
         method.invoke(processor, "system instructions", prompts, provider, new String[] { "auto" });

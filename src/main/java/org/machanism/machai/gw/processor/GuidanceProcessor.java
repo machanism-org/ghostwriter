@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.provider.ProcessProvider;
 import org.machanism.machai.gw.reviewer.Reviewer;
 import org.machanism.machai.gw.tools.CommandFunctionTools;
 import org.machanism.machai.gw.tools.FileFunctionTools;
@@ -430,7 +430,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 * @param tools        requested tool class names
 	 */
 	@Override
-	protected void applyTools(String instructions, String[] prompts, Genai provider, String[] tools) {
+	protected void applyTools(String instructions, String[] prompts, ProcessProvider provider, String[] tools) {
 
 		super.applyTools(instructions, prompts, provider, tools);
 

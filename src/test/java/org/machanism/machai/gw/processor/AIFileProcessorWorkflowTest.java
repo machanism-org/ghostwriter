@@ -23,8 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.macha.core.commons.configurator.LayeredConfigurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.ai.manager.GenaiProviderManager;
-import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.manager.ProcessProviderManager;
+import org.machanism.machai.ai.provider.ProcessProvider;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -100,14 +100,14 @@ class AIFileProcessorWorkflowTest {
         when(layout.getProjectName()).thenReturn("Demo");
         when(layout.getProjectId()).thenReturn("demo");
         when(layout.getProjectLayoutType()).thenReturn("test");
-        Genai provider = mock(Genai.class);
+        ProcessProvider provider = mock(ProcessProvider.class);
         when(provider.perform()).thenReturn("completed");
         File file = tempDir.resolve("Example.java").toFile();
 
         // Act
         String result;
-        try (MockedStatic<GenaiProviderManager> providers = Mockito.mockStatic(GenaiProviderManager.class)) {
-            providers.when(() -> GenaiProviderManager.getProvider(anyString(), any(LayeredConfigurator.class)))
+        try (MockedStatic<ProcessProviderManager> providers = Mockito.mockStatic(ProcessProviderManager.class)) {
+            providers.when(() -> ProcessProviderManager.getProvider(anyString(), any(LayeredConfigurator.class)))
                     .thenReturn(provider);
             result = processor.run(layout, file, "System ${public.name}",
                     "---\nenabledTools: read_file, web\n---\nHello ${public.name}");

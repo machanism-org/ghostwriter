@@ -24,7 +24,7 @@ import org.jsoup.Jsoup;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.Substitutor;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
-import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.provider.ProcessProvider;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.Tool;
@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 import net.htmlparser.jericho.Source;
 
 /**
- * Provides host-side HTTP retrieval tools for a {@link Genai} provider.
+ * Provides host-side HTTP retrieval tools for a {@link ProcessProvider} provider.
  *
  * <p>
  * This tool set exposes two main functions:
