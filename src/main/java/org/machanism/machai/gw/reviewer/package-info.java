@@ -4,37 +4,46 @@
 
 /**
  * Provides the file-format-specific review layer for the Ghostwriter guidance
- * processing pipeline. A reviewer identifies guidance in a supported project
- * file, gathers the context required by the downstream prompt, and returns a
- * localized prompt fragment for further processing.
+ * processing pipeline. A reviewer detects a format-specific guidance marker,
+ * reads the candidate file, adds project-relative context where the prompt
+ * format requires it, and returns a localized prompt fragment for downstream
+ * processing.
  *
  * <p>{@link Reviewer} is the package's service-provider interface. Its
  * {@link Reviewer#perform(java.io.File, java.io.File) perform} operation receives
- * the project root and candidate file, computes project-relative context, and
- * returns {@code null} when the file does not satisfy the implementation's
- * guidance convention. Implementations also advertise the extensions they can
- * inspect through {@link Reviewer#getSupportedFileExtensions()}.
+ * the project root and candidate file and returns {@code null} when the file
+ * does not satisfy the implementation's guidance convention. Implementations
+ * advertise the extensions they can inspect through
+ * {@link Reviewer#getSupportedFileExtensions()}; the caller is responsible for
+ * choosing a reviewer and for deciding how returned prompt fragments are
+ * ordered and submitted.
  *
- * <p>The concrete reviewers separate format detection from prompt construction:
+ * <p>The concrete reviewers combine format detection with prompt construction
+ * as follows:
  * <ul>
  * <li>{@link JavaReviewer} handles Java comments and gives
- *     {@code package-info.java} package-level treatment by omitting its complete
- *     source content from the generated prompt.</li>
+ *     {@code package-info.java} package-level treatment by returning the
+ *     package-info prompt without its complete source content. Other matching
+ *     Java files contribute their complete UTF-8 source content.</li>
  * <li>{@link HtmlReviewer} handles HTML and XML comment blocks.</li>
- * <li>{@link MarkdownReviewer} handles guidance in Markdown HTML comments.</li>
- * <li>{@link PythonReviewer} handles Python line comments and triple-quoted
- *     guidance strings.</li>
- * <li>{@link TypeScriptReviewer} handles TypeScript line and block comments.</li>
- * <li>{@link PumlReviewer} handles PlantUML files containing the guidance tag.</li>
+ * <li>{@link MarkdownReviewer} handles guidance in Markdown HTML comments and
+ *     includes the complete UTF-8 document in its prompt.</li>
+ * <li>{@link PythonReviewer} handles guidance in Python line comments and
+ *     triple-quoted strings, returning the extracted non-blank guidance text.</li>
+ * <li>{@link TypeScriptReviewer} handles guidance in TypeScript line and block
+ *     comments, returning the extracted non-blank guidance text.</li>
+ * <li>{@link PumlReviewer} handles PlantUML files containing the guidance tag
+ *     and includes the complete UTF-8 document in its prompt.</li>
  * <li>{@link TextReviewer} handles only files named {@code @guidance.txt} and
- *     formats their complete text with parent-directory context.</li>
+ *     formats their complete text with the containing directory's context.</li>
  * </ul>
  *
- * <p>Each source-oriented reviewer reads UTF-8 content, detects the format's
- * supported comment or text convention, and uses the {@code document-prompts}
- * resource bundle to create its result. The bundle keys are format-specific;
- * therefore callers should treat the returned string as an opaque prompt
- * fragment rather than depending on its presentation.
+ * <p>All reviewers use UTF-8 input and the {@code document-prompts} resource
+ * bundle to create their results. The bundle keys and argument order are
+ * format-specific, so callers should treat the returned string as an opaque
+ * prompt fragment rather than depending on its presentation. File-reading
+ * failures are reported as {@link java.io.IOException}; a syntactically valid
+ * file that has no matching guidance is represented by {@code null}.
  *
  * <p>A caller can select a reviewer by extension, invoke it with the project
  * directory and candidate file, and forward a non-{@code null} result:
@@ -47,9 +56,10 @@
  * }
  * </pre>
  *
- * <p>Implementations throw {@link java.io.IOException} when file access fails.
- * The package does not prescribe how prompts are ultimately submitted, allowing
- * the processor and downstream clients to control traversal, ordering, and
- * delivery.
+ * <p>The package does not prescribe project traversal, reviewer registration,
+ * prompt ordering, or delivery. Those responsibilities remain with the
+ * processor and downstream clients, which permits additional
+ * {@link Reviewer} implementations to be introduced without changing the
+ * package contract.
  */
 package org.machanism.machai.gw.reviewer;

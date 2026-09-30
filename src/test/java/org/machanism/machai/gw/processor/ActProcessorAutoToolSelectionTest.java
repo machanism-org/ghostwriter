@@ -17,8 +17,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.ai.manager.ProcessProviderManager;
-import org.machanism.machai.ai.provider.ProcessProvider;
+import org.machanism.machai.process.manager.ProcessProviderManager;
+import org.machanism.machai.process.provider.ProcessProvider;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 

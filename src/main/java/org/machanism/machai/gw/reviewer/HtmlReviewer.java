@@ -29,10 +29,11 @@ import org.machanism.machai.project.layout.ProjectLayout;
 public class HtmlReviewer implements Reviewer {
 
 	/**
-	 * Localized prompt templates used to construct review requests for HTML and XML files.
+	 * The resource bundle used to obtain localized prompt templates for HTML and XML files.
 	 *
-	 * <p>The {@code html_file} resource must accept the file name, project-relative
-	 * path, and complete file content, in that order.
+	 * <p>The {@code html_file} resource is expected to accept the file name,
+	 * project-relative path, and complete file content, in that order. The bundle
+	 * is resolved using the default locale when this reviewer is initialized.
 	 */
 	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
@@ -47,7 +48,10 @@ public class HtmlReviewer implements Reviewer {
 	}
 
 	/**
-	 * Reviews the given file and returns a formatted prompt fragment when guidance is present.
+	 * Reviews the given file and returns a formatted prompt fragment when the
+	 * file contains the configured guidance tag in an HTML/XML comment. The
+	 * complete file is read as UTF-8 so that the prompt preserves its source
+	 * content exactly.
 	 *
 	 * @param projectDir    the project root directory used to compute a project-relative path for context
 	 * @param guidancesFile the HTML/XML file to analyze

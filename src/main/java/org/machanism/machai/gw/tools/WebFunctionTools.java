@@ -23,11 +23,11 @@ import org.apache.commons.lang3.Strings;
 import org.jsoup.Jsoup;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.Substitutor;
-import org.machanism.machai.ai.provider.AbstractAIProvider;
-import org.machanism.machai.ai.provider.ProcessProvider;
-import org.machanism.machai.ai.tools.FunctionTools;
-import org.machanism.machai.ai.tools.Param;
-import org.machanism.machai.ai.tools.Tool;
+import org.machanism.machai.process.provider.AbstractAIProvider;
+import org.machanism.machai.process.provider.ProcessProvider;
+import org.machanism.machai.process.tools.FunctionTools;
+import org.machanism.machai.process.tools.Param;
+import org.machanism.machai.process.tools.Tool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

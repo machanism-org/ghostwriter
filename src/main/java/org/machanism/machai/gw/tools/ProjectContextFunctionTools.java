@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.machanism.machai.ai.tools.FunctionTools;
-import org.machanism.machai.ai.tools.Param;
-import org.machanism.machai.ai.tools.SupportedFor;
-import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
+import org.machanism.machai.process.tools.FunctionTools;
+import org.machanism.machai.process.tools.Param;
+import org.machanism.machai.process.tools.SupportedFor;
+import org.machanism.machai.process.tools.Tool;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

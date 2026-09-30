@@ -1,12 +1,12 @@
 package org.machanism.machai.gw.tools;
 
-import org.machanism.machai.ai.provider.ProcessProvider;
-import org.machanism.machai.ai.tools.FunctionTools;
-import org.machanism.machai.ai.tools.Param;
-import org.machanism.machai.ai.tools.SupportedFor;
-import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.gw.processor.AIFileProcessor;
 import org.machanism.machai.gw.processor.ActProcessor;
+import org.machanism.machai.process.provider.ProcessProvider;
+import org.machanism.machai.process.tools.FunctionTools;
+import org.machanism.machai.process.tools.Param;
+import org.machanism.machai.process.tools.SupportedFor;
+import org.machanism.machai.process.tools.Tool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

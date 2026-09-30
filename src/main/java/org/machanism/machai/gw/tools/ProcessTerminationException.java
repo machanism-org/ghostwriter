@@ -1,6 +1,6 @@
 package org.machanism.machai.gw.tools;
 
-import org.machanism.machai.ai.tools.SpecialException;
+import org.machanism.machai.process.tools.SpecialException;
 
 /*@guidance: >>> ${guidances}/def-class-javadoc.md */
 /**

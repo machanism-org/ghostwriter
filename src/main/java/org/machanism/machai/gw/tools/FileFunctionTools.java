@@ -19,10 +19,10 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.IOUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.Substitutor;
-import org.machanism.machai.ai.provider.ProcessProvider;
-import org.machanism.machai.ai.tools.FunctionTools;
-import org.machanism.machai.ai.tools.Param;
-import org.machanism.machai.ai.tools.Tool;
+import org.machanism.machai.process.provider.ProcessProvider;
+import org.machanism.machai.process.tools.FunctionTools;
+import org.machanism.machai.process.tools.Param;
+import org.machanism.machai.process.tools.Tool;
 
 /*@guidance: >>> ${guidances}/def-class-javadoc.md */
 /**
@@ -79,7 +79,7 @@ public class FileFunctionTools implements FunctionTools {
 	 *         </ul>
 	 *         If the specified path is not a directory or is empty, the respective
 	 *         lists will be empty.
-	 * @throws IOException
+	 * @throws IOException              if the directory cannot be accessed
 	 * @throws IllegalArgumentException if either path is {@code null}, cannot be
 	 *                                  canonicalized, or the requested path is
 	 *                                  outside {@code projectDir}
@@ -105,6 +105,14 @@ public class FileFunctionTools implements FunctionTools {
 		return result;
 	}
 
+	/**
+	 * Recursively collects directories and files below {@code currentDir}.
+	 *
+	 * @param currentDir  directory whose children are being inspected
+	 * @param projectDir  root used to compute project-relative paths
+	 * @param directories destination list for discovered directory paths
+	 * @param files       destination list for discovered file paths
+	 */
 	private void collectRecursive(File currentDir, File projectDir, List<String> directories, List<String> files) {
 		File[] listFiles = currentDir.listFiles();
 		if (listFiles != null) {
@@ -133,7 +141,7 @@ public class FileFunctionTools implements FunctionTools {
 	 * @param projectDir the root project directory context
 	 * @return a {@link List} of relative file path strings, or a message string
 	 *         indicating no files were found
-	 * @throws IOException
+	 * @throws IOException              if the directory cannot be accessed
 	 * @throws IllegalArgumentException if the number of discovered files exceeds
 	 *                                  {@code maxCount}, or if the requested path
 	 *                                  is invalid or outside {@code projectDir}
@@ -164,6 +172,17 @@ public class FileFunctionTools implements FunctionTools {
 		return filePaths;
 	}
 
+	/**
+	 * Recursively collects files below {@code currentDir}, enforcing the result
+	 * limit as files are discovered.
+	 *
+	 * @param currentDir directory whose children are being inspected
+	 * @param projectDir root used to compute project-relative paths
+	 * @param filePaths  destination list for discovered file paths
+	 * @param maxCount   maximum number of files permitted
+	 * @throws IllegalArgumentException if the number of discovered files exceeds
+	 *                                  {@code maxCount}
+	 */
 	private void collectFilesRecursive(File currentDir, File projectDir, List<String> filePaths, int maxCount) {
 		File[] listFiles = currentDir.listFiles();
 		if (listFiles != null) {
@@ -198,7 +217,7 @@ public class FileFunctionTools implements FunctionTools {
 	 * @param projectDir project root used to resolve the directory
 	 * @return project-relative folder paths as a list, or a message when none are
 	 *         found
-	 * @throws IOException
+	 * @throws IOException              if the directory cannot be traversed
 	 * @throws IllegalArgumentException if the number of discovered folders exceeds
 	 *                                  {@code maxCount}, or if the requested path
 	 *                                  is invalid or outside {@code projectDir}
@@ -249,7 +268,7 @@ public class FileFunctionTools implements FunctionTools {
 	 * @param charsetName character set used to encode the content
 	 * @param projectDir  project root used to resolve the file
 	 * @return a success message or an error message when writing fails
-	 * @throws IOException
+	 * @throws IOException              if the file cannot be created or written
 	 * @throws IllegalArgumentException if the requested path is invalid or outside
 	 *                                  {@code projectDir}
 	 */
@@ -361,7 +380,7 @@ public class FileFunctionTools implements FunctionTools {
 	 * @param filePath   requested file or directory
 	 * @param projectDir project root
 	 * @return canonical file located under the project root
-	 * @throws IOException
+	 * @throws IOException              if the file cannot be resolved
 	 * @throws IllegalArgumentException if a path is invalid or escapes the root
 	 */
 	File getFile(File filePath, File projectDir) throws IOException {

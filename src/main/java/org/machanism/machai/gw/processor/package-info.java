@@ -10,73 +10,98 @@
  */
 
 /**
- * Project-file processors and the Ghostwriter command-line workflow for
- * provider-backed guidance, prompt inclusions, and reusable acts.
+ * Provides the filesystem processors and command-line orchestration used by
+ * Ghostwriter (GW). The package separates filesystem traversal from provider
+ * invocation, then builds specialized workflows for inline guidance and TOML
+ * acts.
+ *
+ * <h2>Processor architecture</h2>
  * <p>
- * {@link AbstractFileProcessor} is the traversal layer. It discovers project
- * modules, recursively lists files while honoring exclusions, matches files by
- * path, glob, or regular-expression rules, and can process modules concurrently.
- * {@link AIFileProcessor} builds the provider layer on top of it: it resolves a
- * provider or model, supplies project-relative processing metadata, substitutes
- * public configuration values, registers function tools, expands prompt
- * references, and supports file, folder, module, and pattern processing.
+ * {@link AbstractFileProcessor} is the traversal foundation. It discovers
+ * project modules through {@link org.machanism.machai.project.layout.ProjectLayout},
+ * recursively lists files, applies exclusion rules, supports exact paths and
+ * {@code glob:} or {@code regex:} matchers, and can process modules concurrently.
+ * Subclasses provide the per-file and parent-directory hooks while sharing
+ * project-relative path handling, configuration, and shutdown behavior.
  * </p>
- * <h2>AI prompts and execution context</h2>
  * <p>
- * Prompt front matter may specify {@code gw.model} and {@code enabledTools}.
- * The latter accepts a scalar or YAML list. A line beginning with
- * {@link AIFileProcessor#FILE_INCLUDED_MARKER} includes UTF-8 text from an
- * {@code http://}, {@code https://}, or project-relative {@code file://}
- * reference; included text is parsed recursively. Public properties, including
- * the {@code public.} and {@code default.public.} groups, can be referenced as
- * {@code ${public.projectName}}. Interactive processing uses {@code .} to exit,
- * {@code >} to accept the current response, and {@code >>} to continue without
- * further interaction. {@link AIFileProcessor#getProcessInfo(ProjectLayout, File)}
- * exposes the processed relative path, processing mode, and operating-system
- * name to the provider.
+ * {@link AIFileProcessor} adds provider execution to that foundation. It selects
+ * a provider or model, installs discovered and explicitly registered function
+ * tools, stores project metadata for context tools, and supplies JSON processing
+ * information containing {@code PROCESSED_FILE_REL_PATH}, {@code PROCESS_MODE},
+ * and {@code OS_NAME}. It accepts YAML front matter at the start of prompts:
+ * {@code gw.model} overrides the provider/model for that request, while
+ * {@code enabledTools} accepts a scalar or YAML list. Other front-matter values
+ * are added to the layered configuration and can participate in substitution.
  * </p>
- * <h2>Inline guidance</h2>
  * <p>
- * {@link GuidanceProcessor} selects a {@code Reviewer} through
- * {@link java.util.ServiceLoader} according to the file extension, extracts
- * comments marked by {@link GuidanceProcessor#GUIDANCE_TAG_NAME}, and sends the
- * resulting guidance to the provider. Reviewers preserve the marker at its
- * source location so it remains discoverable on later runs. A configured
- * default prompt can process matching files without inline guidance, and
- * {@link GuidanceProcessor#getReport()} records relative file paths and provider
- * messages.
+ * Prompt and instruction lines beginning with
+ * {@link AIFileProcessor#FILE_INCLUDED_MARKER} include UTF-8 content from an
+ * HTTP or HTTPS URL or a project-relative {@code file://} reference. Included
+ * content is parsed recursively. Public configuration groups
+ * {@link AIFileProcessor#PUBLIC_PROP_GROUP_NAME} are available to templates,
+ * including placeholders such as {@code ${public.projectName}}. Interactive
+ * processing recognizes {@code .} to terminate, {@code >} to accept the current
+ * response, and {@code >>} to continue without another interactive prompt.
  * </p>
- * <h2>Acts and episodes</h2>
+ *
+ * <h2>Inline guidance workflow</h2>
  * <p>
- * {@link ActProcessor} loads TOML acts from built-in {@code /acts/} resources,
- * local directories, HTTP or HTTPS locations, or explicit {@code .toml} files.
- * Acts can inherit through {@code basedOn}; {@code ${super.value}} inserts an
- * inherited string or prompt value. TOML {@code default} properties provide
- * fallbacks, and {@code public.prompt} exposes the command prompt to templates.
- * A leading {@code >} expands to the ad-hoc {@code task} act. An act suffix such
- * as {@code review#1,3!} selects episodes 1 and 3 and prevents normal-order
- * continuation. {@link Episodes} executes ordered prompts sequentially, as a
- * selected subset, repeatedly, or after numeric and heading-name jumps, and
- * provides execution metadata. Episode front matter can request
- * {@code enabledTools: auto}, optionally with a selection constraint;
- * {@link EpisodeNotFoundException} reports an unknown heading-name destination.
+ * {@link GuidanceProcessor} specializes {@code AIFileProcessor} for source files
+ * containing {@link GuidanceProcessor#GUIDANCE_TAG_NAME}. It discovers a
+ * {@link org.machanism.machai.gw.reviewer.Reviewer} for each file extension via
+ * {@link java.util.ServiceLoader}, delegates comment parsing to that reviewer,
+ * and sends the extracted guidance together with the bundled guidance rules to
+ * the provider. Reviewers preserve the guidance marker at its original source
+ * location. A configured default prompt can process matching files without an
+ * inline marker, and {@link GuidanceProcessor#getReport()} records relative file
+ * paths and provider messages while {@link GuidanceProcessor#getProcessedFiles()}
+ * counts attempted file processing.
  * </p>
- * <h2>CLI and supporting types</h2>
+ *
+ * <h2>Act and episode workflow</h2>
  * <p>
- * {@link Ghostwriter} parses command-line and properties-file settings, selects
- * guidance mode by default, or selects act mode with {@code --act}.
- * {@link GWConstants} defines shared configuration keys and formatting values,
- * while {@link ProjectContextKey} names project-layout metadata registered for
- * project-context tools.
+ * {@link ActProcessor} loads TOML act definitions from the built-in
+ * {@code /acts/} classpath resources, a local acts directory, an HTTP or HTTPS
+ * location, or an explicit TOML file. Definitions can inherit through
+ * {@code basedOn}; {@code ${super.value}} inserts the inherited string or prompt
+ * value. {@code default.*} properties provide fallbacks, and
+ * {@code public.prompt} exposes the command prompt to act templates. A leading
+ * {@code >} expands an ad-hoc command into the {@code task} act. An act suffix
+ * such as {@code review#1,3!} selects episodes 1 and 3 and disables continuation
+ * in normal order. Act results are available through
+ * {@link ActProcessor#getResults()} and merged properties through
+ * {@link ActProcessor#getActProperties()}.
  * </p>
+ * <p>
+ * {@link Episodes} owns the ordered prompts of an act. It executes them in normal
+ * order, in an explicitly selected order, or repeatedly when a callback requests
+ * another iteration. It also supports numeric jumps and heading-name jumps,
+ * records episode results through its owning {@code ActProcessor}, and exposes
+ * episode names and current-episode metadata through
+ * {@link Episodes#getActInformation(int)}. Episode front matter may request
+ * {@code enabledTools: auto}; an optional mapping supplies constraints to the
+ * provider-assisted tool selector. An unknown heading destination is reported by
+ * {@link EpisodeNotFoundException}.
+ * </p>
+ *
+ * <h2>Command-line entry point and shared types</h2>
+ * <p>
+ * {@link Ghostwriter} parses command-line options and properties-file settings,
+ * resolves precedence, and selects guidance mode by default or act mode through
+ * {@code --act}. It also applies project, model, instruction, exclusion, thread,
+ * and scan-path settings and maps processing failures to exit codes.
+ * {@link GWConstants} centralizes the corresponding configuration keys and
+ * formatting values. {@link ProjectContextKey} names the operating-system,
+ * project identity, layout, source, test, documentation, and module metadata
+ * registered for project-context tools.
+ * </p>
+ *
  * <h2>Typical usage</h2>
  * <pre>{@code
- * AIFileProcessor processor = new AIFileProcessor(projectDir, configurator, "openai:model");
- * processor.setInstructions("Follow the project's coding standards.");
- * processor.process(projectLayout, file, "Review this file.");
- *
  * GuidanceProcessor guidance = new GuidanceProcessor(projectDir, "openai:model", configurator);
- * guidance.process(projectLayout, file, "Apply the file's inline guidance.");
+ * guidance.setInstructions("Follow the project's coding standards.");
+ * guidance.scanDocuments(projectDir, "glob:**&#47;*.java");
  *
  * ActProcessor acts = new ActProcessor(projectDir, "openai:model", configurator);
  * acts.setAct("review#1,3! Check correctness and error handling");

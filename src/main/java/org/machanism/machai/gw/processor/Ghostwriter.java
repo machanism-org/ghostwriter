@@ -17,10 +17,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.SystemUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.ai.manager.UsageStatistics;
-import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.gw.tools.EndTaskException;
 import org.machanism.machai.gw.tools.ProcessTerminationException;
+import org.machanism.machai.process.manager.UsageStatistics;
+import org.machanism.machai.process.provider.AbstractAIProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -124,11 +124,17 @@ public class CommandSecurityChecker {
 	 * Loads deny-list rules from the provided string.
 	 *
 	 * <p>
-	 * This method is intended for internal initialization.
+	 * This method is intended for internal initialization. Each rule is trimmed
+	 * before parsing; blank lines and lines beginning with {@code #} are ignored.
+	 * A {@code REGEX:} rule is compiled as a Java regular expression, while a
+	 * {@code KEYWORD:} rule is retained for case-insensitive substring matching.
+	 * Rules with any other prefix are ignored.
 	 * </p>
 	 *
+	 * <p>
 	 * Empty strings and {@code null} values produce no rules and are logged as a
-	 * warning. Lines with an unrecognized prefix are ignored.
+	 * warning. Existing rules are retained when this method is called again.
+	 * </p>
 	 *
 	 * @param rulesString string containing rule definitions, separated by line
 	 *                    breaks; may be {@code null}
@@ -161,8 +167,11 @@ public class CommandSecurityChecker {
 	 * Checks whether the supplied command matches any deny-list rule.
 	 *
 	 * <p>
-	 * If the command matches a rule, a {@link DenyException} is thrown containing a
-	 * message identifying the matched rule.
+	 * Regular-expression rules are evaluated first and match anywhere in the
+	 * command. If none matches, keyword rules are evaluated as
+	 * case-insensitive substring searches. If the command matches a rule, a
+	 * {@link DenyException} is thrown containing a message identifying the
+	 * matched rule; otherwise this method returns normally.
 	 * </p>
 	 *
 	 * @param command shell command to check; must not be {@code null}

@@ -17,7 +17,7 @@ import org.apache.commons.cli.Options;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.ai.provider.AbstractAIProvider;
+import org.machanism.machai.process.provider.AbstractAIProvider;
 
 /** Tests non-destructive command-line workflows and interactive input helpers. */
 class GhostwriterCliWorkflowTest {

@@ -61,7 +61,7 @@ class CommandFunctionToolsExecutionTest {
                 ? "cmd /c exit /b 3" : "/usr/bin/sh -c \"exit 3\"";
 
         // Act / Assert
-        assertThrows(org.machanism.machai.ai.tools.ErrorResultException.class,
+        assertThrows(org.machanism.machai.process.tools.ErrorResultException.class,
                 () -> tools.executeCommand(command, null, ".", 128, "UTF-8", projectDirectory.toFile(), configurator));
     }
 

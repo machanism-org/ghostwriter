@@ -7,6 +7,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,10 +29,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.apache.commons.text.StringSubstitutor;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.manager.ProcessProviderManager;
-import org.machanism.machai.ai.provider.ProcessProvider;
 import org.machanism.machai.gw.tools.EndTaskException;
 import org.machanism.machai.gw.tools.MoveToEpisodeException;
+import org.machanism.machai.process.manager.ProcessProviderManager;
+import org.machanism.machai.process.provider.ProcessProvider;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -277,7 +279,7 @@ public class ActProcessor extends AIFileProcessor {
 	 * <ol>
 	 * <li><b>Task Shorthand Expansion:</b> Converting shortcut inputs (beginning
 	 * with {@link #DEFAULT_TASK_MARKER}) into standard task instructions.</li>
-	 * <li><b>Fallback Fallback Defaults:</b> Defaulting blank actions to
+	 * <li><b>Fallback Defaults:</b> Defaulting blank actions to
 	 * {@code "help"}.</li>
 	 * <li><b>Token/Argument Extraction:</b> Parsing the action name (first
 	 * contiguous word) and separating it from any trailing, inline text
@@ -457,9 +459,8 @@ public class ActProcessor extends AIFileProcessor {
 	 * @param actsLocation optional directory containing user-defined (custom) act
 	 *                     files; may be {@code null}
 	 * @param rootDir      project root used to resolve relative act locations
-	 * @throws IOException              if reading act content fails
-	 * @throws IllegalArgumentException if the specified act cannot be found in
-	 *                                  either location
+	 * @throws IOException if reading act content fails or the specified act cannot
+	 *                     be found in either location
 	 */
 	public static void loadAct(String name, Map<String, Object> properties, String actsLocation, File rootDir)
 			throws IOException {
@@ -549,6 +550,24 @@ public class ActProcessor extends AIFileProcessor {
 		return toml;
 	}
 
+	private static boolean isExtentionExists(String filename) {
+		if (filename == null || filename.trim().isEmpty()) {
+			return false;
+		}
+
+		// Extract the filename component in case a full path was passed
+		String name = Optional.ofNullable(Paths.get(filename).getFileName())
+				.map(Path::toString)
+				.orElse(filename);
+
+		int lastDotIndex = name.lastIndexOf('.');
+
+		// Ensure the dot exists, is not the very first character (e.g., hidden files
+		// like ".gitignore"),
+		// and is not the very last character (e.g., "file.")
+		return lastDotIndex > 0 && lastDotIndex < name.length() - 1;
+	}
+
 	/**
 	 * Resolves an act file path or URL from an act name and configured act source.
 	 *
@@ -560,11 +579,19 @@ public class ActProcessor extends AIFileProcessor {
 	 */
 	private static String getAbsolutePath(String name, String actsLocation, File rootDir) throws IOException {
 		String path = null;
-		if (!Strings.CS.startsWithAny(actsLocation, HTTP_PREFIX, HTTPS_PREFIX)) {
+
+		if(!isExtentionExists(name)) {
+			name = name + TOML_EXTENSION;
+		}
+		
+		if (Strings.CS.startsWithAny(actsLocation, HTTP_PREFIX, HTTPS_PREFIX)) {
+			String base = actsLocation.endsWith("/") ? actsLocation : actsLocation + "/";
+			path = URI.create(base + name).toURL().toString();
+		} else {
 			File file = new File(name);
 			if (!file.isAbsolute()) {
 				Path actsPath = rootDir.toPath().resolve(actsLocation);
-				file = actsPath.resolve(name + TOML_EXTENSION).toFile();
+				file = actsPath.resolve(name).toFile();
 			} else {
 				if (!file.exists()) {
 					throw new IOException("The act not found: " + name);
@@ -572,10 +599,6 @@ public class ActProcessor extends AIFileProcessor {
 			}
 			path = file.getAbsolutePath();
 
-		} else {
-			String base = actsLocation.endsWith("/") ? actsLocation : actsLocation + "/";
-			String uriString = Strings.CS.endsWithAny(name, TOML_EXTENSION) ? name : base + name + TOML_EXTENSION;
-			path = URI.create(uriString).toURL().toString();
 		}
 
 		return path;

@@ -10,7 +10,7 @@
  *
  * <p>The package is the integration boundary between an AI provider and a
  * project-scoped workflow. Implementations of
- * {@link org.machanism.machai.ai.tools.FunctionTools} expose annotated methods
+ * {@link org.machanism.machai.process.tools.FunctionTools} expose annotated methods
  * to the provider, while the processors in
  * {@link org.machanism.machai.gw.processor.ActProcessor} and
  * {@link org.machanism.machai.gw.processor.AIFileProcessor} perform the
@@ -19,17 +19,17 @@
  * runtime temporary directory and return an identifier for later polling.</p>
  *
  * <h2>AI metadata and tool providers</h2>
- * <p>Methods annotated with
- * {@link org.machanism.machai.ai.tools.Tool @Tool} are <em>Functional AI
+ * <p>Classes or methods annotated with
+ * {@link org.machanism.machai.process.tools.Tool @Tool} are <em>Functional AI
  * Tools</em>. Their names, parameter descriptions, default values, return
  * contracts, and failures are published as callable operations. Methods
- * annotated with {@link org.machanism.machai.ai.tools.Prompt @Prompt} are
+ * annotated with {@link org.machanism.machai.process.tools.Prompt @Prompt} are
  * <em>Prompt Templates</em>; they supply reusable instructions from the
  * {@code mcp-prompts} resource bundle. This package currently declares no
- * methods annotated with {@code @Resource}, so it provides no <em>Contextual
- * Resources</em>. Package-level Javadoc has no callable parameters, return
- * value, or thrown exception; those contracts are documented on each public
- * constructor and method.</p>
+ * classes or methods annotated with {@code @Resource}, so it provides no
+ * <em>Contextual Resources</em>. Package-level Javadoc has no callable
+ * parameters, return value, or thrown exception; those contracts are
+ * documented on each public constructor and method.</p>
  *
  * <h2>Functional areas</h2>
  * <ul>
