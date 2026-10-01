@@ -17,50 +17,54 @@ start
 
 :Parse the act command;
 note right
-  Expands ">" shorthand, defaults to
-  "help", splits act name from prompt,
-  and reads episode selection like "#1,3!".
+  Expands ">" shorthand, defaults blank input to
+  "help", separates the act name from its prompt,
+  and reads an episode selector such as "#1,3!".
 end note
 
-:Load the act definition;
+:Load the act definition and configure it;
 note right
-  Merges built-in and custom TOML,
-  resolves "basedOn" inheritance,
-  and applies defaults and prompt values.
+  Loads built-in and custom TOML, resolves
+  "basedOn" inheritance, applies defaults and
+  prompt values, and prepares the episode list.
 end note
 
-:Find files to process;
+:Find project files to process;
 note right
-  If nothing matches, the project
-  directory itself is processed.
+  Module traversal is handled by the shared
+  project processor. Parent-project children are
+  filtered by match rules and exclusions. If no
+  child matches, the project directory is used.
 end note
 
-:Process each matching file in turn;
+:Process each selected file in turn;
 
 if (Specific episodes were requested?) then (yes)
-  :Begin with the selected episodes;
+  :Run the selected episodes in request order;
+  if (Continue with normal order?) then (yes)
+    :Continue with the next episode;
+  else (no)
+    :Finish this file;
+  endif
 else (no)
-  :Begin with episode 1;
+  :Start with episode 1;
 endif
 
 :Run the episode sequence;
 note right
-  Selected episodes run in the requested order.
-  A trailing "!" ends processing for this file
-  after those episodes; otherwise normal order continues.
+  Each episode combines act metadata, process
+  information, instructions, and its prompt;
+  it resolves episode tools and calls the provider.
+  Repeat requests rerun the episode, while move
+  requests jump to a numeric or named episode.
 end note
 
+:Collect the file result;
 note right
-  Each episode builds its prompt, resolves tools,
-  and calls the AI provider. Its control signals can
-  repeat an episode, jump to another one, or end this file.
-end note
-
-:Collect results from the file
-and continue with the next match;
-note right
-  When every matching file is complete,
-  collect the overall results.
+  Continue with the next matching file unless an
+  episode signals that the task should end. After
+  all files complete, the accumulated act results
+  are available to the caller.
 end note
 
 stop
@@ -69,7 +73,7 @@ legend right
   * Episodes are ordered steps within one act.
   * A caller can select specific episodes and choose
     whether normal order continues afterward.
-  * Control signals can repeat an episode, jump to another,
-    or end the current file's processing.
+  * Each episode receives act metadata and can repeat,
+    jump to another episode, or end task processing.
 endlegend
 @enduml

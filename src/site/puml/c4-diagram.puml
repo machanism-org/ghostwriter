@@ -31,6 +31,7 @@ System_Boundary(ghostwriter, "Ghostwriter") {
 
   Component(fileTools, "File Tools", "FileFunctionTools", "Reads, writes, patches, and lists project files and directories.")
   Component(commandTools, "Command Tools", "CommandFunctionTools / CommandSecurityChecker", "Runs security-checked project commands and exposes command logs.")
+  Component(commandSpecTools, "Execution Control Tools", "CommandSpecFunctionTools", "Signals task completion or process termination through controlled workflow exceptions.")
   Component(webTools, "Web Tools", "WebFunctionTools", "Fetches web content, reads file resources, and calls REST APIs.")
   Component(actTools, "Act Tools", "ActFunctionTools / ActSpecFunctionTools", "Loads act details, starts acts, and retrieves asynchronous act results.")
   Component(guidanceTools, "Guidance Tools", "GuidanceFunctionTools", "Discovers and processes guidance-tagged files, synchronously or asynchronously.")
@@ -71,6 +72,7 @@ Rel(toolLoading, genaiProvider, "Registers enabled tools with")
 
 Rel(toolLoading, fileTools, "Registers")
 Rel(toolLoading, commandTools, "Registers")
+Rel(toolLoading, commandSpecTools, "Registers")
 Rel(toolLoading, webTools, "Registers")
 Rel(toolLoading, actTools, "Registers")
 Rel(toolLoading, guidanceTools, "Registers")

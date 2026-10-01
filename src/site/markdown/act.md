@@ -177,6 +177,7 @@ The YAML input parameters recognized specially by `AIFileProcessor` are:
 
 - `gw.model` — overrides the configured AI model/provider for the prompt.
 - `enabledTools` — a string or YAML list of regular-expression patterns controlling registered tools.
+- `errorHandling` — when configured, controls provider error handling for the request.
 - Other YAML values are retained as prompt configuration; string values are resolved through the active configurator, but they do not by themselves change processing behavior.
 
 For every processed item, Ghostwriter also sends JSON process information containing `PROCESSED_FILE_REL_PATH`, `PROCESS_MODE` (`INTERACTIVE` or `NOT-INTERACTIVE`), and `OS_NAME`. Project-context tools receive the project name, IDs, directories, source/test/document folders, modules, and operating-system context.

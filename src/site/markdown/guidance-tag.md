@@ -46,11 +46,15 @@ Guidance tags help automate routine work such as improving documentation, creati
 
 This follows the Guided File Processing approach: natural-language instructions are treated as maintainable project assets. AI is useful for routine enrichment—explaining existing code, adding examples, or organizing text—but it cannot know your project-specific intent unless you state it in the guidance.
 
+Guidance-driven processing is deliberately an assistant workflow rather than a promise that AI will make every decision for you. The application identifies eligible files and creates a separate context for each one; you remain the author who checks the proposed result. The same instructions can be followed manually when a task should not use AI.
+
 ### Scope and processing order
 
 The **project folder** is the base directory Ghostwriter examines. A **scan path** narrows that work to a file, folder, glob pattern, or regular expression; it can be relative or absolute. A narrow scan is useful when you want to update only one documentation area or module.
 
 Ghostwriter recognizes project modules and processes child modules before the parent project. Files deeper in the directory structure are considered first, which helps when a top-level file relies on information from lower-level files. Child modules may run in declared order or in parallel when multithreading is enabled; a build tool can instead determine the module order from dependencies.
+
+The model is selected for the run, so choose a model that fits the quality, speed, and cost you need. Ghostwriter can be used from the command line or from a Maven build, and is suitable for repeatable local or CI/CD workflows.
 
 ### Supported files and tag styles
 
@@ -63,12 +67,12 @@ Reviewers recognize these built-in file types:
 | Java | `java` | A block or `//` comment |
 | TypeScript | `ts` | A block or `//` comment |
 | Python | `py` | A `#` comment or triple-quoted string |
-| PlantUML | `puml` | Include the marker in the diagram (a PlantUML comment is the usual choice) |
+| PlantUML | `puml` | Include the marker anywhere in the diagram; a PlantUML comment is the usual choice |
 | Folder instruction | exactly `@guidance.txt` | Put the instruction in that file |
 
 An ordinary `.txt` file is not an inline-guidance file: text files have no comment syntax. `@guidance.txt` is the exception and represents guidance for its folder. Java's `package-info.java` can also provide package-level guidance.
 
-The exact comment format matters. For example, the Markdown and HTML reviewers look for an HTML comment, the Java reviewer accepts a block or line comment, and the TypeScript and Python reviewers extract non-blank text from their supported line, block, or triple-quoted forms. The PlantUML reviewer checks for the marker and includes the complete file when it is present. `@guidance.txt` is identified by its exact filename rather than by an inline marker. Tags are retained in the source so they can be found in a later run.
+The exact comment format matters. The Markdown reviewer looks for the marker inside an HTML comment and supplies the complete Markdown file. The HTML/XML reviewer likewise requires an HTML/XML comment and supplies the complete file. The Java reviewer accepts a block or line comment and supplies the complete source, except that `package-info.java` receives package-level context. TypeScript and Python reviewers extract non-blank text from their supported line, block, or triple-quoted forms. The PlantUML reviewer checks for the marker anywhere in the file and includes the complete file when it is present. `@guidance.txt` is identified by its exact filename rather than by an inline marker and supplies its complete contents. Tags are retained in the source so they can be found in a later run.
 
 ## Practical usage
 
@@ -140,6 +144,8 @@ java -jar gw.jar
 mvn gw:gw
 ```
 
+Ghostwriter requires a Java 8 JVM; Java 17 or newer is recommended for the best experience. In a CI/CD pipeline, keep provider credentials and tool permissions in the build environment rather than embedding them in guidance comments.
+
 To limit the scan, provide a path or pattern, for example:
 
 ```shell
@@ -151,7 +157,7 @@ The model selection applies to the run. Run separate scans when different folder
 
 ## What happens during a run?
 
-`GuidanceProcessor` loads reviewers through Java's service-provider mechanism and selects one by normalized file extension. The built-in reviewers cover Markdown (`.md`), HTML/HTML fragments/XML (`.html`, `.htm`, `.xml`), Java (`.java`), TypeScript (`.ts`), Python (`.py`), PlantUML (`.puml`), and the exact folder file `@guidance.txt` (handled through `.txt`). If no reviewer supports the file, Ghostwriter normally leaves it alone; a configured default instruction is the exception for matching files. A reviewer checks for the marker in the comment or string style it supports and builds the material for that file. Markdown, HTML/XML, Java, and PlantUML reviewers provide file content with project-relative context; Python and TypeScript reviewers provide the non-blank instruction they find with that context. Java `package-info.java` receives package-level context, while the text reviewer reads the full contents of `@guidance.txt` and identifies its parent folder.
+`GuidanceProcessor` loads reviewers through Java's service-provider mechanism and selects one by normalized file extension. The built-in reviewers cover Markdown (`.md`), HTML/HTML fragments/XML (`.html`, `.htm`, `.xml`), Java (`.java`), TypeScript (`.ts`), Python (`.py`), PlantUML (`.puml`), and the exact folder file `@guidance.txt` (handled through `.txt`). If no reviewer supports the file, Ghostwriter normally leaves it alone; a configured default instruction is the exception for matching files. A reviewer checks for the marker in the comment or string style it supports and builds the material for that file. Markdown, HTML/XML, Java, and PlantUML reviewers provide file content with project-relative context; Python and TypeScript reviewers provide the non-blank instruction they find with that context. Java `package-info.java` receives package-level context, while the text reviewer reads the full contents of `@guidance.txt` and identifies its parent folder. Reviewer loading is extensible: projects can provide additional `Reviewer` implementations through the same service-provider mechanism.
 
 Ghostwriter then invokes the configured provider with the standard instructions and the reviewer material. Its optional functional tools can inspect and modify files, run commands and examine logs, or obtain web information. Tools that modify files, run commands, or make network requests must be enabled and controlled by your settings.
 

@@ -99,6 +99,10 @@ Put these properties in the selected Java properties file. `gw.config` is a Java
 | `gw.act` | Default Act name or prompt read when Act mode is selected. | Unset unless configured; does not itself enable Act mode. |
 | `gw.threads` | Concurrent processing thread count. | Processor default unless configured; overridden by `-t`. |
 | `gw.path` | Default file, directory, glob, or regex scan target. | `.` when absent; positional paths take precedence. |
+| `gw.nonRecursive` | Configuration key defined by the shared Ghostwriter constants for disabling recursive module traversal. | Not read by the `Ghostwriter` CLI entry point shown here; use the processor/version that supports it. |
+| `gw.interactive` | Configuration key defined by the shared constants for interactive command processing. | Not read by the `Ghostwriter` CLI entry point shown here; Act mode is enabled with `-a`/`--act`. |
+
+`gw.nonRecursive` and `gw.interactive` are documented for completeness because they are canonical Ghostwriter property names, but this CLI class does not resolve or apply them. They therefore must not be treated as active command-line options for this pack.
 
 Example `gw.properties`:
 
@@ -134,7 +138,7 @@ set "GENAI_PASSWORD=your_codemie_password"
 java -Dgw.config=production.properties -jar gw.jar src
 ```
 
-Only `gw.config` is read by `Ghostwriter` as a Java system-property override. The other runtime settings belong in the properties file or on the command line.
+Only `gw.config` is read by `Ghostwriter` as a Java system-property override. The other runtime settings belong in the properties file or on the command line. `gw.nonRecursive` and `gw.interactive` are not consumed by this CLI entry point.
 
 ### Unix examples
 
