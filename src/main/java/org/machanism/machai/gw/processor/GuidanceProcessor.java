@@ -299,13 +299,12 @@ public class GuidanceProcessor extends AIFileProcessor {
 			String guidance = parseFile(projectDir, file);
 
 			String guidanceRules = promptBundle.getString("guidance_rules");
-			String processInfo = getProcessInfo(projectLayout, file);
 			if (guidance != null) {
-				perform = process(projectLayout, file, getInstructions(), processInfo, guidanceRules, guidance);
+				perform = process(projectLayout, file, getInstructions(), guidanceRules, guidance);
 				perform = defaultReport(projectLayout, file, perform);
 
 			} else if (getDefaultPrompt() != null) {
-				perform = process(projectLayout, file, getInstructions(), processInfo, getDefaultPrompt());
+				perform = process(projectLayout, file, getInstructions(), getDefaultPrompt());
 				perform = defaultReport(projectLayout, file, perform);
 			}
 		}

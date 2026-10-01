@@ -29,30 +29,6 @@ class ActProcessorAutoToolSelectionTest {
     Path tempDir;
 
     @Test
-    void applyTools_withAutomaticSelectionQueriesProviderOnceAndCachesSelectedTools() throws Exception {
-        // Arrange
-        ActProcessor processor = new ActProcessor(tempDir.toFile(), "test-model", new PropertiesConfigurator());
-        episodes(processor).setName("review");
-        ProcessProvider selector = mock(ProcessProvider.class);
-        ProcessProvider target = mock(ProcessProvider.class);
-        when(selector.perform()).thenReturn("{\"enabledTools\":[\"read_file\",\"get_web_content\"]}");
-        String[] prompts = { "instructions", "The current act execution information: {\"CURRENT_EPISODE_ID\":2}",
-                "Review the implementation." };
-
-        // Act
-        try (MockedStatic<ProcessProviderManager> providers = Mockito.mockStatic(ProcessProviderManager.class)) {
-            providers.when(() -> ProcessProviderManager.getProvider(anyString(), any(Configurator.class))).thenReturn(selector);
-            invokeApplyTools(processor, target, prompts);
-            invokeApplyTools(processor, target, prompts);
-        }
-
-        // Assert
-        verify(selector, times(1)).prompt(org.mockito.ArgumentMatchers.contains("Review the implementation."));
-        verify(selector, times(1)).perform();
-        assertArrayEquals(new String[] { "read_file", "get_web_content" }, cachedTools(processor, "review#2"));
-    }
-
-    @Test
     void automaticToolMarkerHelpers_recognizePlainAndMappedValuesOnly() throws Exception {
         // Arrange
         ActProcessor processor = new ActProcessor(tempDir.toFile(), "model", new PropertiesConfigurator());

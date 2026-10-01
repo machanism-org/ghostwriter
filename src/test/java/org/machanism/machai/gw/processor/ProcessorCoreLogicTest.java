@@ -124,7 +124,7 @@ class ProcessorCoreLogicTest {
         // Assert
         assertEquals("Hello Ada\nplain", parsed);
         assertTrue(info.contains("PROCESSED_FILE_REL_PATH"));
-        assertTrue(info.contains("NOT-INTERACTIVE"));
+        assertTrue(info.contains("Do not ask any question because this is not-interactive process mode."));
         assertEquals(1, processor.getDirInfoLine(Collections.singleton("src"), tempDir.toFile()).size());
         assertEquals(null, processor.getDirInfoLine(Collections.singleton("missing"), tempDir.toFile()));
     }

@@ -325,8 +325,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * <li>Resolves the GenAI model configuration (falling back to the default
 	 * configured model if not explicitly overridden in prompt metadata via
 	 * {@code gw.model}).</li>
-	 * <li>Instantiates the target {@code ProcessProvider} provider and registers enabled
-	 * toolkits and custom function tools.</li>
+	 * <li>Instantiates the target {@code ProcessProvider} provider and registers
+	 * enabled toolkits and custom function tools.</li>
 	 * <li>Constructs system instructions by combining default bundle instructions
 	 * with any custom parameters passed to {@code instructions}.</li>
 	 * <li>Feeds file-specific contextual metadata and substituted prompts to the AI
@@ -383,6 +383,11 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				if (requestedModel == null) {
 					requestedModel = this.model;
 				}
+				
+				Boolean interactive = (Boolean) inputProps.get(GWConstants.INTERACTIVE_MODE_PROP_NAME);
+				if (interactive != null) {
+					setInteractive(interactive);
+				}
 
 				LayeredConfigurator conf = new LayeredConfigurator(getConfigurator());
 				inputProps.entrySet().stream().forEach(e -> {
@@ -418,7 +423,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				}
 
 				applyTools(instructions, prompts, provider, tools);
-				
+
 				provider.setProjectDir(projectDir);
 
 				provider.instructions(instructions);
@@ -426,6 +431,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 					logger.debug("Instructions: {}", instructions);
 				}
 
+				provider.prompt(getProcessInfo(projectLayout, file));
 				for (String prompt : prompts) {
 					provider.prompt(prompt);
 					if (logger.isDebugEnabled()) {
@@ -602,13 +608,16 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	}
 
 	/**
-	 * Processes the project modules in a multi-threaded manner using the specified layout and module list.
+	 * Processes the project modules in a multi-threaded manner using the specified
+	 * layout and module list.
 	 * <p>
-	 * If {@code interactive} mode is currently enabled, it is automatically disabled with a warning log,
-	 * as interactive mode is not supported during concurrent multi-threaded execution.
+	 * If {@code interactive} mode is currently enabled, it is automatically
+	 * disabled with a warning log, as interactive mode is not supported during
+	 * concurrent multi-threaded execution.
 	 * </p>
 	 *
-	 * @param projectLayout the layout of the project containing configuration and structure details
+	 * @param projectLayout the layout of the project containing configuration and
+	 *                      structure details
 	 * @param modules       the list of module identifiers or names to be processed
 	 */
 	@Override
@@ -659,20 +668,16 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * @see com.fasterxml.jackson.databind.ObjectMapper#writeValueAsString(Object)
 	 */
 	public String getProcessInfo(ProjectLayout projectLayout, File file) {
-		Map<String, String> result = new HashMap<>();
+		StringBuilder result = new StringBuilder("# File process information\n\n");
 
 		File projectDir = projectLayout.getProjectDir();
-		result.put("PROCESSED_FILE_REL_PATH", ProjectLayout.getRelativePath(projectDir, file));
-		result.put("PROCESS_MODE", interactive ? "INTERACTIVE" : "NOT-INTERACTIVE");
-		result.put("OS_NAME", SystemUtils.OS_NAME);
-
-		String jsonString;
-		try {
-			jsonString = new ObjectMapper().writeValueAsString(result);
-		} catch (Exception e) {
-			jsonString = result.toString();
+		result.append("- PROCESSED_FILE_REL_PATH: " + ProjectLayout.getRelativePath(projectDir, file) + "\n");
+		result.append("- OS_NAME: " + SystemUtils.OS_NAME + "\n");
+		if (!interactive) {
+			result.append("\nDo not ask any question because this is not-interactive process mode.");
 		}
-		return jsonString;
+
+		return result.toString();
 	}
 
 	/**
@@ -680,12 +685,12 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * next user command or follow-up prompt.
 	 * <p>
 	 * The exit command terminates processing, the continue command returns the
-	 * current response, and the non-interactive command disables further input.
-	 * Any other input is submitted to the provider and processing recurses until a
+	 * current response, and the non-interactive command disables further input. Any
+	 * other input is submitted to the provider and processing recurses until a
 	 * command is received or input is unavailable.
 	 * </p>
 	 *
-	 * @param file the file associated with the current processing operation
+	 * @param file     the file associated with the current processing operation
 	 * @param provider the configured provider to execute and, if needed, receive a
 	 *                 follow-up prompt
 	 * @return the current or final provider response
