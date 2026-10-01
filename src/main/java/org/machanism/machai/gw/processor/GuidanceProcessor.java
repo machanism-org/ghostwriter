@@ -237,6 +237,9 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 * Processes files and folders under the parent project directory, excluding
 	 * module directories. A matching project directory is additionally processed
 	 * with the default prompt when one is configured.
+	 *
+	 * @param projectLayout project layout whose parent files are scanned
+	 * @throws IOException if listing or processing a child cannot be completed
 	 */
 	@Override
 	protected void processParentFiles(ProjectLayout projectLayout) throws IOException {

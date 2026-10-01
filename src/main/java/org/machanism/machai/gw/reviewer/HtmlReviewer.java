@@ -15,7 +15,8 @@ import org.machanism.machai.project.layout.ProjectLayout;
 /*@guidance: >>> ${guidances}/def-class-javadoc.md  */
 /**
  * A {@link Reviewer} implementation for HTML and XML files with the
- * {@code .html}, {@code .htm}, or {@code .xml} extension.
+ * {@code .html}, {@code .htm}, or {@code .xml} extension. It identifies
+ * guidance comments and turns matching files into localized review prompts.
  *
  * <p>The reviewer reads the complete file as UTF-8 text and looks for the
  * configured guidance tag inside an HTML/XML comment. When guidance is found,
@@ -24,21 +25,27 @@ import org.machanism.machai.project.layout.ProjectLayout;
  *
  * <p>Guidance is expected to appear in an HTML/XML comment block, for example
  * {@code <!-- @guidance ... -->}. Files without such a comment are not
- * reviewable by this implementation.
+ * reviewable by this implementation. The source is decoded as UTF-8 and is
+ * passed to the prompt template without altering its content.
  */
 public class HtmlReviewer implements Reviewer {
 
 	/**
-	 * The resource bundle used to obtain localized prompt templates for HTML and XML files.
+	 * The resource bundle used to obtain localized prompt templates for HTML and
+	 * XML files.
 	 *
 	 * <p>The {@code html_file} resource is expected to accept the file name,
 	 * project-relative path, and complete file content, in that order. The bundle
 	 * is resolved using the default locale when this reviewer is initialized.
+	 *
+	 * <p>This field is initialized when an {@code HtmlReviewer} instance is
+	 * created and remains unchanged for the lifetime of that instance.
 	 */
 	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
 	/**
-	 * Returns the file extensions supported by this reviewer.
+	 * Returns the file extensions supported by this reviewer. The returned
+	 * extensions do not include a leading period.
 	 *
 	 * @return an array containing {@code "html"}, {@code "htm"}, and {@code "xml"}
 	 */
@@ -51,7 +58,9 @@ public class HtmlReviewer implements Reviewer {
 	 * Reviews the given file and returns a formatted prompt fragment when the
 	 * file contains the configured guidance tag in an HTML/XML comment. The
 	 * complete file is read as UTF-8 so that the prompt preserves its source
-	 * content exactly.
+	 * content exactly. The first matching guidance comment determines whether
+	 * the file is reviewable; the extracted comment text is used only for that
+	 * determination because the prompt contains the complete source file.
 	 *
 	 * @param projectDir    the project root directory used to compute a project-relative path for context
 	 * @param guidancesFile the HTML/XML file to analyze

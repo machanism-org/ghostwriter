@@ -98,7 +98,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 * in the returned map.
 	 * </p>
 	 *
-	 * @param rootDir      The absolute path to the root project directory or a
+	 * @param projectDir   The absolute path to the root project directory or a
 	 *                     folder containing multiple projects. All scanning
 	 *                     operations are performed relative to this directory.
 	 * @param path         Specifies the scanning path or pattern. Use a relative
@@ -107,9 +107,8 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 *                     root project directory. Supported patterns: raw directory
 	 *                     names, glob patterns (e.g., "glob:*.java"), or regex
 	 *                     patterns (e.g., "regex:^.java$"). Default: "glob:*.*"
-	 * @param projectDir   The project directory to use as the working directory for
-	 *                     scanning operations.
-	 * @param configurator The configuration object.
+	 * @param configurator The configuration object used to resolve the configured
+	 *                     model for scanning operations.
 	 * @return A map where each key is a project directory and each value is a list
 	 *         of files with guidance tags found in that directory.
 	 * @throws IOException if an I/O error occurs during scanning.
@@ -203,7 +202,8 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 * retrieval using the process ID.
 	 * </p>
 	 *
-	 * @param projectDir The project directory in which to scan for files.
+	 * @param projectDir The project directory in which to scan for files. The
+	 *                   directory must be readable by the process.
 	 * @param properties Optional map of Act properties, such as configuration
 	 *                   overrides or parameters for the guidance processing. If
 	 *                   {@code null}, only the main configuration is used.
@@ -215,7 +215,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 *                   patterns (e.g., "regex:^.[^/]+\\.java$"). Default:
 	 *                   "${project_dir}".
 	 * @param config     The configuration object for property resolution and
-	 *                   default values.
+	 *                   default values. It is layered with the supplied properties.
 	 * @return In asynchronous mode, a map containing the unique {@code process_id}
 	 *         and a {@code status} of {@code "processing"}; in synchronous mode,
 	 *         the complete guidance-processing report.

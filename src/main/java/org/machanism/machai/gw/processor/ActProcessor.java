@@ -550,6 +550,16 @@ public class ActProcessor extends AIFileProcessor {
 		return toml;
 	}
 
+	/**
+	 * Determines whether a file name already contains a non-leading, non-trailing
+	 * extension separator. The check is performed on the final path component so
+	 * dots in parent directories do not count as an extension.
+	 *
+	 * @param filename file name or path to inspect
+	 * @return {@code true} when the final path component contains a valid extension
+	 *         separator; {@code false} for blank names and names without an
+	 *         extension
+	 */
 	private static boolean isExtentionExists(String filename) {
 		if (filename == null || filename.trim().isEmpty()) {
 			return false;

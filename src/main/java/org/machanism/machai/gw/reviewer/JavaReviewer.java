@@ -19,8 +19,8 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * {@link Reviewer} implementation for Java source files ({@code .java}).
  *
  * <p>The reviewer reads source files as UTF-8 and detects the presence of the
- * {@link GuidanceProcessor#GUIDANCE_TAG_NAME @guidance} tag in either block ({@code /* ... *&#47;})
- * or line ({@code // ...}) comments. A matching file is converted into the
+ * {@link GuidanceProcessor#GUIDANCE_TAG_NAME @guidance} tag in either block
+ * or line comments. A matching file is converted into the
  * localized prompt fragment appropriate for its kind of Java source file.
  *
  * <p>When processing {@code package-info.java}, the reviewer emits a
@@ -35,6 +35,7 @@ public class JavaReviewer implements Reviewer {
 	 *
 	 * <p>The bundle is loaded using the default locale and must provide the
 	 * {@code java_file} and {@code java_package_info_file} message keys.
+	 * The field is initialized when a reviewer instance is created.
 	 */
 	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
@@ -49,7 +50,13 @@ public class JavaReviewer implements Reviewer {
 	}
 
 	/**
-	 * Reviews the provided Java file and, if guidance is present, returns a formatted prompt fragment.
+	 * Reviews the provided Java file and, if guidance is present, returns a
+	 * formatted prompt fragment.
+	 *
+	 * <p>The file is read as UTF-8. The complete source is included in the
+	 * prompt for ordinary Java files, while {@code package-info.java} receives
+	 * the package-level prompt containing its relative path. Only the first
+	 * matching guidance comment is required to produce a result.
 	 *
 	 * @param projectDir    the project root directory used to compute a project-relative path for context
 	 * @param guidancesFile the Java file to analyze
@@ -88,6 +95,9 @@ public class JavaReviewer implements Reviewer {
 
 	/**
 	 * Extracts the declared package name from a Java source snippet.
+	 *
+	 * <p>The first declaration matching the Java package-name syntax is returned;
+	 * this method does not attempt to parse comments or string literals.
 	 *
 	 * @param content the full text content of a Java source file
 	 * @return the declared package name, or {@code "<default package>"} when no package declaration is present
