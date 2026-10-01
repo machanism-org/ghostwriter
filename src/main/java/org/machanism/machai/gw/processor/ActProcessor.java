@@ -590,10 +590,10 @@ public class ActProcessor extends AIFileProcessor {
 	private static String getAbsolutePath(String name, String actsLocation, File rootDir) throws IOException {
 		String path = null;
 
-		if(!isExtentionExists(name)) {
+		if (!isExtentionExists(name)) {
 			name = name + TOML_EXTENSION;
 		}
-		
+
 		if (Strings.CS.startsWithAny(actsLocation, HTTP_PREFIX, HTTPS_PREFIX)) {
 			String base = actsLocation.endsWith("/") ? actsLocation : actsLocation + "/";
 			path = URI.create(base + name).toURL().toString();
@@ -1036,7 +1036,7 @@ public class ActProcessor extends AIFileProcessor {
 
 		String actSysInstructions = actBundle.getString("act_sys_instructions");
 		String process = super.process(projectLayout, projectDir, getInstructions(),
-				getProcessInfo(projectLayout, projectDir), actInformationJson, actSysInstructions, prompt);
+				actInformationJson, actSysInstructions, prompt);
 		return process;
 	}
 
@@ -1090,7 +1090,7 @@ public class ActProcessor extends AIFileProcessor {
 	protected void applyTools(String instructions, String[] prompts, ProcessProvider provider, String[] tools) {
 		if (tools != null && tools.length != 0 && isAutoToolSelection(tools[0])
 				&& prompts.length > 1
-				&& Strings.CS.startsWith(prompts[1], ACT_EXECUTION_INFORMATION_PREFIX)) {
+				&& Strings.CS.startsWith(prompts[0], ACT_EXECUTION_INFORMATION_PREFIX)) {
 			tools = getAutoTools(getAutoToolSelectionQuery(tools[0]), instructions, prompts);
 		}
 		super.applyTools(instructions, prompts, provider, tools);
