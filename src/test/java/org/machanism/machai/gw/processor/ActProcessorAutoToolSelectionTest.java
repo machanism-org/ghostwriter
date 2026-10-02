@@ -1,13 +1,6 @@
 package org.machanism.machai.gw.processor;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -15,12 +8,8 @@ import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.process.manager.ProcessProviderManager;
 import org.machanism.machai.process.provider.ProcessProvider;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 
 /** Verifies automatic Act tool selection and its per-episode cache. */
 class ActProcessorAutoToolSelectionTest {
