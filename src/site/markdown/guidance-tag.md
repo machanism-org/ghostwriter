@@ -30,7 +30,7 @@ Create a user manual web page titled "Guidance Tag" that explains the guidance t
 
 # Guidance Tag
 
-A guidance tag is a plain-language instruction you keep **inside the file it concerns**. Machai Ghostwriter reads these instructions during Guided File Processing and uses them to prepare an AI-assisted update. Think of a tag as a note in the margin: it tells the assistant what you want, while you remain responsible for the final result.
+A guidance tag is a plain-language instruction you keep **inside the file it concerns**. The marker is written as `@guidance:` inside a supported comment, or supplied by the special `@guidance.txt` folder file. Machai Ghostwriter reads these instructions during Guided File Processing and uses them to prepare an AI-assisted update. Think of a tag as a note in the margin: it tells the assistant what you want, while you remain responsible for the final result.
 
 Guidance tags help automate routine work such as improving documentation, creating website content, or adding tests. They do not change how your application runs, add dependencies, or affect source data at runtime. Because the instruction lives with the project, it can be reviewed, versioned, reused, and refined by the whole team. You can also use the saved instruction as a checklist for manual work when AI processing is not appropriate.
 
@@ -44,7 +44,7 @@ Guidance tags help automate routine work such as improving documentation, creati
 4. A file-type-aware reviewer recognizes the tag and provides the relevant instruction and file information to the processing request. Markdown and HTML/XML reviewers require the tag in an HTML/XML comment and supply the complete file content. The Java reviewer accepts block or line comments and supplies the complete source (with special package-level handling for `package-info.java`). TypeScript and Python reviewers accept their supported comment or string forms and supply the non-blank instruction they find. PlantUML files are reviewed when they contain the marker and supply the complete file content. The `@guidance.txt` reviewer uses that file's complete contents as the instruction for its folder.
 5. Ghostwriter combines this material with its standard processing rules and sends it to your configured GenAI provider. Review the result, then revise the tag and run again if needed.
 
-This follows the Guided File Processing approach: natural-language instructions are treated as maintainable project assets. AI is useful for routine enrichment—explaining existing code, adding examples, or organizing text—but it cannot know your project-specific intent unless you state it in the guidance.
+This follows the Guided File Processing approach: natural-language instructions are treated as maintainable project assets and are kept in context with the files they describe. AI is useful for routine enrichment—explaining existing code, adding examples, or organizing text—but it cannot know your project-specific intent unless you state it in the guidance.
 
 Guidance-driven processing is deliberately an assistant workflow rather than a promise that AI will make every decision for you. The application identifies eligible files and creates a separate context for each one; you remain the author who checks the proposed result. The same instructions can be followed manually when a task should not use AI.
 

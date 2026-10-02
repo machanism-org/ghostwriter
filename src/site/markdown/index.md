@@ -165,15 +165,15 @@ Command-line values take precedence over properties loaded from the selected con
 
 | Option | Description | Default value |
 |---|---|---|
-| `-h`, `--help` | Print help and exit without processing. | Not enabled |
-| `-d <dir>`, `--projectDir <dir>` | Set the project directory used for processing. | Configured `projectDir`, otherwise the current user directory |
-| `-c <file>`, `--config <file>` | Select a configuration properties file. Relative paths are resolved from the startup project directory. | The default `gw.properties`, or the file named by the `config` system property |
-| `-t <n>`, `--threads <n>` | Set concurrent processing threads; higher values can improve throughput but increase resource and provider use. | Configured `threads`, otherwise processor default |
-| `-m <provider:model>`, `--model <provider:model>` | Select the GenAI provider and model, for example `OpenAI:gpt-5.1`. | Configured model, otherwise unset |
-| `-i [text]`, `--instructions [text]` | Set system instructions. When used without text, prompt for the instructions on standard input. | Configured `instructions`, otherwise unset |
-| `-e <list>`, `--excludes <list>` | Supply comma-separated directories or patterns to skip. | Configured exclusions, otherwise unset |
-| `-as <dir>`, `--acts <dir>` | Set the directory containing predefined Act prompt files. | Configured Acts location |
-| `-a [name]`, `--act [name]` | Enable interactive Act mode and optionally select the Act; prompts for a name when supplied without one. | Guidance mode; configured Act when applicable |
+| `-h`, `--help` | Print the usage header, positional path rules, all options, and examples, then exit without processing. | Not enabled |
+| `-d <dir>`, `--projectDir <dir>` | Set the project directory used for processing. | `gw.project.dir`; otherwise the current user directory |
+| `-c <file>`, `--config <file>` | Select a configuration properties file. Relative paths are resolved from the project directory. | `gw.properties`; the `gw.config` system property can select another file |
+| `-t <n>`, `--threads <n>` | Set concurrent processing threads; higher values can improve throughput but increase resource and provider use. | `gw.threads`, otherwise the processor default |
+| `-m <provider:model>`, `--model <provider:model>` | Select the GenAI provider and model, for example `OpenAI:gpt-5.1`. | `gw.model`, otherwise unset |
+| `-i [text]`, `--instructions [text]` | Set system instructions. When used without text, prompt for the instructions on standard input. | `gw.instructions`, otherwise unset |
+| `-e <list>`, `--excludes <list>` | Supply comma-separated directories or patterns to skip. | `gw.excludes`, otherwise unset |
+| `-as <dir>`, `--acts <dir>` | Set the location containing predefined Act prompt files. | `gw.acts`, otherwise the Act processor's default location |
+| `-a [name]`, `--act [name]` | Enable Act mode and optionally select the Act; prompts for a name when supplied without one. | Guidance mode; `gw.act` when configured |
 
 ### Example
 

@@ -69,7 +69,7 @@ Searches a saved command log using a Java regular expression and returns every m
 `CommandSpecFunctionTools` is annotated with `@SupportedFor({ AIFileProcessor.class })`; these controls are intended for `AIFileProcessor` workflows.
 
 ### `terminate_execution`
-Requests application termination by raising a controlled termination signal. Use only when explicitly requested or when the workflow intentionally must abort; do not use it merely because a task completed.
+Requests application termination by raising a controlled termination signal. Use it only when the user explicitly requests application termination; do not use it merely because a task completed.
 
 **Inputs:** `message` — optional host-facing message, default `Execution terminated by function tool.`; `exit_code` — exit code, default `0`.
 
