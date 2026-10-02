@@ -1,0 +1,27 @@
+# Manual test act: custom act-directory lookup and URL-shaped location handling.
+# Configure the project's acts location to this directory, then run:
+# --act manual-act-remote-location
+# Covers: setActsLocation for a relative local directory, custom TOML lookup,
+# classpath fallback behavior, direct URL-shaped location handling, and explicit
+# public.prompt binding. Verify gw.path remains rooted at the project directory.
+# This file itself is local; use a separately hosted copy to manually exercise
+# an HTTP/HTTPS actsLocation without changing the raw URL or any ${...} value.
+description = "Manual workflow for custom ActProcessor act-location resolution."
+instructions = '''
+Verify that the custom acts directory was used to load this definition.
+Report the resolved act name and inspect the selected resources without modifying files.
+'''
+inputs = '''
+# Custom act-location verification
+Confirm that this prompt came from a custom TOML Act.
+Request: ${public.prompt}
+'''
+
+[default]
+public.prompt = "Describe whether the custom act location was resolved successfully."
+
+[gw]
+path = "src/test/resources/acts"
+interactive = false
+threads = 1
+excludes = ["**/target/**"]

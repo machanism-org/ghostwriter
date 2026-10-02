@@ -1,0 +1,40 @@
+# Manual test act: ActProcessor configuration and marker matrix.
+# Run with the custom acts directory configured to this folder:
+# --act manual-act-configuration-matrix
+# Run only the second episode and stop normal-order continuation:
+# --act manual-act-configuration-matrix#2!
+# Covers: [default] fallback values, [gw] path/threads/excludes/nonRecursive
+# settings, multiple inputs episodes, episode selection, STOP_SYMBOL, and
+# per-episode front matter. The request placeholder remains runtime-resolved.
+description = "Manual workflow for ActProcessor configuration and episode markers."
+instructions = '''
+Inspect the selected test-resource context without changing files.
+For each episode, state which ActProcessor setting or marker is being checked.
+'''
+inputs = [
+'''---
+gw.model: ${public.model}
+enabledTools: org\\.machanism\\..*:read_file
+---
+Episode 1: verify that the selected files and the configured non-recursive scope are visible.
+Request: ${public.prompt}
+''',
+'''---
+enabledTools:
+  - org\\.machanism\\..*:read_file
+---
+Episode 2: verify that explicit episode selection and the stop marker are honored.
+Request: ${public.prompt}
+'''
+]
+
+[default]
+public.prompt = "Report the configuration and marker behavior without making edits."
+public.model = "${model}"
+
+[gw]
+path = "src/test/resources/acts"
+interactive = false
+threads = 2
+nonRecursive = true
+excludes = ["**/target/**", "**/.git/**"]

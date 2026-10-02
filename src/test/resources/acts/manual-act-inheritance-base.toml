@@ -1,0 +1,19 @@
+# Manual test act: parent definition for inheritance checks.
+# Configure this directory as the external acts location, then run:
+# --act manual-act-inheritance-child
+# Covers: basedOn, inherited values, and ${super.value} replacement.
+description = "Parent workflow used by the inheritance manual test."
+instructions = '''
+Base instruction: inspect the selected context and explain the evidence.
+'''
+inputs = '''
+Base prompt. ${public.prompt}
+'''
+
+[default]
+public.prompt = "Use the inherited base workflow."
+
+[gw]
+path = "src/test/resources/acts"
+interactive = false
+threads = 1

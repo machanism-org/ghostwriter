@@ -1,0 +1,8 @@
+# Requirements Analysis
+
+Review the specification description from the web page: `https://machanism.org/act/` and the class `src/main/java/org/machanism/machai/gw/processor/ActProcessor.java`.
+
+# Test Act Generation
+
+- Create or update, if necessary, act files for possible test cases for manual testing.
+- The act should describe how to use the information and what is covered in the case.

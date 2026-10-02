@@ -1,0 +1,27 @@
+# Manual test act: explicit TOML-file loading and act-level execution settings.
+# Run it by passing this file as the act name, using the project's absolute path:
+# --act <absolute-project-path>\\src\\test\\resources\\acts\\manual-act-direct-file.toml
+# Add a request when desired:
+# --act <absolute-project-path>\\src\\test\\resources\\acts\\manual-act-direct-file.toml "inspect direct loading"
+# Covers: direct absolute-file resolution, the .toml extension check, prompt
+# binding through ${public.prompt}, and [gw] path/exclusion settings. Verify
+# gw.path is resolved from the project root, not from the act file's directory.
+description = "Manual workflow for loading an Act directly from a TOML file."
+instructions = '''
+Verify that this Act was loaded from the explicitly supplied TOML file.
+Inspect only the selected test resources, explain the files considered, and do not modify them.
+'''
+inputs = '''
+# Direct-file ActProcessor verification
+Confirm the direct-file loading path and summarize the selected resources.
+Request: ${public.prompt}
+'''
+
+[default]
+public.prompt = "Report whether the explicit TOML file was loaded successfully."
+
+[gw]
+path = "src/test/resources/acts"
+interactive = false
+threads = 1
+excludes = ["**/target/**"]

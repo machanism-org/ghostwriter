@@ -1,0 +1,25 @@
+# Manual test act: basic command parsing, defaults, and project targeting.
+# Use with: --act manual-act-basics
+# Use with a request: --act manual-act-basics "check the test resources"
+# Use the shorthand equivalent: --act > "check the test resources"
+# Covers: blank-act fallback to help, the > task shorthand, default.public.prompt,
+# public.prompt substitution, [gw] settings, and the normal single-episode path.
+description = "Basic manual workflow for ActProcessor configuration and prompt binding."
+instructions = '''
+You are performing a manual ActProcessor verification.
+Explain what files were inspected and make no changes unless the user explicitly asks for them.
+'''
+inputs = '''
+# Basic ActProcessor verification
+Inspect the selected project context and report the relevant files.
+User request: ${public.prompt}
+'''
+
+[default]
+public.prompt = "Report the test files available under src/test/resources/acts."
+
+[gw]
+path = "src/test/resources/acts"
+interactive = false
+threads = 1
+excludes = ["**/target/**"]

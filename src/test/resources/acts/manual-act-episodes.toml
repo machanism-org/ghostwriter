@@ -1,0 +1,43 @@
+# Manual test act: ordered episodes, episode selection, stop symbol, and
+# per-episode YAML front matter.
+# Run all episodes: --act manual-act-episodes
+# Run selected episodes: --act manual-act-episodes#1,3
+# Run selected episodes and stop: --act manual-act-episodes#1,3!
+# Covers: inputs arrays, episode numbering, ${public.prompt}, regex tool
+# filtering, and the enabledTools auto-selection mapping form.
+description = "Manual multi-step ActProcessor episode verification."
+instructions = '''
+Run each episode in order and clearly label its result. Do not modify files.
+'''
+inputs = [
+'''---
+enabledTools:
+  - org\\.machanism\\..*:read_file
+---
+Episode 1: list the relevant test resources and summarize their purpose.
+Request: ${public.prompt}
+''',
+'''---
+enabledTools:
+  - org\\.machanism\\..*:read_file
+---
+Episode 2: compare the available act definitions and identify their covered behavior.
+Request: ${public.prompt}
+''',
+'''---
+enabledTools:
+  auto: Don't use web access and system command tools.
+---
+Episode 3: verify the ActProcessor execution markers and report which manual checks remain.
+Request: ${public.prompt}
+'''
+]
+
+[default]
+public.prompt = "Keep the report concise and suitable for manual verification."
+
+[gw]
+path = "src/test/resources/acts"
+interactive = false
+threads = 1
+excludes = ["**/target/**"]

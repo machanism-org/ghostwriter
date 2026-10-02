@@ -1,0 +1,18 @@
+# Manual test act: child definition extending manual-act-inheritance-base.toml.
+# Configure this directory as the external acts location, then run:
+# --act manual-act-inheritance-child "check inheritance"
+# Covers: recursive parent loading, inherited prompt composition, and child
+# property override while preserving the ${super.value} marker literally.
+basedOn = "manual-act-inheritance-base"
+description = "Child workflow used to verify ActProcessor inheritance merging."
+instructions = '''
+${super.value}
+Child instruction: also identify which settings came from the child Act.
+'''
+inputs = '''
+${super.value}
+Child prompt extension. ${public.prompt}
+'''
+
+[gw]
+threads = 2

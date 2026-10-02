@@ -1,0 +1,25 @@
+# Manual test act: recursive external-content inclusion.
+# Prepare src/test/resources/acts/shared/manual-guidance.md, then run:
+# --act manual-act-inclusion
+# Covers: >>> expansion in an Act instruction and prompt, preserving the
+# included content at the marker location. The paths are intentionally raw.
+# For nested-inclusion coverage, add another raw >>> path in the shared file,
+# resolving that path relative to src/test/resources/acts/shared/.
+description = "Manual inclusion workflow for prompt content expansion."
+instructions = '''
+>>> src/test/resources/acts/shared/manual-guidance.md
+Use the included guidance when reviewing the selected context.
+'''
+inputs = '''
+>>> src/test/resources/acts/shared/manual-guidance.md
+Summarize the included guidance and report the selected files.
+Request: ${public.prompt}
+'''
+
+[default]
+public.prompt = "Confirm that included content is available to the episode."
+
+[gw]
+path = "src/test/resources/acts"
+interactive = false
+threads = 1
