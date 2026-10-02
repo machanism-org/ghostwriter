@@ -50,19 +50,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * IMPORTANT: Create or Update the Javadoc for ActProcessor class.
  * Class javadoc description should describe supported functionality and provide examples to use it.
  * If the method used as Javadoc documentation is not public or protected, the method name should not be specified.
- * Functionality:
- *  - describe supported special markers, see javadoc for following constants:
- *  	- SUPER_VALUE_PLACEHOLDER
- *  	- PUBLIC_USER_PROMPT_PROP_NAME
- *  	- ACT_DEFAULT_PROPS_SECTION_NAME
- *  	- STOP_SYMBOL
- *  	- SEPARATOR_CHARS
- *  	- EPISODE_DELIMETER
- *  	- ACTS_BASENAME_PREFIX
- *  	- TOML_EXTENSION
- *  	- BASED_ON_PROPERTY_NAME
- *  	- HTTP_PREFIX, HTTPS_PREFIX
- *  	- DEFAULT_TASK_MARKER
+ * Functionality: describe supported special markers, see javadoc of public static fields.
  */
 
 /**
@@ -100,6 +88,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * definitions.</li>
  * <li>{@value #BASED_ON_PROPERTY_NAME} &mdash; property name used to declare
  * act inheritance.</li>
+ * <li>{@value #INSTRUCTIONS_PROPERTY_NAME} and {@value #INPUTS_PROPERTY_NAME}
+ * &mdash; TOML property names for system instructions and episode prompt
+ * definitions supplied to an act.</li>
  * <li>{@value #HTTP_PREFIX} and {@value #HTTPS_PREFIX} &mdash; the supported
  * remote act-location prefixes; non-URL locations are resolved from the project
  * root.</li>
