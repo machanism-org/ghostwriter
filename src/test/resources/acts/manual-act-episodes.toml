@@ -37,7 +37,7 @@ Request: ${public.prompt}
 public.prompt = "Keep the report concise and suitable for manual verification."
 
 [gw]
-path = "src/test/resources/acts"
+path = "glob:src/test/resources/acts"
 interactive = false
 threads = 1
 excludes = ["**/target/**"]

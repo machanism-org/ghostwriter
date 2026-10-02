@@ -20,6 +20,6 @@ Request: ${public.prompt}
 public.prompt = "Confirm that included content is available to the episode."
 
 [gw]
-path = "src/test/resources/acts"
+path = "glob:src/test/resources/acts"
 interactive = false
 threads = 1

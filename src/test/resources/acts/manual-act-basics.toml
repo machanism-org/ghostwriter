@@ -19,7 +19,7 @@ User request: ${public.prompt}
 public.prompt = "Report the test files available under src/test/resources/acts."
 
 [gw]
-path = "src/test/resources/acts"
+path = "glob:src/test/resources/acts"
 interactive = false
 threads = 1
 excludes = ["**/target/**"]

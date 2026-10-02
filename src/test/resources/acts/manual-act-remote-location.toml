@@ -21,7 +21,7 @@ Request: ${public.prompt}
 public.prompt = "Describe whether the custom act location was resolved successfully."
 
 [gw]
-path = "src/test/resources/acts"
+path = "glob:src/test/resources/acts"
 interactive = false
 threads = 1
 excludes = ["**/target/**"]
