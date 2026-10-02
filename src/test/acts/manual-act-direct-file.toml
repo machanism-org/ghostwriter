@@ -21,7 +21,7 @@ Request: ${public.prompt}
 public.prompt = "Report whether the explicit TOML file was loaded successfully."
 
 [gw]
-path = "glob:src/test/resources/acts"
+path = "glob:src/test/acts"
 interactive = false
 threads = 1
 excludes = ["**/target/**"]

@@ -16,10 +16,10 @@ User request: ${public.prompt}
 '''
 
 [default]
-public.prompt = "Report the test files available under src/test/resources/acts."
+public.prompt = "Report the test files available under src/test/acts."
 
 [gw]
-path = "glob:src/test/resources/acts"
+path = "glob:src/test/acts"
 interactive = false
 threads = 1
 excludes = ["**/target/**"]

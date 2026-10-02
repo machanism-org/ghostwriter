@@ -14,6 +14,6 @@ Base prompt. ${public.prompt}
 public.prompt = "Use the inherited base workflow."
 
 [gw]
-path = "glob:src/test/resources/acts"
+path = "glob:src/test/acts"
 interactive = false
 threads = 1

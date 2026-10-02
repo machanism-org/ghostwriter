@@ -15,4 +15,5 @@ Child prompt extension. ${public.prompt}
 '''
 
 [gw]
+path = "glob:src/test/acts"
 threads = 2
