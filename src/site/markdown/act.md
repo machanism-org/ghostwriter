@@ -41,7 +41,7 @@ Update this page: "The Act" as a Project Information page for the project:
 
 An **Act** is a reusable Ghostwriter workflow. Instead of writing the same request and tool setup every time, you select an act by name. Its TOML file supplies instructions, prompts, optional file-selection settings, and tool access. Ghostwriter then applies the workflow to the current project, a folder, or matching files.
 
-Acts sit on top of `AIFileProcessor`: `ActProcessor` loads and combines the TOML configuration, prepares the user request and episodes, and delegates each prompt to the AI file processor. The file processor supplies project and file context, loads permitted tools, expands supported prompt content, and calls the configured AI provider. This makes acts suitable for routine work such as creating documentation, generating tests, reviewing SonarQube findings, or running a carefully scoped custom task.
+Acts sit on top of `AIFileProcessor`: `ActProcessor` loads and combines the TOML configuration, prepares the user request and episodes, and delegates each prompt to the AI file processor. The file processor supplies project and file context, loads permitted tools, expands supported prompt content, and calls the configured AI provider. It also supplies structured processing information containing the relative file path, operating-system name, and interactive-mode notice. This makes acts suitable for routine work such as creating documentation, generating tests, reviewing SonarQube findings, or running a carefully scoped custom task.
 
 For a broader introduction to this style of automation, see [Act-Driven Workflows (ADW)](https://machanism.org/act/index.html). To learn how modules and individual project files are traversed and processed while an act's episodes run, see [Module & Project File Processing during Act Steps](#module--project-file-processing-by-act).
 
@@ -180,7 +180,7 @@ The YAML input parameters recognized specially by `AIFileProcessor` are:
 - `errorHandling` — when configured, controls provider error handling for the request.
 - Other YAML values are retained as prompt configuration; string values are resolved through the active configurator, but they do not by themselves change processing behavior.
 
-For every processed item, Ghostwriter also sends JSON process information containing `PROCESSED_FILE_REL_PATH`, `PROCESS_MODE` (`INTERACTIVE` or `NOT-INTERACTIVE`), and `OS_NAME`. Project-context tools receive the project name, IDs, directories, source/test/document folders, modules, and operating-system context.
+For every processed item, Ghostwriter supplies processing information containing `PROCESSED_FILE_REL_PATH`, `OS_NAME`, and (in non-interactive mode) the notice `Do not ask any question because this is not-interactive process mode.` The act additionally prepends JSON execution metadata containing the current episode information. Project-context tools receive the project name, IDs, directories, source/test/document folders, modules, and operating-system context.
 
 For a detailed look at how an episode's file-selection settings (such as `path`, `excludes`, and `nonRecursive`) determine which modules and files are visited, and in what order, see [Module & Project File Processing during Act Steps](module-file-act-processing.html).
 
