@@ -258,7 +258,8 @@ public class ActProcessor extends AIFileProcessor {
 	public ActProcessor(File projectDir, String genai, Configurator configurator) {
 		super(projectDir, configurator, genai);
 		episodes = new Episodes(this);
-		actsLocation = configurator.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);
+		String acts = configurator.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);
+		setActsLocation(acts);
 	}
 
 	/**
@@ -527,8 +528,19 @@ public class ActProcessor extends AIFileProcessor {
 		if (new File(name).isAbsolute()) {
 			toml = loadActToml(name);
 		} else if (actsLocation != null) {
-			String absolutePath = getAbsolutePath(name, actsLocation, rootDir);
-			toml = loadActToml(absolutePath);
+			List<String> absolutePathList = getAbsolutePath(name, actsLocation, rootDir);
+			for (String absolutePath : absolutePathList) {
+				try {
+					toml = loadActToml(absolutePath);
+					break;
+				} catch (IOException e) {
+					// TODO: handle exception
+				}
+			}
+
+			if (toml == null) {
+				throw new IOException(name);
+			}
 		}
 
 		if (toml != null) {
@@ -578,28 +590,29 @@ public class ActProcessor extends AIFileProcessor {
 	 * @return absolute file path or URL string
 	 * @throws IOException if an explicitly referenced local act file does not exist
 	 */
-	private static String getAbsolutePath(String name, String actsLocation, File rootDir) throws IOException {
-		String path = null;
+	private static List<String> getAbsolutePath(String name, String actsLocation, File rootDir) throws IOException {
+		List<String> path = new ArrayList<String>();
 
 		if (!isExtentionExists(name)) {
 			name = name + TOML_EXTENSION;
 		}
 
-		if (Strings.CS.startsWithAny(actsLocation, HTTP_PREFIX, HTTPS_PREFIX)) {
-			String base = actsLocation.endsWith("/") ? actsLocation : actsLocation + "/";
-			path = URI.create(base + name).toURL().toString();
-		} else {
-			File file = new File(name);
-			if (!file.isAbsolute()) {
-				Path actsPath = rootDir.toPath().resolve(actsLocation);
-				file = actsPath.resolve(name).toFile();
+		for (String acts : StringUtils.split(actsLocation, " ,")) {
+			if (Strings.CS.startsWithAny(acts, HTTP_PREFIX, HTTPS_PREFIX)) {
+				String base = acts.endsWith("/") ? acts : acts + "/";
+				path.add(URI.create(base + name).toURL().toString());
 			} else {
-				if (!file.exists()) {
-					throw new IOException("The act not found: " + name);
+				File file = new File(name);
+				if (!file.isAbsolute()) {
+					Path actsPath = rootDir.toPath().resolve(acts);
+					file = actsPath.resolve(name).toFile();
+				} else {
+					if (!file.exists()) {
+						throw new IOException("The act not found: " + name);
+					}
 				}
+				path.add(file.getAbsolutePath());
 			}
-			path = file.getAbsolutePath();
-
 		}
 
 		return path;
@@ -925,23 +938,31 @@ public class ActProcessor extends AIFileProcessor {
 	 *                                  that does not resolve to an existing
 	 *                                  directory
 	 */
-	public void setActsLocation(String actsLocation) {
-		if (actsLocation != null) {
-			if (!Strings.CS.startsWithAny(actsLocation, HTTP_PREFIX, HTTPS_PREFIX)) {
-				File actDir = new File(actsLocation);
-				if (!actDir.isAbsolute()) {
-					actDir = new File(getRootDir(), actsLocation);
-				}
+	public void setActsLocation(String acts) {
+		String[] actsLocations = StringUtils.split(acts, " ,");
+		if (actsLocations != null) {
+			List<String> actsResult = new ArrayList<String>();
+			for (String actsLocation : actsLocations) {
+				if (actsLocation != null) {
+					if (!Strings.CS.startsWithAny(actsLocation.trim(), HTTP_PREFIX, HTTPS_PREFIX)) {
+						File actDir = new File(actsLocation);
+						if (!actDir.isAbsolute()) {
+							actDir = new File(getRootDir(), actsLocation);
+						}
 
-				if (!actDir.exists() || !actDir.isDirectory()) {
-					throw new IllegalArgumentException(
-							"Act directory does not exist or is not a directory: " + actDir.getAbsolutePath());
+						if (!actDir.exists() || !actDir.isDirectory()) {
+							throw new IllegalArgumentException(
+									"Act directory does not exist or is not a directory: " + actDir.getAbsolutePath());
+						}
+					}
+
+					actsResult.add(actsLocation.trim());
 				}
-				this.actsLocation = actDir.getAbsolutePath();
-			} else {
-				this.actsLocation = actsLocation;
 			}
-			getConfigurator().set(GWConstants.ACTS_LOCATION_PROP_NAME, this.actsLocation);
+			if (!actsResult.isEmpty()) {
+				this.actsLocation = StringUtils.join(actsResult.toArray(new String[0]), ",");
+				getConfigurator().set(GWConstants.ACTS_LOCATION_PROP_NAME, this.actsLocation);
+			}
 		}
 	}
 

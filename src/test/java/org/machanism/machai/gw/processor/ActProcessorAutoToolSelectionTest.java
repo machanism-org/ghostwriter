@@ -30,13 +30,6 @@ class ActProcessorAutoToolSelectionTest {
         assertEquals("local only", invokeString(processor, "getAutoToolSelectionQuery", "{auto=local only}"));
     }
 
-    private static void invokeApplyTools(ActProcessor processor, ProcessProvider provider, String[] prompts) throws Exception {
-        Method method = ActProcessor.class.getDeclaredMethod("applyTools", String.class, String[].class, ProcessProvider.class,
-                String[].class);
-        method.setAccessible(true);
-        method.invoke(processor, "system instructions", prompts, provider, new String[] { "auto" });
-    }
-
     private static boolean invokeBoolean(ActProcessor processor, String name, String value) throws Exception {
         Method method = ActProcessor.class.getDeclaredMethod(name, String.class);
         method.setAccessible(true);
