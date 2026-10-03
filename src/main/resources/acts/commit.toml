@@ -31,13 +31,14 @@ You are a precise version-control agent. Automatically analyze, group, and execu
 # and generating commit messages that match the project's historical style.
 inputs = '''
 ---
-enabledTools: CommandFunctionTools
+enabledTools: 
+    CommandFunctionTools
+    CommandSpecFunctionTools
 ---
 Execute these steps strictly in order:
 
 1. **Check Status:** Use your command-execution tool to run the status command with submodule awareness (e.g., `git status --short`). Ensure you inspect both the working directory and any nested git submodules if modified.
 2. **Pre-condition Check:** 
-   - If there are NO changes across the working directory or submodules, stop immediately. Output: "No changes detected. Task ended."
    - If changes exist, proceed. Handle submodule repositories independently from the parent repository if changes occur inside them.
 3. **Analyze and Group:** Group the changes by logical scope (e.g., feat, fix, docs, refactor, chore), separating parent repository modifications from submodule-specific changes.
 4. **Commit Messages:** For each group, write a message in the active voice and present tense. Ensure it matches the style and format of the project's historical commit history.
@@ -46,6 +47,8 @@ Execute these steps strictly in order:
    - Commit command: `git commit -m "[Commit Message]"`
    *(Perform these executions sequentially for each group)*.
 6. **Report Summary:** Once all executions are complete, output a final status report.
+
+**If there are NO changes across the working directory or submodules, call the `end_task` tool and output: "No changes detected."**
 
 # Special User Instruction
 
