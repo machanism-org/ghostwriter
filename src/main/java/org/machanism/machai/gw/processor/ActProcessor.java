@@ -915,9 +915,10 @@ public class ActProcessor extends AIFileProcessor {
 
 	/**
 	 * Sets the location used for loading external act definition files
-	 * ({@code *.toml}).
+	 * ({@code *.toml}). Multiple locations may be specified as a comma- or
+	 * space-separated list.
 	 * <p>
-	 * The location may be specified as:
+	 * Each location may be specified as:
 	 * <ul>
 	 * <li><b>An absolute path</b> — used as-is (e.g., {@code /opt/gw/acts}).</li>
 	 * <li><b>A relative path</b> — resolved against the {@linkplain #getRootDir()
@@ -927,16 +928,16 @@ public class ActProcessor extends AIFileProcessor {
 	 * directory validation is performed.</li>
 	 * </ul>
 	 * For path-based (non-URL) locations, the resolved directory must already
-	 * exist; otherwise an exception is thrown.
+	 * exist and be a directory; otherwise an exception is thrown.
 	 * <p>
-	 * A {@code null} value is ignored and leaves the current setting unchanged.
+	 * A {@code null} or empty value is ignored and leaves the current setting unchanged.
 	 *
-	 * @param actsLocation absolute path, relative path, or URL pointing to the
-	 *                     directory (or remote source) containing act files;
-	 *                     {@code null} to leave the current value unchanged
-	 * @throws IllegalArgumentException if {@code actsLocation} is a non-URL path
-	 *                                  that does not resolve to an existing
-	 *                                  directory
+	 * @param acts absolute path, relative path, or URL (or a comma- or
+	 *             space-separated list of them) pointing to the
+	 *             directories (or remote sources) containing act files;
+	 *             {@code null} to leave the current value unchanged
+	 * @throws IllegalArgumentException if any non-URL path does not resolve to
+	 *                                  an existing directory
 	 */
 	public void setActsLocation(String acts) {
 		String[] actsLocations = StringUtils.split(acts, " ,");

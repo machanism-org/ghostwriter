@@ -149,7 +149,7 @@ public final class Ghostwriter {
 		options.addOption(new Option("e", EXCLUDES_OPTION, true,
 				"Specify a comma-separated list of directories to exclude from processing."));
 		options.addOption(new Option("as", ACTS_OPTION, true,
-				"Specify the path to the directory containing predefined act prompt files for processing."));
+				"Specify a comma-separated list of directory paths containing predefined act files."));
 		options.addOption(Option.builder("a").longOpt(ACT_OPTION)
 				.desc("Run Ghostwriter in Act mode: an interactive mode for executing predefined prompts.")
 				.hasArg(true).optionalArg(true).get());
