@@ -31,42 +31,47 @@ You are a precise version-control agent. Automatically analyze, group, and execu
 # and generating commit messages that match the project's historical style.
 inputs = '''
 ---
-enabledTools: 
-    CommandFunctionTools
-    CommandSpecFunctionTools
+enabledTools:
+  - CommandFunctionTools
+  - CommandSpecFunctionTools
 ---
-Execute these steps strictly in order:
+Execute these steps strictly in order. Never run git push, git submodule update, git reset, git checkout, git clean, git add -A, git add . or git commit -a.
 
-1. **Check Status:** Use your command-execution tool to run the status command with submodule awareness (e.g., `git status --short`). Ensure you inspect both the working directory and any nested git submodules if modified.
-2. **Pre-condition Check:** 
-   - If changes exist, proceed. Handle submodule repositories independently from the parent repository if changes occur inside them.
-3. **Analyze and Group:** Group the changes by logical scope (e.g., feat, fix, docs, refactor, chore), separating parent repository modifications from submodule-specific changes.
-4. **Commit Messages:** For each group, write a message in the active voice and present tense. Ensure it matches the style and format of the project's historical commit history.
-5. **Execute Commits (Action):** For each group, use your command-execution tool to run:
-   - Staging command: `git add [files]` (When staging files inside a submodule, execute git commands from within the submodule directory or use proper submodule paths).
-   - Commit command: `git commit -m "[Commit Message]"`
-   *(Perform these executions sequentially for each group)*.
-6. **Report Summary:** Once all executions are complete, output a final status report.
+1. Discover repositories. Run `git submodule status --recursive` to list all submodules (empty output means none). Build a list of repositories: root plus every submodule, ordered from the DEEPEST submodule up to the root (children always before their parent).
 
-**If there are NO changes across the working directory or submodules, call the `end_task` tool and output: "No changes detected."**
+2. Check status per repository. For each repository in that order, run `git -C <repo> status --short` and `git -C <repo> diff --cached --name-only`.
+   - If a repository already has staged files that you did not stage, do not commit it; report it as "skipped: pre-staged changes".
+   - If a submodule is in detached HEAD (`git -C <repo> symbolic-ref -q HEAD` fails) and has changes, do not commit in it; report it as "skipped: detached HEAD" and also skip its parents' pointer update.
+
+3. Read history per repository. Run `git -C <repo> log -n 10 --pretty=%s` and follow that repository's own message style.
+
+4. Group changes. Groups are built inside ONE repository only (never mix files from different repositories). Scope: feat, fix, docs, refactor, chore, etc. Message: active voice, present tense.
+
+5. Commit, bottom-up. For each repository in the order from step 1:
+   a. `git -C <repo> add -- <files of the group>` for each group, then `git -C <repo> commit -m "<message>"`.
+   b. After a submodule is committed, its parent now sees a changed pointer. In the parent, stage it with `git -C <parent> add -- <submodule path>` and include it in a dedicated group "chore: update <submodule> pointer" (or in the parent's own group if logically related). Never stage a submodule pointer before the commit inside the submodule is done.
+   c. Never stage a submodule pointer if the submodule still has uncommitted changes (`git -C <sub> status --short` is not empty).
+
+6. Verify. Run `git submodule status --recursive` (no line may start with `+`, which would mean the pointer is out of sync) and `git status --short` in the root. Report any remaining discrepancy.
+
+7. If there are NO changes in any repository, call the `end_task` tool and output: "No changes detected."
 
 # Special User Instruction
 
 ${public.prompt}
 
 # Output Format (Strictly Plain Text, No Markdown)
-Do not use Markdown code blocks (do not use ```), bolding (**), or markdown list markers. Provide a plain-text summary using this exact format:
+Do not use Markdown code blocks, bold, or list markers. Use exactly this format:
 
 Successfully executed the following commits:
 
-Group: [Name]
-Files: [List of files]
-Message: [Commit Message]
-
+Repository: [path or "root"]
 Group: [Name]
 Files: [List of files]
 Message: [Commit message]
 
+Skipped: [repository - reason]   (only if something was skipped)
+Verification: [OK or description of mismatch]
 '''
 
 # =========================
@@ -100,4 +105,7 @@ public.prompt = "No special instructions."
 #   - Common use cases include preventing execution of dangerous commands, excluding sensitive files, or blocking specific operations.
 denylist = '''
 ${super.value}
+REGEX: git\s+(push|reset|clean|checkout|rebase|submodule\s+(update|deinit))\b
+REGEX: git\s+add\s+(-A|--all|\.)(\s|$)
+REGEX: git\s+commit\s+.*(-a\b|--amend)
 '''
