@@ -177,7 +177,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * {@code mcp.properties}):</b>
 	 * 
 	 * <pre>{@code
-	 *     public.schemaUrl=https://raw.githubusercontent.com/machanism-org/bindex/schema-v2.json
+	 *     public.schemaUrl=https://raw.githubusercontent.com/machanism-org/bindex-core/refs/heads/main/bindex.json
 	 *     public.projectName=Bindex Core
 	 *     }</pre>
 	 * 
