@@ -2,8 +2,10 @@ package org.machanism.machai.gw.processor;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -492,22 +494,37 @@ public class ActProcessor extends AIFileProcessor {
 	 * @throws IOException if the resource cannot be read
 	 */
 	public static TomlParseResult tryLoadActFromClasspath(Map<String, Object> properties, String name)
-			throws IOException {
-		String path = ACTS_BASENAME_PREFIX + name + TOML_EXTENSION;
-		URL resource = GWConstants.class.getResource(path);
-		if (resource == null) {
-			return null;
-		}
+	        throws IOException {
+	    if (name == null || name.isEmpty() || name.contains("..") || name.contains("\\")) {
+	        throw new IllegalArgumentException("Invalid act name: `" + name + "`");
+	    }
 
-		String tomlStr = IOUtils.toString(resource, StandardCharsets.UTF_8);
-		TomlParseResult toml = Toml.parse(tomlStr);
-		setActData(properties, toml);
+	    String path = ACTS_BASENAME_PREFIX + name + TOML_EXTENSION;
+	    URL resource = GWConstants.class.getResource(path);
+	    if (resource == null) {
+	        return null;
+	    }
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Load act: `{}` from classpath.", name);
-		}
+	    String tomlStr;
+	    URLConnection conn = resource.openConnection();
+	    conn.setUseCaches(false);
+	    try (InputStream in = conn.getInputStream()) {
+	        tomlStr = IOUtils.toString(in, StandardCharsets.UTF_8);
+	    } catch (IOException e) {
+	        throw new IOException("Unable to read act `" + name + "` from " + resource, e);
+	    }
 
-		return toml;
+	    TomlParseResult toml = Toml.parse(tomlStr);
+	    if (toml.hasErrors()) {
+	        throw new IOException("Act `" + name + "` has TOML errors: " + toml.errors());
+	    }
+	    setActData(properties, toml);
+
+	    if (logger.isDebugEnabled()) {
+	        logger.debug("Load act: `{}` from classpath.", name);
+	    }
+
+	    return toml;
 	}
 
 	/**

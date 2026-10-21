@@ -1,7 +1,9 @@
 package org.machanism.machai.gw.tools;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -89,35 +91,41 @@ public class CommandSecurityChecker {
 	 * @throws NullPointerException     if {@code configurator} is {@code null}
 	 */
 	public CommandSecurityChecker(Configurator configurator) throws IOException {
-		String resourcePath;
-		if (SystemUtils.IS_OS_WINDOWS) {
-			resourcePath = "denylist/windows.txt";
-		} else if (SystemUtils.IS_OS_UNIX) {
-			resourcePath = "denylist/unix.txt";
-		} else {
-			throw new IllegalArgumentException(
-					"No denylist defined for operating system: `" + SystemUtils.OS_NAME + "`.");
-		}
+	    String resourcePath;
+	    if (SystemUtils.IS_OS_WINDOWS) {
+	        resourcePath = "denylist/windows.txt";
+	    } else if (SystemUtils.IS_OS_UNIX) {
+	        resourcePath = "denylist/unix.txt";
+	    } else {
+	        throw new IllegalArgumentException(
+	                "No denylist defined for operating system: `" + SystemUtils.OS_NAME + "`.");
+	    }
 
-		logger.debug("Loading denylist for OS `{}` from resource: {}", SystemUtils.OS_NAME, resourcePath);
+	    logger.debug("Loading denylist for OS `{}` from resource: {}", SystemUtils.OS_NAME, resourcePath);
 
-		ClassLoader classLoader = getClass().getClassLoader();
-		URL systemResource = classLoader.getResource(resourcePath);
-		if (systemResource == null) {
-			throw new IOException("Command denylist resource is missing: " + resourcePath);
-		}
-		try {
-			String denylist = IOUtils.toString(systemResource, StandardCharsets.UTF_8);
+	    URL systemResource = getClass().getClassLoader().getResource(resourcePath);
+	    if (systemResource == null) {
+	        throw new IOException("Command denylist resource is missing: " + resourcePath);
+	    }
 
-			String denylistValue = configurator.get(DENYLIST_PROP_NAME, null);
-			if (denylistValue != null) {
-				denylist = Strings.CS.replace(denylistValue, ActProcessor.SUPER_VALUE_PLACEHOLDER, denylist);
-			}
-			loadRules(denylist);
+	    try {
+	        URLConnection conn = systemResource.openConnection();
+	        conn.setUseCaches(false); 
 
-		} catch (IOException e) {
-			throw new IOException("Unable to load command denylist from " + resourcePath, e);
-		}
+	        String denylist;
+	        try (InputStream in = conn.getInputStream()) {
+	            denylist = IOUtils.toString(in, StandardCharsets.UTF_8);
+	        }
+
+	        String denylistValue = configurator.get(DENYLIST_PROP_NAME, null);
+	        if (denylistValue != null) {
+	            denylist = Strings.CS.replace(denylistValue, ActProcessor.SUPER_VALUE_PLACEHOLDER, denylist);
+	        }
+	        loadRules(denylist);
+
+	    } catch (IOException e) {
+	        throw new IOException("Unable to load command denylist from " + resourcePath + " (" + systemResource + ")", e);
+	    }
 	}
 
 	/**
