@@ -1,0 +1,28 @@
+# Manual test act: remote HTTP/HTTPS act-location loading.
+# Host this TOML file at an HTTP(S) endpoint, configure that URL as the acts
+# location, and run: --act manual-act-remote-url
+# Example configuration value (replace only the endpoint when testing):
+#   acts.location=https://example.invalid/acts
+# Covers: ActProcessor.setActsLocation URL acceptance, URL-based TOML lookup,
+# remote custom-act loading, prompt binding, and project-root file targeting.
+# Use a reachable test server; this file is not expected to contact a network
+# endpoint during the normal project test suite.
+description = "Manual workflow for loading an Act from an HTTP or HTTPS source."
+instructions = '''
+Confirm that this definition was loaded from the configured remote acts location.
+Inspect the selected project context, identify the resolved act name, and do not modify files.
+'''
+inputs = '''
+# Remote ActProcessor verification
+Report the remote source used for this Act and summarize the selected resources.
+Request: ${public.prompt}
+'''
+
+[default]
+public.prompt = "Verify remote TOML loading and project-root path resolution."
+
+[gw]
+path = "glob:src/test/acts"
+interactive = false
+threads = 1
+excludes = ["**/target/**"]

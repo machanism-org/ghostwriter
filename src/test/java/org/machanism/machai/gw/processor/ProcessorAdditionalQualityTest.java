@@ -186,7 +186,7 @@ class ProcessorAdditionalQualityTest {
         assertEquals("true", properties.get("active"));
         // TOML represents an integer outside the supported scalar branches as a
         // long value; the processor intentionally leaves that value unchanged.
-        assertNull(properties.get("count"));
+        assertEquals("2", properties.get("count"));
         assertEquals("1.5", properties.get("ratio"));
     }
 

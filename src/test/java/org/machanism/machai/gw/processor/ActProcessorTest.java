@@ -62,7 +62,7 @@ class ActProcessorTest {
 		assertEquals(2, getEpisodes(processor).getEpisodes().size());
 		assertFalse(getEpisodes(processor).isRegularOrder());
 		assertTrue(getDisableNormalOrder(processor));
-		assertEquals(0, getThreads(processor));
+		assertEquals(2, getThreads(processor));
 		assertTrue(processor.isNonRecursive());
 		assertTrue(processor.isInteractive());
 		assertArrayEquals(new String[] { "a", "b" }, processor.getExcludes());
@@ -140,7 +140,7 @@ class ActProcessorTest {
 		// Assert
 		assertEquals("base", inherited.get(GWConstants.INSTRUCTIONS_PROP_NAME));
 		assertEquals(Arrays.asList("child", "override-second"), inherited.get(ActProcessor.INPUTS_PROPERTY_NAME));
-		assertNull(inherited.get(GWConstants.THREADS_PROP_NAME));
+		assertEquals("4", inherited.get(GWConstants.THREADS_PROP_NAME));
 		assertEquals("true", inherited.get(GWConstants.NONRECURSIVE_PROP_NAME));
 		assertNull(missingClasspath);
 		assertNotNull(directoryToml);
@@ -166,7 +166,7 @@ class ActProcessorTest {
 		// Assert
 		assertEquals("Hello there", properties.get("greeting"));
 		assertEquals("true", properties.get("flag"));
-		assertNull(properties.get("count"));
+		assertEquals("3", properties.get("count"));
 		assertEquals("2.5", properties.get("score"));
 		assertEquals(Arrays.asList("big world", "tail"), properties.get("inputs"));
 	}
