@@ -34,6 +34,8 @@ A guidance tag is a plain-language instruction you keep **inside the file it con
 
 Guidance tags help automate routine work such as improving documentation, creating website content, or adding tests. They do not change how your application runs, add dependencies, or affect source data at runtime. Because the instruction lives with the project, it can be reviewed, versioned, reused, and refined by the whole team. You can also use the saved instruction as a checklist for manual work when AI processing is not appropriate.
 
+This is Machai's **Guidance-Driven Processing (GDP)** approach: the instruction travels with the file instead of being kept in a separate chat or one-off prompt. Ghostwriter acts as a skilled assistant that formats and enriches the ideas you provide; it does not know project-specific intent unless you describe it. The same workflow can be completed manually, or accelerated with AI followed by your final verification.
+
 ## How it works
 
 ![Overview of Guided File Processing: Ghostwriter finds guidance in project files, prepares one context per file, and sends it to the selected AI service for review.](images/guidance-tag-processing-overview.png)

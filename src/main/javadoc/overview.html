@@ -45,7 +45,10 @@
       file-format-specific guidance extraction; and tool providers expose the
       controlled operations used by those workflows. The processor layer also
       supplies traversal, configuration, prompt inclusion, provider selection,
-      and ordered episode execution around the project layout.
+      and ordered episode execution around the project layout. In this design,
+      processors select reviewers for candidate files and register tool
+      providers with the configured AI provider, while reviewers remain focused
+      on format-aware extraction and tools remain scoped to the active project.
     </P>
 
     <H2>Packages</H2>

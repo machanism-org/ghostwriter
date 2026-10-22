@@ -73,6 +73,10 @@ The project is organized as a command-line application with a shared processing 
 
 ![Ghostwriter component diagram](./images/c4-diagram.png)
 
+The related processing diagrams show the same architecture from complementary perspectives. The guidance flow scans eligible content, extracts an embedded directive with the appropriate reviewer, sends the composed request to the provider, and records a guidance report; files without applicable instructions are skipped unless a default prompt is configured. The Act flow parses and configures a workflow, selects its episodes, traverses project modules and files, and records results while allowing an episode to repeat, move, or stop processing. Together, these views clarify that guidance processing and Act processing are separate entry paths that share traversal, provider, tool, and project-context services.
+
+See the [guidance processing flow](../puml/guidance-tag-processing.puml), [guidance overview](../puml/guidance-tag-processing-overview.puml), [Act episode flow](../puml/episodes-act-processing.puml), and [module and file traversal flow](../puml/module-file-act-processing.puml) for the detailed diagrams.
+
 ### Machai Ghostwriter vs. Other Tools
 
 The closest widely known tool to Machai Ghostwriter is **Claude Code**. Both can operate across repositories, use tools, and assist with multi-file changes rather than only inline code completion. Claude Code is the nearest comparison because it supports agentic command-line workflows and project-level reasoning, but Ghostwriter is more specifically designed for repeatable project-wide automation driven by repository-embedded guidance, Maven/CLI execution, and reusable acts.
@@ -172,7 +176,7 @@ Command-line values take precedence over properties loaded from the selected con
 | `-m <provider:model>`, `--model <provider:model>` | Select the GenAI provider and model, for example `OpenAI:gpt-5.1`. | `gw.model`, otherwise unset |
 | `-i [text]`, `--instructions [text]` | Set system instructions. When used without text, prompt for the instructions on standard input. | `gw.instructions`, otherwise unset |
 | `-e <list>`, `--excludes <list>` | Supply comma-separated directories or patterns to skip. | `gw.excludes`, otherwise unset |
-| `-as <dir>`, `--acts <dir>` | Set the location containing predefined Act prompt files. | `gw.acts`, otherwise the Act processor's default location |
+| `-as <dir>`, `--acts <dir>` | Set the location containing predefined Act prompt files; the value may also identify a remote source supported by the Act processor. | `gw.acts`, otherwise the Act processor's default location |
 | `-a [name]`, `--act [name]` | Enable Act mode and optionally select the Act; prompts for a name when supplied without one. | Guidance mode; `gw.act` when configured |
 
 ### Example

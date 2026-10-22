@@ -35,11 +35,13 @@ creates projectLayout = getProjectLayout(projectDir);
 
 partition "Module traversal (inherited)" {
   note right
-    Modules from ProjectLayout.getModules()
-    are recursed into (each re-enters scanFolder).
-    processModule() only recurses when the
-    configured scan `path` matches / is inside
-    the module. NO Act episodes are involved.
+    Unless nonRecursive is enabled, modules from
+    ProjectLayout.getModules() are processed (serially
+    or with the configured worker count); each accepted
+    module re-enters scanFolder(). GuidanceProcessor's
+    processModule() only recurses when the configured
+    scan `path` matches / is inside the module.
+    NO Act episodes are involved.
   end note
   :recurse into matching modules -> scanFolder(moduleDir);
 }
@@ -99,12 +101,7 @@ repeat :next eligible child;
         :perform = provider output;
       }
       note right
-        Per-file traversal calls AIFileProcessor's protected
-        process(...) directly, normalizes blank output to OK,
-        logs the result, and records { file, message } in
-        GuidanceProcessor.getReport(). The public three-argument
-        process(...) overload also records a report entry.
-      end note
+        Per-file traversal calls AIFileProcessor's protected\n        process(...) directly. GuidanceProcessor then normalizes\n        blank output to OK and increments the processed-file count;\n        processFile() logs nonblank output and records\n        { file, message } in getReport(). The folder-level fallback\n        uses the public three-argument process(...) overload, which\n        also records a report entry.\n      end note
 
       |#FDF3E7|GuidanceProcessor.processFile|
       if (perform is not blank?) then (yes)

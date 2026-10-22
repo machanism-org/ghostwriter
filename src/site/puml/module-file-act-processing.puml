@@ -24,10 +24,11 @@ else (no)
   if (Modules found?) then (yes)
     :Recursively scan and process each module;
     note right
-      Modules can run one after another,
-      or in parallel when multi-threading
-      is enabled. Each module is scanned
-      the same way as the top-level project.
+      Each module is scanned and processed
+      like the top-level project, including
+      its own project files and Act episodes.
+      Modules run sequentially, or in parallel
+      when multi-threading is enabled.
     end note
   endif
 endif
@@ -41,14 +42,13 @@ note right
   itself is processed instead.
 end note
 
-:For each collected file;
+:For each collected project file;
 
 :Run the act's episodes for this file;
 note right
-  See "Episodes Act Processing" for how
-  episodes are selected and ordered.
+  Episodes are selected and ordered by the act.
   A file's processing can stop early if
-  the act signals the task should end.
+  the act signals that the task should end.
 end note
 
 :Record the result;

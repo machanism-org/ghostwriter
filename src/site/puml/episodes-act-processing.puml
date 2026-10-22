@@ -41,11 +41,6 @@ end note
 
 if (Specific episodes were requested?) then (yes)
   :Run the selected episodes in request order;
-  if (Continue with normal order?) then (yes)
-    :Continue with the next episode;
-  else (no)
-    :Finish this file;
-  endif
 else (no)
   :Start with episode 1;
 endif

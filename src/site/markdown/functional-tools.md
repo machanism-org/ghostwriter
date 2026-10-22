@@ -19,15 +19,21 @@ Act tools inspect and run named, reusable workflows. `ActFunctionTools` is annot
 ### `get_act_details`
 Loads the instructions, input template, and configuration options for a named Act. It searches both project-defined and built-in definitions, making it useful for inspecting an Act before running or editing it.
 
+**Availability:** Supported by `ActFunctionTools` for processors other than `GuidanceProcessor`.
+
 **Input:** `name` — Act name.
 
 ### `perform_act`
 Runs a named Act in the current project. It can return the completed result synchronously or start background processing and return a process identifier. Property overrides are resolved and applied before execution.
 
+**Availability:** Supported by `ActFunctionTools` for processors other than `GuidanceProcessor`.
+
 **Inputs:** `name` — Act name; `properties` — optional configuration overrides; `async` — whether to run in the background (default `true`).
 
 ### `get_act_result`
 Polls a background Act started by `perform_act`. It returns `status: done` and the result when serialization is complete, or `status: processing` while the result is still being written.
+
+**Availability:** Supported by `ActFunctionTools` for processors other than `GuidanceProcessor`.
 
 **Input:** `process_id` — identifier returned by `perform_act`.
 
@@ -38,10 +44,14 @@ Polls a background Act started by `perform_act`. It returns `status: done` and t
 ### `move_to_episode`
 Explicitly jumps to an episode identified by an ID or name. Use it only when a workflow must navigate to a requested episode; normal progression to the next episode is automatic.
 
+**Availability:** Supported by `ActSpecFunctionTools` for `ActProcessor` workflows.
+
 **Inputs:** `id` — episode ID; `name` — episode name.
 
 ### `repeate_episode`
 Requests another pass through the current episode while preserving workflow context. It is useful after validation failure or when another input pass is required.
+
+**Availability:** Supported by `ActSpecFunctionTools` for `ActProcessor` workflows.
 
 **Input:** `message` — optional message emitted before repetition; defaults to an empty string.
 
@@ -71,10 +81,14 @@ Searches a saved command log using a Java regular expression and returns every m
 ### `terminate_execution`
 Requests application termination by raising a controlled termination signal. Use it only when the user explicitly requests application termination; do not use it merely because a task completed.
 
+**Availability:** Supported by `CommandSpecFunctionTools` for `AIFileProcessor` workflows.
+
 **Inputs:** `message` — optional host-facing message, default `Execution terminated by function tool.`; `exit_code` — exit code, default `0`.
 
 ### `end_task`
 Completes the current task without shutting down the application, allowing the host to accept later tasks.
+
+**Availability:** Supported by `CommandSpecFunctionTools` for `AIFileProcessor` workflows.
 
 **Input:** `message` — optional completion message, default `Execution terminated by function tool.`.
 
@@ -119,15 +133,21 @@ Applies either a standard unified diff or the supported simplified search-and-re
 ### `get_guidance_tagged_files`
 Scans matching files and groups files containing guidance tags by project directory. This is a discovery operation and does not apply the instructions.
 
+**Availability:** Supported by `GuidanceFunctionTools` for processors other than `GuidanceProcessor`.
+
 **Input:** `path` — raw path, `glob:` pattern, or `regex:` pattern, default `glob:**/*.*`.
 
 ### `process_guidance_tagged_files`
 Applies guidance processing to matching files using optional global instructions and configured properties. It can block for a report or run in the background and return a process ID.
 
+**Availability:** Supported by `GuidanceFunctionTools` for processors other than `GuidanceProcessor`.
+
 **Inputs:** `instructions` — optional global instructions; `properties` — optional processing overrides; `path` — scan path or pattern, default `.`; `async` — background mode, default `true`.
 
 ### `get_guidance_tagged_files_process_result`
 Retrieves an asynchronous guidance-processing report. Until the report file is available it returns a processing status; afterward it returns the completed result.
+
+**Availability:** Supported by `GuidanceFunctionTools` for processors other than `GuidanceProcessor`.
 
 **Input:** `process_id` — identifier returned by `process_guidance_tagged_files`.
 
@@ -138,20 +158,28 @@ Retrieves an asynchronous guidance-processing report. Until the report file is a
 ### `put_project_context_variable`
 Creates or replaces a named project context value.
 
+**Availability:** Supported by `ProjectContextFunctionTools` for processors other than `GuidanceProcessor`.
+
 **Inputs:** `name` — variable name; `value` — value to store.
 
 ### `get_project_context_variables`
 Returns a map containing the requested context names and their stored values. Missing names have null values; no context for the project is an error.
+
+**Availability:** Supported by `ProjectContextFunctionTools` for processors other than `GuidanceProcessor`.
 
 **Input:** `names` — list of variable names.
 
 ### `push_project_context_variable`
 Appends a value to a context variable, creating a list when needed or converting an existing string into a list.
 
+**Availability:** Supported by `ProjectContextFunctionTools` for processors other than `GuidanceProcessor`.
+
 **Inputs:** `name` — variable name; `value` — value to append.
 
 ### `pop_project_context_variable`
 Removes and returns a context value. Lists support LIFO or FIFO removal, and are simplified or removed when they become shorter.
+
+**Availability:** Supported by `ProjectContextFunctionTools` for processors other than `GuidanceProcessor`.
 
 **Inputs:** `name` — variable name; `mode` — `LIFO` or `FIFO`, default LIFO behavior.
 
