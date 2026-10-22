@@ -698,6 +698,8 @@ public class ActProcessor extends AIFileProcessor {
 			properties.put(key, Boolean.toString((Boolean) value));
 		} else if (value instanceof Integer) {
 			properties.put(key, Integer.toString((Integer) value));
+		} else if (value instanceof Long) {
+			properties.put(key, Long.toString((Long) value));
 		} else if (value instanceof Double) {
 			properties.put(key, Double.toString((Double) value));
 		} else if (value instanceof TomlArray) {

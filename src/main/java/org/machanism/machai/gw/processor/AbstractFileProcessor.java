@@ -32,6 +32,12 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * and perform work on their files and folders.
  *
  * <p>
+ * Instances are configured with a project root and a layered configuration;
+ * callers may additionally select a scan path, exclusion rules, and the number
+ * of module-processing threads through the provided accessors.
+ * </p>
+ *
+ * <p>
  * {@code AbstractFileProcessor} provides common functionality used by the
  * Ghostwriter CLI, such as:
  * </p>

@@ -4,15 +4,16 @@ import org.machanism.machai.process.tools.SpecialException;
 
 /*@guidance: >>> ${guidances}/def-class-javadoc.md */
 /**
- * Exception used to signal the end of a task without terminating the
+ * Signals that the current task has ended without terminating the
  * application.
  * <p>
- * This exception is typically thrown by function tools to gracefully conclude
- * an interactive session or user-driven task, allowing the application to
- * continue running.
+ * Function tools can throw this exception to gracefully conclude an
+ * interactive session or user-driven task. The surrounding application can
+ * handle it as a control-flow signal and continue running.
  * </p>
  *
  * @author Viktor Tovstyi
+ * @see SpecialException
  */
 public class EndTaskException extends SpecialException {
 	/**
@@ -23,9 +24,10 @@ public class EndTaskException extends SpecialException {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Constructs a new {@code EndTaskException} with the specified detail message.
+	 * Constructs an exception with the specified detail message.
 	 *
-	 * @param message the detail message describing the reason for ending the task
+	 * @param message the detail message describing why the task ended; may be
+	 *                {@code null}
 	 */
 	public EndTaskException(String message) {
 		super(message);

@@ -36,11 +36,15 @@ public class ProjectContextFunctionTools implements FunctionTools {
 
 	/**
 	 * Thread-safe registry that associates each project directory with its mutable
-	 * context-variable map. Individual maps are also used as synchronization locks
-	 * for compound operations on their values.
+	 * context-variable map. Values stored by {@link #put(File, String, Object)} are
+	 * represented as strings, while values managed by the push and pop operations
+	 * may temporarily be lists. Individual maps are also used as synchronization
+	 * locks for compound operations on their values.
 	 */
 	private static final Map<File, Map<String, Object>> contextProjectMap = new ConcurrentHashMap<>();
-	/** Prefix shared by status messages that identify a context variable. */
+	/**
+	 * Prefix shared by status messages that identify a context variable.
+	 */
 	private static final String CONTEXT_VARIABLE_PREFIX = "Context variable '";
 
 	/**
@@ -118,8 +122,9 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 * <p>
 	 * This method accesses a named variable associated with a particular project
 	 * directory, making it available for act execution or prompt templates. If the
-	 * context or variable does not exist, an appropriate message is returned. As an
-	 * AI functional tool, it exposes project-context lookup to an AI workflow.
+	 * context does not exist, an {@link IllegalArgumentException} is thrown; an
+	 * absent variable is represented by a {@code null} value in the returned map.
+	 * As an AI functional tool, it exposes project-context lookup to an AI workflow.
 	 * </p>
 	 * <p>
 	 * This method synchronizes on the target project's context map to ensure that

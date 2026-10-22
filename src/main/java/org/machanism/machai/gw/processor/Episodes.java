@@ -191,6 +191,7 @@ public class Episodes {
      * @param func callback used to execute an episode
      * @return the last processed episode identifier, or {@code 0} when none are selected
      * @throws IndexOutOfBoundsException if a selected episode identifier is invalid
+     * @throws MoveToEpisodeException if the callback requests a move to another episode
      */
     public int requestedOrder(BiFunction<Integer, String, String> func) {
         int episodeId = 0;
@@ -208,6 +209,7 @@ public class Episodes {
      * @param episodeId 1-based identifier of the episode to execute
      * @param func callback used to execute the episode
      * @throws IndexOutOfBoundsException if the identifier does not address an episode
+     * @throws MoveToEpisodeException if the callback requests a move to another episode
      */
     private void executeEpisodeWithRepeats(int episodeId, BiFunction<Integer, String, String> func) {
         int iteration = 1;
@@ -226,6 +228,7 @@ public class Episodes {
      * @return {@code true} when the iteration completed, or {@code false} when it
      *         requested a repeat
      * @throws IndexOutOfBoundsException if the identifier does not address an episode
+     * @throws MoveToEpisodeException if the callback requests a move to another episode
      */
     private boolean executeEpisode(int episodeId, int iteration, BiFunction<Integer, String, String> func) {
         try {

@@ -27,7 +27,9 @@ public class RepeatEpisodeException extends RuntimeException {
 	 * Creates an exception that requests repetition of the current Act episode.
 	 *
 	 * <p>The exception message identifies the request when it is recorded by
-	 * workflow diagnostics.</p>
+	 * workflow diagnostics. The exception does not accept a cause or custom
+	 * message because its purpose is to convey a specific control-flow signal.
+	 * </p>
 	 */
 	public RepeatEpisodeException() {
 		super("Repeat current episode requested.");

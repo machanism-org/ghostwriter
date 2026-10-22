@@ -27,6 +27,10 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * {@code <!-- @guidance ... -->}. Files without such a comment are not
  * reviewable by this implementation. The source is decoded as UTF-8 and is
  * passed to the prompt template without altering its content.
+ *
+ * <p>The reviewer uses the first matching guidance comment only as the
+ * reviewability test; it does not include the extracted comment separately
+ * because the complete source is already supplied to the prompt template.
  */
 public class HtmlReviewer implements Reviewer {
 

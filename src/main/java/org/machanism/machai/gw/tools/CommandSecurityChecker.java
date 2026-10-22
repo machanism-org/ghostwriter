@@ -7,6 +7,7 @@ import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
@@ -23,8 +24,9 @@ import org.slf4j.LoggerFactory;
  * execution tools.
  *
  * <p>
- * The checker reads one or more rule resources and evaluates an input command
- * line against those rules. Each non-empty, non-comment line of a deny-list
+ * The checker reads an operating-system-specific rule resource, optionally
+ * combines it with rules supplied through configuration, and evaluates an
+ * input command line against the resulting rules. Each non-empty, non-comment line of a deny-list
  * file must use one of the following formats:
  * </p>
  * <ul>
@@ -91,6 +93,7 @@ public class CommandSecurityChecker {
 	 * @throws NullPointerException     if {@code configurator} is {@code null}
 	 */
 	public CommandSecurityChecker(Configurator configurator) throws IOException {
+		Objects.requireNonNull(configurator, "configurator must not be null");
 	    String resourcePath;
 	    if (SystemUtils.IS_OS_WINDOWS) {
 	        resourcePath = "denylist/windows.txt";
@@ -187,6 +190,7 @@ public class CommandSecurityChecker {
 	 * @throws NullPointerException if {@code command} is {@code null}
 	 */
 	public void denyCheck(String command) throws DenyException {
+		Objects.requireNonNull(command, "command must not be null");
 		for (Pattern pattern : denyPatterns) {
 			if (pattern.matcher(command).find()) {
 				throw new DenyException("Pattern: " + pattern.pattern());
