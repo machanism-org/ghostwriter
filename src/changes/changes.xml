@@ -29,5 +29,9 @@
       <action dev="dev" type="fix">Function Tool Execution: Fixed get_recursive_file_list, tool calls through ToolsProvider, perform_act result returns, load_act_details, path parameter naming, return values, end_task handling, act lookup diagnostics, and log chunk naming.</action>
       <action dev="dev" type="fix">Runtime Reliability: Fixed model override handling, asynchronous act and guidance execution, stacktrace output, request session parameter naming, web content fetching, and error handling behavior.</action>
     </release>
+    <release version="1.4.2" date="2026-10-23" description="Improves processor workflow handling and command security processing.">
+      <action dev="dev" type="refactor">Processor Workflow: Improved workflow handling across processors, reviewers, and tools.</action>
+      <action dev="dev" type="refactor">Command Security: Streamlined command security processing.</action>
+    </release>
   </body>
 </document>
