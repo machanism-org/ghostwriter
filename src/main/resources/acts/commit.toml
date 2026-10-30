@@ -29,7 +29,7 @@ You are a precise version-control agent. Automatically analyze, group, and execu
 # Multi-line string describing the input workflow for the agent.
 # Outlines the steps for checking the current directory status, grouping changes,
 # and generating commit messages that match the project's historical style.
-inputs = '''
+inputs = ['''
 ---
 enabledTools:
   - CommandFunctionTools
@@ -57,6 +57,8 @@ Execute these steps strictly in order. Never run git push, git submodule update,
 
 7. If there are NO changes in any repository, call the `end_task` tool and output: "No changes detected."
 
+8. Push the commit report to the global context variable: `REPORT`.
+
 # Special User Instruction
 
 ${public.prompt}
@@ -73,7 +75,16 @@ Message: [Commit message]
 
 Skipped: [repository - reason]   (only if something was skipped)
 Verification: [OK or description of mismatch]
+''',
 '''
+---
+enabledTools:
+  - ProjectContextFunctionTools
+---
+Generate full report based on informatioon from global variable: `REPORT`.
+
+'''
+]
 
 # =========================
 # Ghostwriter (gw) Section
