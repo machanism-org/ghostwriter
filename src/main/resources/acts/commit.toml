@@ -34,6 +34,7 @@ inputs = '''
 enabledTools:
   - CommandFunctionTools
   - CommandSpecFunctionTools
+  - ProjectContextFunctionTools
 ---
 Execute these steps strictly in order. Never run git push, git submodule update, git reset, git checkout, git clean, git add -A, git add . or git commit -a.
 
