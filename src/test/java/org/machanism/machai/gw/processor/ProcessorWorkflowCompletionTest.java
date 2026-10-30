@@ -52,7 +52,8 @@ class ProcessorWorkflowCompletionTest {
         processor.setAct("demo#2!");
 
         // Assert
-        assertEquals("fallback prompt", processor.getActProperties().get(ActProcessor.PUBLIC_USER_PROMPT_PROP_NAME));
+        Object actual = processor.getActProperties().get(ActProcessor.PUBLIC_USER_PROMPT_PROP_NAME);
+		assertEquals("fallback prompt", actual);
         assertEquals("first", processor.getDefaultPrompt());
         assertEquals(2, processor.getActProperties().containsKey(ActProcessor.INPUTS_PROPERTY_NAME)
                 ? ((List<?>) processor.getActProperties().get(ActProcessor.INPUTS_PROPERTY_NAME)).size() : 0);
