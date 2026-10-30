@@ -118,22 +118,23 @@ class FileAndProjectContextFunctionToolsTest {
 	}
 
 	@Test
-	void projectContextSupportsPutPushAndBothPopOrders() {
+	void projectContextSupportsPutPushAndBothPopOrders() throws Exception {
 		// Arrange
 		File project = temporaryDirectory.resolve("context-project").toFile();
 
 		// Act
-		String put = ProjectContextFunctionTools.putProjectContextVariable("name", "first", project);
-		Object pushFirst = ProjectContextFunctionTools.pushProjectContextVariable("name", "second", project);
-		Object pushSecond = ProjectContextFunctionTools.pushProjectContextVariable("name", "third", project);
-		Object fifo = ProjectContextFunctionTools.popProjectContextVariable("name", "FIFO", project);
-		Object lifo = ProjectContextFunctionTools.popProjectContextVariable("name", "LIFO", project);
+		ProjectContextFunctionTools.putProjectContextVariable("name", "first", false, project);
+		assertEquals("first", ProjectContextFunctionTools.getProjectContextVariables(
+				Collections.singletonList("name"), false, project).get("name"));
+		Object pushFirst = ProjectContextFunctionTools.pushProjectContextVariable("name", "second", false, project);
+		Object pushSecond = ProjectContextFunctionTools.pushProjectContextVariable("name", "third", false, project);
+		Object fifo = ProjectContextFunctionTools.popProjectContextVariable("name", "FIFO", false, project);
+		Object lifo = ProjectContextFunctionTools.popProjectContextVariable("name", "LIFO", false, project);
 		Map<String, Object> remaining = ProjectContextFunctionTools.getProjectContextVariables(
-				Collections.singletonList("name"), project);
-		Object finalPop = ProjectContextFunctionTools.popProjectContextVariable("name", "", project);
+				Collections.singletonList("name"), false, project);
+		Object finalPop = ProjectContextFunctionTools.popProjectContextVariable("name", "", false, project);
 
 		// Assert
-		assertTrue(put.contains("set to 'first'"));
 		assertTrue(pushFirst.toString().contains("Pushed value 'second'"));
 		assertTrue(pushSecond.toString().contains("Pushed value 'third'"));
 		assertEquals("first", fifo);
@@ -141,7 +142,7 @@ class FileAndProjectContextFunctionToolsTest {
 		assertEquals("second", remaining.get("name"));
 		assertEquals("second", finalPop);
 		assertEquals(null, ProjectContextFunctionTools.getProjectContextVariables(
-				Collections.singletonList("name"), project).get("name"));
+				Collections.singletonList("name"), false, project).get("name"));
 	}
 
 	@Test
@@ -152,13 +153,13 @@ class FileAndProjectContextFunctionToolsTest {
 		// Act
 		ProjectContextFunctionTools.put(project, "number", Integer.valueOf(7));
 		Map<String, Object> serialized = ProjectContextFunctionTools.getProjectContextVariables(
-				Collections.singletonList("number"), project);
+				Collections.singletonList("number"), false, project);
 		IllegalArgumentException noContext = assertMissingContext();
 
 		// Assert
 		assertEquals("7", serialized.get("number"));
 		assertTrue(noContext.getMessage().contains("No context found"));
-		assertFalse(ProjectContextFunctionTools.popProjectContextVariable("number", "", project).toString().isEmpty());
+		assertFalse(ProjectContextFunctionTools.popProjectContextVariable("number", "", false, project).toString().isEmpty());
 	}
 
 	@Test
@@ -167,16 +168,16 @@ class FileAndProjectContextFunctionToolsTest {
 		File project = temporaryDirectory.resolve("branch-context-project").toFile();
 
 		// Act
-		Object firstPush = ProjectContextFunctionTools.pushProjectContextVariable("items", "one", project);
-		Object secondPush = ProjectContextFunctionTools.pushProjectContextVariable("items", "two", project);
-		Object missingPop = ProjectContextFunctionTools.popProjectContextVariable("absent", "LIFO", project);
+		Object firstPush = ProjectContextFunctionTools.pushProjectContextVariable("items", "one", false, project);
+		Object secondPush = ProjectContextFunctionTools.pushProjectContextVariable("items", "two", false, project);
+		Object missingPop = ProjectContextFunctionTools.popProjectContextVariable("absent", "LIFO", false, project);
 
 		Map<File, Map<String, Object>> contextMap = getContextProjectMap();
 		Map<String, Object> values = new ConcurrentHashMap<>();
 		values.put("unsupported", Integer.valueOf(3));
 		contextMap.put(project, values);
-		Object unsupportedPush = ProjectContextFunctionTools.pushProjectContextVariable("unsupported", "x", project);
-		Object unsupportedPop = ProjectContextFunctionTools.popProjectContextVariable("unsupported", "", project);
+		Object unsupportedPush = ProjectContextFunctionTools.pushProjectContextVariable("unsupported", "x", false, project);
+		Object unsupportedPop = ProjectContextFunctionTools.popProjectContextVariable("unsupported", "", false, project);
 
 		// Assert
 		assertTrue(firstPush.toString().contains("Pushed value 'one'"));
@@ -228,7 +229,7 @@ class FileAndProjectContextFunctionToolsTest {
 
 	private void getMissingContext() {
 		ProjectContextFunctionTools.getProjectContextVariables(
-				Collections.singletonList("unknown"), temporaryDirectory.resolve("unknown").toFile());
+				Collections.singletonList("unknown"), false, temporaryDirectory.resolve("unknown").toFile());
 	}
 
 	@SuppressWarnings("unchecked")
