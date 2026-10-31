@@ -35,6 +35,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class ProjectContextFunctionTools implements FunctionTools {
 
 	private static final File GLOBAL_CONTEXTE = new File("__global__");
+
+	private static final String PROJECT_DIR_MUST_BE_CONFIGURED_MSG = "projectDir must be configured when 'global' is false";
+
 	/**
 	 * Thread-safe registry that associates each project directory with its mutable
 	 * context-variable map. Values stored by {@link #put(File, String, Object)} are
@@ -65,7 +68,7 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 *                   associated.
 	 * @return A message indicating whether the context variable was successfully
 	 *         set or if an error occurred.
-	 * @throws JsonProcessingException 
+	 * @throws JsonProcessingException
 	 */
 	@Tool(name = "put_project_context_variable", description = "Sets or updates a project context variable used exclusively to save and share data between acts and workflow steps. Cannot be used to set environment variables.")
 	public static void putProjectContextVariable(
@@ -74,10 +77,10 @@ public class ProjectContextFunctionTools implements FunctionTools {
 			@Param(name = "global", description = "If true, the value is put to the application context "
 					+ "(shared across all projects) instead of the project-specific context.", defaultValue = "false") boolean global,
 			File projectDir) throws JsonProcessingException {
-		if(global) {
+		if (global) {
 			projectDir = GLOBAL_CONTEXTE;
 		}
-		
+
 		put(projectDir, name, value);
 	}
 
@@ -137,13 +140,15 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 * partially-modified state.
 	 * </p>
 	 *
-	 * @param names      The names of the context variables to retrieve.
 	 * @param projectDir The project directory with which the context variable is
-	 *                   associated.
+	 *                   associated. May be {@code null} only if {@code global} is
+	 *                   {@code true}.
 	 * @return A map containing an entry for every requested name. Entries whose
 	 *         variables are absent have a {@code null} value.
-	 * @throws IllegalArgumentException If no context has been created for
-	 *                                  {@code projectDir}.
+	 * @throws IllegalArgumentException If {@code global} is {@code false} and
+	 *                                  {@code projectDir} is not configured
+	 *                                  ({@code null}), or if no context has been
+	 *                                  created for {@code projectDir}.
 	 */
 	@Tool(name = "get_project_context_variables", description = "Retrieves the value of a variable from the project-specific context. Use this to access a named "
 			+ "variable associated with a particular project for act execution or prompt templates.")
@@ -154,11 +159,15 @@ public class ProjectContextFunctionTools implements FunctionTools {
 			File projectDir) {
 
 		Map<String, Object> result = new HashMap<>();
-		
-		if(global) {
+
+		if (global) {
 			projectDir = GLOBAL_CONTEXTE;
 		}
-		
+
+		if (projectDir == null) {
+			throw new IllegalArgumentException(PROJECT_DIR_MUST_BE_CONFIGURED_MSG);
+		}
+
 		Map<String, Object> context = contextProjectMap.get(projectDir);
 		if (context == null) {
 			throw new IllegalArgumentException("No context found for project: " + projectDir);
@@ -203,10 +212,10 @@ public class ProjectContextFunctionTools implements FunctionTools {
 			@Param(name = "global", description = "If true, the value is push to the application context "
 					+ "(shared across all projects) instead of the project-specific context.", defaultValue = "false") boolean global,
 			File projectDir) {
-		if(global) {
+		if (global) {
 			projectDir = GLOBAL_CONTEXTE;
 		}
-		
+
 		try {
 			Map<String, Object> context = contextProjectMap.computeIfAbsent(
 					projectDir, key -> new ConcurrentHashMap<>());
@@ -280,10 +289,14 @@ public class ProjectContextFunctionTools implements FunctionTools {
 					+ "(shared across all projects) instead of the project-specific context.", defaultValue = "false") boolean global,
 			File projectDir) {
 		try {
-			if(global) {
+			if (global) {
 				projectDir = GLOBAL_CONTEXTE;
 			}
-			
+
+			if (projectDir == null) {
+				throw new IllegalArgumentException(PROJECT_DIR_MUST_BE_CONFIGURED_MSG);
+			}
+
 			Map<String, Object> context = contextProjectMap.get(projectDir);
 			if (context == null) {
 				return "No context found for project: " + projectDir;
