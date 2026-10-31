@@ -66,8 +66,6 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 * @param value      The value to assign to the context variable.
 	 * @param projectDir The project directory with which the context variable is
 	 *                   associated.
-	 * @return A message indicating whether the context variable was successfully
-	 *         set or if an error occurred.
 	 * @throws JsonProcessingException
 	 */
 	@Tool(name = "put_project_context_variable", description = "Sets or updates a project context variable used exclusively to save and share data between acts and workflow steps. Cannot be used to set environment variables.")
