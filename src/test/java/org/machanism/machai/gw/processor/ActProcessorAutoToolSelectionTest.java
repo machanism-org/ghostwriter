@@ -9,7 +9,6 @@ import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.process.provider.ProcessProvider;
 
 /** Verifies automatic Act tool selection and its per-episode cache. */
 class ActProcessorAutoToolSelectionTest {
