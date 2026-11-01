@@ -100,7 +100,7 @@ Verification: [OK or description of mismatch]''',
 enabledTools:
   - ProjectContextFunctionTools
 ---
-If [PROCESSED_FILE_REL_PATH] is `.` then generate full report based on information from global variable: `REPORT`.
+Generate full report based on information from global variable: `REPORT`.
 '''
 ]
 
