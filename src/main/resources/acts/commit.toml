@@ -44,20 +44,39 @@ Execute these steps strictly in order. Never run git push, git submodule update,
    - If a repository already has staged files that you did not stage, do not commit it; report it as "skipped: pre-staged changes".
    - If a submodule is in detached HEAD (`git -C <repo> symbolic-ref -q HEAD` fails) and has changes, do not commit in it; report it as "skipped: detached HEAD" and also skip its parents' pointer update.
 
-3. Read history per repository. Run `git -C <repo> log -n 10 --pretty=%s` and follow that repository's own message style.
+3. Read history per repository. Run `git -C <repo> log -n 10 --pretty=%s` and follow that repository's own subject style (scope format, language, capitalization, length).
 
-4. Group changes. Groups are built inside ONE repository only (never mix files from different repositories). Scope: feat, fix, docs, refactor, chore, etc. Message: active voice, present tense.
+4. Analyze the changes in depth. Do this BEFORE grouping or writing any message. Never base a message on file names or `git status` output alone.
+   a. For every modified or deleted file, run `git -C <repo> diff -- <file>` and read the actual hunks. For large diffs, read them in chunks (e.g. `git -C <repo> diff -U5 -- <file>`) rather than skipping them.
+   b. For every untracked file, read its content (limit to the first ~200 lines for very large files and infer the rest from structure).
+   c. For modified submodule pointers, run `git -C <repo> diff --submodule=log -- <submodule path>` to see which commits are included.
+   d. If a changed function, class, config key or API is used elsewhere and the effect of the change is unclear, inspect the call sites (`git -C <repo> grep -n "<symbol>"`) to understand the real impact.
+   e. For each change, determine:
+      - WHAT changed: concrete functions, classes, endpoints, config options, UI elements, schemas, dependencies.
+      - FUNCTIONAL EFFECT: how the behavior differs for the user, caller or system (new capability, fixed bug and its symptom, changed default, removed feature, performance or security effect, new validation, changed error handling, etc.).
+      - WHY (only if evident from the code, comments, tests or naming; never invent motivation).
+   f. Distinguish real functional changes from noise (formatting, renames, import reordering, comment edits). Mention noise only briefly and never present it as a functional change.
+   g. Tests: if tests were added or changed, state which behavior they cover.
 
-5. Commit, bottom-up. For each repository in the order from step 1:
-   a. `git -C <repo> add -- <files of the group>` for each group, then `git -C <repo> commit -m "<message>"`.
-   b. After a submodule is committed, its parent now sees a changed pointer. In the parent, stage it with `git -C <parent> add -- <submodule path>` and include it in a dedicated group "chore: update <submodule> pointer" (or in the parent's own group if logically related). Never stage a submodule pointer before the commit inside the submodule is done.
+5. Group changes. Groups are built inside ONE repository only (never mix files from different repositories). Each group must be one logical, self-contained change (one feature, one fix, one refactor), based on the functional analysis from step 4, not on file location. Split unrelated changes inside a single file only if they can be separated by whole files; never use `git add -p` or other interactive commands. Choose the scope: feat, fix, docs, refactor, test, perf, build, chore, etc.
+
+6. Write commit messages. Every message consists of:
+   - Subject (first line): active voice, present tense, max ~72 characters, in the repository's own style, naming the main functional result (e.g. "fix: prevent duplicate orders when payment callback is retried"), not the files touched.
+   - Body (after a blank line): 2-6 short lines or sentences that describe in detail WHAT was done and the functional effect, naming concrete components (functions, classes, endpoints, config keys). Explain the behavior before vs. after when it is a fix or a change. Mention side effects, breaking changes, new config or migration requirements if present.
+   - Forbidden: vague wording ("update code", "fix issues", "improve logic", "various changes", "minor tweaks"), listing file names as the description, claims not supported by the diff.
+   - Trivial changes (typo, whitespace, version bump) may have a subject only.
+   - Pass the body with multiple `-m` flags: `git -C <repo> commit -m "<subject>" -m "<body>"`.
+
+7. Commit, bottom-up. For each repository in the order from step 1:
+   a. `git -C <repo> add -- <files of the group>` for each group, then `git -C <repo> commit -m "<subject>" -m "<body>"`.
+   b. After a submodule is committed, its parent now sees a changed pointer. In the parent, stage it with `git -C <parent> add -- <submodule path>` and include it in a dedicated group "chore: update <submodule> pointer" (or in the parent's own group if logically related). For pointer commits, the body must summarize the functional changes brought by the submodule commits (based on `git diff --submodule=log`). Never stage a submodule pointer before the commit inside the submodule is done.
    c. Never stage a submodule pointer if the submodule still has uncommitted changes (`git -C <sub> status --short` is not empty).
 
-6. Verify. Run `git submodule status --recursive` (no line may start with `+`, which would mean the pointer is out of sync) and `git status --short` in the root. Report any remaining discrepancy.
+8. Verify. Run `git submodule status --recursive` (no line may start with `+`, which would mean the pointer is out of sync) and `git status --short` in the root. Report any remaining discrepancy.
 
-7. If there are NO changes in any repository, call the `end_task` tool and output: "No changes detected."
+9. If there are NO changes in any repository, call the `end_task` tool and output: "No changes detected."
 
-8. Push the commit report to the global context variable: `REPORT`.
+10. Push the commit report to the global context variable: `REPORT`.
 
 # Special User Instruction
 
@@ -71,11 +90,11 @@ Successfully executed the following commits:
 Repository: [path or "root"]
 Group: [Name]
 Files: [List of files]
-Message: [Commit message]
+Message: [Subject]
+Details: [Body of the commit message: detailed functional description of what was done]
 
 Skipped: [repository - reason]   (only if something was skipped)
-Verification: [OK or description of mismatch]
-''',
+Verification: [OK or description of mismatch]''',
 '''
 ---
 enabledTools:
