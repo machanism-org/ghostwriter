@@ -1,7 +1,6 @@
 package org.machanism.machai.gw.processor;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
