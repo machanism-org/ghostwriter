@@ -1,6 +1,7 @@
 package org.machanism.machai.gw.processor;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -393,7 +394,7 @@ public class ActProcessor extends AIFileProcessor {
 		if (actData.containsKey(PUBLIC_USER_PROMPT_PROP_NAME)) {
 			if (prompt == null) {
 				prompt = (String) actData.get("default." + PUBLIC_USER_PROMPT_PROP_NAME);
-			} 
+			}
 		}
 		actData.put(PUBLIC_USER_PROMPT_PROP_NAME, Objects.toString(prompt, ""));
 	}
@@ -466,8 +467,7 @@ public class ActProcessor extends AIFileProcessor {
 		TomlParseResult toml = tryLoadActFromClasspath(properties, name);
 
 		if (toml == null && customToml == null) {
-			throw new IOException(
-					"Act: `" + name + "`, " + GWConstants.ACTS_LOCATION_PROP_NAME + ": `" + actsLocation + "`.");
+			throw new ActNotFoundException(name);
 		}
 
 		String basedOn = null;
@@ -493,37 +493,37 @@ public class ActProcessor extends AIFileProcessor {
 	 * @throws IOException if the resource cannot be read
 	 */
 	public static TomlParseResult tryLoadActFromClasspath(Map<String, Object> properties, String name)
-	        throws IOException {
-	    if (name == null || name.isEmpty() || name.contains("..") || name.contains("\\")) {
-	        throw new IllegalArgumentException("Invalid act name: `" + name + "`");
-	    }
+			throws IOException {
+		if (name == null || name.isEmpty() || name.contains("..") || name.contains("\\")) {
+			throw new IllegalArgumentException("Invalid act name: `" + name + "`");
+		}
 
-	    String path = ACTS_BASENAME_PREFIX + name + TOML_EXTENSION;
-	    URL resource = GWConstants.class.getResource(path);
-	    if (resource == null) {
-	        return null;
-	    }
+		String path = ACTS_BASENAME_PREFIX + name + TOML_EXTENSION;
+		URL resource = GWConstants.class.getResource(path);
+		if (resource == null) {
+			return null;
+		}
 
-	    String tomlStr;
-	    URLConnection conn = resource.openConnection();
-	    conn.setUseCaches(false);
-	    try (InputStream in = conn.getInputStream()) {
-	        tomlStr = IOUtils.toString(in, StandardCharsets.UTF_8);
-	    } catch (IOException e) {
-	        throw new IOException("Unable to read act `" + name + "` from " + resource, e);
-	    }
+		String tomlStr;
+		URLConnection conn = resource.openConnection();
+		conn.setUseCaches(false);
+		try (InputStream in = conn.getInputStream()) {
+			tomlStr = IOUtils.toString(in, StandardCharsets.UTF_8);
+		} catch (IOException e) {
+			throw new IOException("Unable to read act `" + name + "` from " + resource, e);
+		}
 
-	    TomlParseResult toml = Toml.parse(tomlStr);
-	    if (toml.hasErrors()) {
-	        throw new IOException("Act `" + name + "` has TOML errors: " + toml.errors());
-	    }
-	    setActData(properties, toml);
+		TomlParseResult toml = Toml.parse(tomlStr);
+		if (toml.hasErrors()) {
+			throw new IOException("Act `" + name + "` has TOML errors: " + toml.errors());
+		}
+		setActData(properties, toml);
 
-	    if (logger.isDebugEnabled()) {
-	        logger.debug("Load act: `{}` from classpath.", name);
-	    }
+		if (logger.isDebugEnabled()) {
+			logger.debug("Load act: `{}` from classpath.", name);
+		}
 
-	    return toml;
+		return toml;
 	}
 
 	/**
@@ -945,17 +945,18 @@ public class ActProcessor extends AIFileProcessor {
 	 * {@code https://}, in which case acts are loaded remotely and no local
 	 * directory validation is performed.</li>
 	 * </ul>
-	 * For path-based (non-URL) locations, the resolved directory must already
-	 * exist and be a directory; otherwise an exception is thrown.
+	 * For path-based (non-URL) locations, the resolved directory must already exist
+	 * and be a directory; otherwise an exception is thrown.
 	 * <p>
-	 * A {@code null} or empty value is ignored and leaves the current setting unchanged.
+	 * A {@code null} or empty value is ignored and leaves the current setting
+	 * unchanged.
 	 *
 	 * @param acts absolute path, relative path, or URL (or a comma- or
-	 *             space-separated list of them) pointing to the
-	 *             directories (or remote sources) containing act files;
-	 *             {@code null} to leave the current value unchanged
-	 * @throws IllegalArgumentException if any non-URL path does not resolve to
-	 *                                  an existing directory
+	 *             space-separated list of them) pointing to the directories (or
+	 *             remote sources) containing act files; {@code null} to leave the
+	 *             current value unchanged
+	 * @throws IllegalArgumentException if any non-URL path does not resolve to an
+	 *                                  existing directory
 	 */
 	public void setActsLocation(String acts) {
 		String[] actsLocations = StringUtils.split(acts, " ,");
