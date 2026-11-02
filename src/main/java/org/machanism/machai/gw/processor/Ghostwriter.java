@@ -475,7 +475,7 @@ public final class Ghostwriter {
 		} catch (EndTaskException e) {
 			LOGGER.info(e.getMessage());
 		} catch (IOException e) {
-			LOGGER.error("I/O error occurred during file processing: {}", e.getMessage(), e);
+			LOGGER.error("Processing failed.", e);
 		}
 	}
 
