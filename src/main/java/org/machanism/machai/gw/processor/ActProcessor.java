@@ -221,7 +221,7 @@ public class ActProcessor extends AIFileProcessor {
 	private String actsLocation;
 
 	/** The episodes container managed by this processor. */
-	private final Episodes episodes;
+	private Episodes episodes;
 
 	/**
 	 * Whether normal sequential execution should be skipped after explicit episode
@@ -304,6 +304,8 @@ public class ActProcessor extends AIFileProcessor {
 	 *                     from the target storage location
 	 */
 	public void setAct(String act) throws IOException {
+		episodes = new Episodes(this);
+		
 		act = StringUtils.trim(act);
 		if (Strings.CS.startsWith(act, DEFAULT_TASK_MARKER)) {
 			act = "task " + StringUtils.substringAfter(act, DEFAULT_TASK_MARKER);
