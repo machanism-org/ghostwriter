@@ -36,12 +36,6 @@ enabledTools:
   - CommandSpecFunctionTools
   - ProjectContextFunctionTools
 ---
----
-enabledTools:
-  - CommandFunctionTools
-  - CommandSpecFunctionTools
-  - ProjectContextFunctionTools
----
 Execute these steps strictly in order. Never run git push, git submodule update, git reset, git checkout, git clean, git add -A, git add . or git commit -a.
 
 1. Discover repositories. Run `git submodule status --recursive` to list all submodules (empty output means none). Build a list of repositories: root plus every submodule, ordered from the DEEPEST submodule up to the root (children always before their parent).
@@ -68,16 +62,24 @@ Execute these steps strictly in order. Never run git push, git submodule update,
 
 6. Write commit messages. Every message consists of:
    - Subject (first line): active voice, present tense, max ~72 characters, in the repository's own style, naming the main functional result (e.g. "fix: prevent duplicate orders when payment callback is retried"), not the files touched.
-   - Body (after a blank line): 2-6 short lines or sentences that describe in detail WHAT was done and the functional effect, naming concrete components (functions, classes, endpoints, config keys). Explain the behavior before vs. after when it is a fix or a change. Mention side effects, breaking changes, new config or migration requirements if present.
+   - Body (after exactly ONE blank line following the subject): 2-6 short lines or sentences that describe in detail WHAT was done and the functional effect, naming concrete components (functions, classes, endpoints, config keys). Explain the behavior before vs. after when it is a fix or a change. Mention side effects, breaking changes, new config or migration requirements if present.
+   - Body layout: put each sentence on its own line, with NO empty lines between body lines. The only empty line in the whole message is the one between the subject and the body.
    - Forbidden: vague wording ("update code", "fix issues", "improve logic", "various changes", "minor tweaks"), listing file names as the description, claims not supported by the diff.
    - Trivial changes (typo, whitespace, version bump) may have a subject only.
    - Line breaks: NEVER write the two characters backslash+n ("\n") or any other escape sequence inside a commit message. Git and the shell do not interpret them, so they end up literally in the history.
-   - Pass the subject as the first `-m` and EACH body sentence/line as its own separate `-m` flag (git inserts a blank line between every -m, which is the correct paragraph separation):
-     git -C <repo> commit -m "<subject>" -m "<body line 1>" -m "<body line 2>" -m "<body line 3>"
-   - Do not put several body sentences into one `-m` string.
+   - Do NOT use several `-m` flags for the body: git inserts an empty line between every `-m`, which creates unwanted blank lines.
+   - Pass the message through stdin with a quoted heredoc, so it contains real line breaks:
+     git -C <repo> commit -F - <<'EOF'
+     <subject>
+
+     <body line 1>
+     <body line 2>
+     <body line 3>
+     EOF
+   - Write the heredoc lines without leading indentation. Only if no real bash shell is available (e.g. PowerShell), use `git -C <repo> commit -m "<subject>" -m "<entire body as ONE string with real line breaks>"`, still never with "\n".
 
 7. Commit, bottom-up. For each repository in the order from step 1:
-   a. `git -C <repo> add -- <files of the group>` for each group, then commit with the subject as the first `-m` and one `-m` per body line (never use "\n" inside a message): `git -C <repo> commit -m "<subject>" -m "<line 1>" -m "<line 2>" -m "<line 3>"`
+   a. `git -C <repo> add -- <files of the group>` for each group, then commit using the heredoc form from step 6 (`git -C <repo> commit -F - <<'EOF' ... EOF`), with one blank line after the subject and no blank lines inside the body. Never use "\n" inside a message.
    b. After a submodule is committed, its parent now sees a changed pointer. In the parent, stage it with `git -C <parent> add -- <submodule path>` and include it in a dedicated group "chore: update <submodule> pointer" (or in the parent's own group if logically related). For pointer commits, the body must summarize the functional changes brought by the submodule commits (based on `git diff --submodule=log`). Never stage a submodule pointer before the commit inside the submodule is done.
    c. Never stage a submodule pointer if the submodule still has uncommitted changes (`git -C <sub> status --short` is not empty).
 
@@ -92,7 +94,7 @@ Execute these steps strictly in order. Never run git push, git submodule update,
 ${public.prompt}
 
 # Output Format (Strictly Plain Text, No Markdown)
-Do not use Markdown code blocks, bold, or list markers. Use exactly this format:
+Do not use Markdown code blocks, bold, or list markers. Use exactly this format, with no extra empty lines inside a field:
 
 Successfully executed the following commits:
 
@@ -100,7 +102,7 @@ Repository: [path or "root"]
 Group: [Name]
 Files: [List of files]
 Message: [Subject]
-Details: [Body of the commit message: detailed functional description of what was done, one sentence per line, using real line breaks, never the literal characters "\n"]
+Details: [Body of the commit message: detailed functional description of what was done, one sentence per line, using real line breaks, no empty lines between them, never the literal characters "\n"]
 
 Skipped: [repository - reason]   (only if something was skipped)
 Verification: [OK or description of mismatch]
