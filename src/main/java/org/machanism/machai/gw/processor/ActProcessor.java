@@ -306,6 +306,7 @@ public class ActProcessor extends AIFileProcessor {
 	 *                     from the target storage location
 	 */
 	public void setAct(String act) throws IOException {
+		
 		episodes = new Episodes(this);
 
 		act = StringUtils.trim(act);
