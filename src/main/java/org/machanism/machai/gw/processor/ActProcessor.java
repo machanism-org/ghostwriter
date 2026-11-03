@@ -241,6 +241,8 @@ public class ActProcessor extends AIFileProcessor {
 	/** Cached automatically selected tools, keyed by act name and episode ID. */
 	private Map<String, String[]> autoToolsMap = new ConcurrentHashMap<>();
 
+	private String defaultActName = "task ";
+
 	/**
 	 * TOML property name containing the instructions supplied to the AI provider
 	 * for an act.
@@ -308,7 +310,7 @@ public class ActProcessor extends AIFileProcessor {
 		
 		act = StringUtils.trim(act);
 		if (Strings.CS.startsWith(act, DEFAULT_TASK_MARKER)) {
-			act = "task " + StringUtils.substringAfter(act, DEFAULT_TASK_MARKER);
+			act = defaultActName + StringUtils.substringAfter(act, DEFAULT_TASK_MARKER);
 		}
 		act = StringUtils.defaultIfBlank(act, "help");
 
