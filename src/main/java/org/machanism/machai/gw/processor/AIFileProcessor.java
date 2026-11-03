@@ -1044,7 +1044,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * 
 	 * @return the default prompt
 	 */
-	protected String getDefaultPrompt() {
+	public String getDefaultPrompt() {
 		return defaultPrompt;
 	}
 
@@ -1053,7 +1053,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * 
 	 * @param defaultPrompt the default prompt text
 	 */
-	protected void setDefaultPrompt(String defaultPrompt) {
+	public void setDefaultPrompt(String defaultPrompt) {
 		this.defaultPrompt = defaultPrompt;
 	}
 
