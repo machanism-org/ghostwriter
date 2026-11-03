@@ -471,7 +471,7 @@ public final class Ghostwriter {
 		try {
 			AIFileProcessor processor = createProcessor(scanner, config, cmd, settings);
 			applyCommonSettings(processor, settings);
-			handleExitCode(processPathectories(processor, settings.paths, settings.projectDir));
+			int exitCode = processPathectories(processor, settings.paths, settings.projectDir);\n\t\t\twhile (processor instanceof ActProcessor) {\n\t\t\t\tconfigureDefaultAct(cmd, config, scanner, (ActProcessor) processor);\n\t\t\t\tapplyCommonSettings(processor, settings);\n\t\t\t\texitCode = processPathectories(processor, settings.paths, settings.projectDir);\n\t\t\t}\n\t\t\thandleExitCode(exitCode);
 		} catch (EndTaskException e) {
 			LOGGER.info(e.getMessage());
 		} catch (IOException e) {
