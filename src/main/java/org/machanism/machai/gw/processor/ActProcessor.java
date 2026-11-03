@@ -241,7 +241,7 @@ public class ActProcessor extends AIFileProcessor {
 	/** Cached automatically selected tools, keyed by act name and episode ID. */
 	private Map<String, String[]> autoToolsMap = new ConcurrentHashMap<>();
 
-	private String defaultActName = "task ";
+	private String defaultActName = "task";
 
 	/**
 	 * TOML property name containing the instructions supplied to the AI provider
@@ -307,10 +307,10 @@ public class ActProcessor extends AIFileProcessor {
 	 */
 	public void setAct(String act) throws IOException {
 		episodes = new Episodes(this);
-		
+
 		act = StringUtils.trim(act);
-		if (Strings.CS.startsWith(act, DEFAULT_TASK_MARKER)) {
-			act = defaultActName + StringUtils.substringAfter(act, DEFAULT_TASK_MARKER);
+		if (Strings.CS.startsWith(act, DEFAULT_TASK_MARKER) && defaultActName != null) {
+			act = defaultActName + " " + StringUtils.substringAfter(act, DEFAULT_TASK_MARKER);
 		}
 		act = StringUtils.defaultIfBlank(act, "help");
 
@@ -1277,6 +1277,14 @@ public class ActProcessor extends AIFileProcessor {
 	 */
 	public Map<String, Object> getActProperties() {
 		return actProperties;
+	}
+
+	public String getDefaultActName() {
+		return defaultActName;
+	}
+
+	public void setDefaultActName(String defaultActName) {
+		this.defaultActName = defaultActName;
 	}
 
 }
