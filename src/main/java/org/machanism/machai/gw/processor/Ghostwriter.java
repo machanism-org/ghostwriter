@@ -61,7 +61,7 @@ public final class Ghostwriter {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Ghostwriter.class);
 
 	/** Prefix displayed before interactive Act-mode input. */
-	public static final String USER_INPUT_PREFIX = ">>>";
+	public static final String USER_INPUT_PREFIX = ">";
 
 	/** Long option name for displaying CLI help. */
 	private static final String HELP_OPTION = "help";

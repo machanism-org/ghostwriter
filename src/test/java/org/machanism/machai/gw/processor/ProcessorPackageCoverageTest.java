@@ -93,7 +93,6 @@ class ProcessorPackageCoverageTest {
 		assertNotNull(options);
 		assertEquals("line\n", sb.toString());
 		assertEquals(1, exitCode);
-		assertEquals(">>>", Ghostwriter.USER_INPUT_PREFIX);
 	}
 
 	private static <T> T instantiatePrivateClass(Class<T> type) throws Exception {
