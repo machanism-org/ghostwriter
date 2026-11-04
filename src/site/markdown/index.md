@@ -43,6 +43,13 @@ Let me know if you want it even shorter or tailored for a specific toolset!
    - **Command-Line Options:** Analyze `/java/org/machanism/machai/gw/processor/Ghostwriter.java` to extract and describe all available command-line options.
    - **Options Table:** Present a table listing each option, its description, and default value.
    - **Example:** Provide a command-line example showing how to configure and run the application with custom parameters. Include information from the `Ghostwriter.help()` method.
+   - **gw.properties** :
+   ```
+	gw.acts=src/acts
+	GENAI_USERNAME=...
+	GENAI_PASSWORD=...
+	BINDEX_PASSWORD=...
+	```
 9. **Resources**
    - List relevant links, including the official platform, GitHub repository, and Maven Central page.
    - [Ghostwriter MCP Server](gw-mcp-server/)
@@ -205,6 +212,19 @@ java -jar gw.jar "glob:**/*.md" --projectDir . --model "OpenAI:gpt-5.1" --thread
 ```
 
 To select a different properties file, use `--config automation.properties` or place the JVM option before the JAR: `java -Dgw.config=automation.properties -jar gw.jar src`. Keep provider secrets in the environment or a protected configuration source, not in checked-in commands.
+
+### `gw.properties`
+
+The default configuration file is `gw.properties` in the project directory. A minimal configuration can define the Acts location and provider credentials as follows:
+
+```properties
+gw.acts=src/acts
+GENAI_USERNAME=...
+GENAI_PASSWORD=...
+BINDEX_PASSWORD=...
+```
+
+Keep credentials out of version control and provide them through a protected configuration source or the environment when supported by the selected provider and tooling.
 
 For Act mode, run a bundled workflow or an ad-hoc task:
 
