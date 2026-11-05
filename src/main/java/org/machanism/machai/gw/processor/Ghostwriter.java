@@ -474,10 +474,18 @@ public final class Ghostwriter {
 			int exitCode = processPathectories(processor, settings.paths, settings.projectDir);
 
 			while (processor instanceof ActProcessor) {
-				processor.setDefaultPrompt(null);
-				configureDefaultAct(cmd, config, scanner, (ActProcessor) processor);
-				applyCommonSettings(processor, settings);
-				exitCode = processPathectories(processor, settings.paths, settings.projectDir);
+				try {
+					processor.setDefaultPrompt(null);
+					configureDefaultAct(cmd, config, scanner, (ActProcessor) processor);
+					applyCommonSettings(processor, settings);
+					exitCode = processPathectories(processor, settings.paths, settings.projectDir);
+				} catch (ActNotFoundException e) {
+					LOGGER.info("Act not found: {}", e.getMessage());
+				} catch (ProcessTerminationException e) {
+					throw e;
+				} catch (Exception e) {
+					LOGGER.info("Act processing failed.", e.getMessage());
+				}
 			}
 
 			handleExitCode(exitCode);
