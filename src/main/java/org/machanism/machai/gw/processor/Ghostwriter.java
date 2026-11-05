@@ -481,7 +481,7 @@ public final class Ghostwriter {
 					exitCode = processPathectories(processor, settings.paths, settings.projectDir);
 				} catch (ActNotFoundException e) {
 					LOGGER.info("Act not found: {}", e.getMessage());
-				} catch (ProcessTerminationException e) {
+				} catch (ProcessTerminationException | EndTaskException e) {
 					throw e;
 				} catch (Exception e) {
 					LOGGER.info("Act processing failed.", e.getMessage());
