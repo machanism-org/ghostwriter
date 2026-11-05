@@ -36,7 +36,7 @@ enabledTools:
   - CommandSpecFunctionTools
   - ProjectContextFunctionTools
 ---
-Execute these steps strictly in order. Never run git push, git submodule update, git reset, git checkout, git clean, git add -A, git add . or git commit -a.
+Execute these steps strictly in order.
 
 1. Discover repositories. Run `git submodule status --recursive` to list all submodules (empty output means none). Build a list of repositories: root plus every submodule, ordered from the DEEPEST submodule up to the root (children always before their parent).
 
@@ -140,7 +140,7 @@ public.prompt = "No special instructions."
 #   - Common use cases include preventing execution of dangerous commands, excluding sensitive files, or blocking specific operations.
 denylist = '''
 ${super.value}
-REGEX: git\s+(push|reset|clean|checkout|rebase|submodule\s+(update|deinit))\b
+REGEX: git\s+(reset|clean|checkout|rebase|submodule\s+(update|deinit))\b
 REGEX: git\s+add\s+(-A|--all|\.)(\s|$)
 REGEX: git\s+commit\s+.*(-a\b|--amend)
 '''
