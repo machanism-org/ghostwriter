@@ -21,13 +21,16 @@ import org.slf4j.LoggerFactory;
 /*@guidance: >>> ${guidances}/def-class-javadoc.md */
 /**
  * Loads and evaluates command deny-list rules used by host-side command
- * execution tools.
+ * execution tools. The rules are loaded once when an instance is constructed
+ * and are then reused for each command check.
  *
  * <p>
- * The checker reads an operating-system-specific rule resource, optionally
- * combines it with rules supplied through configuration, and evaluates an
- * input command line against the resulting rules. Each non-empty, non-comment line of a deny-list
- * file must use one of the following formats:
+ * The checker reads an operating-system-specific rule resource and evaluates
+ * input command lines against those rules. If the deny-list configuration
+ * property is set, its value replaces the resource contents unless it contains
+ * {@link ActProcessor#SUPER_VALUE_PLACEHOLDER}, in which case the placeholder
+ * is replaced by the resource contents. Each non-empty, non-comment line of a
+ * deny-list file should use one of the following formats:
  * </p>
  * <ul>
  * <li>{@code REGEX:...} – a Java regular expression; a match anywhere in the

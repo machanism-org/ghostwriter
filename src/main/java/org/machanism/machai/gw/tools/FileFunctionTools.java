@@ -31,8 +31,9 @@ import org.machanism.machai.process.tools.Tool;
  * <p>
  * Tools in this installer are intended for host-integrated use where the host
  * controls the base working directory. All paths provided to these tools are
- * interpreted relative to the working directory supplied by the
- * provider/runtime.
+ * resolved against the working directory supplied by the provider/runtime;
+ * relative paths are based there, and path resolution is confined to the
+ * project root.
  * </p>
  *
  * <h2>Installed tools</h2>
@@ -40,8 +41,13 @@ import org.machanism.machai.process.tools.Tool;
  * <li>{@code read_file} – reads a file as text</li>
  * <li>{@code write_file} – writes a file (creating parent directories as
  * needed)</li>
- * <li>{@code list_files_in_directory} – lists immediate children of a
- * directory</li>
+ * <li>{@code list_files_in_directory} – recursively lists files and
+ * directories grouped by type</li>
+ * <li>{@code get_recursive_file_list} – recursively lists files subject to a
+ * maximum result count</li>
+ * <li>{@code get_recursive_folder_list} – recursively lists directories subject
+ * to a maximum result count</li>
+ * <li>{@code apply_patch_to_file} – applies a supported patch to a file</li>
  * </ul>
  *
  * @author Viktor Tovstyi
@@ -61,9 +67,9 @@ public class FileFunctionTools implements FunctionTools {
 	 * <p>
 	 * This method resolves the target directory using {@code dirPath} and
 	 * {@code projectDir}, verifies that it is a valid directory, and iterates
-	 * through its direct children. Each child is classified as either a directory
-	 * or a file and its relative path is added to the corresponding list in the
-	 * returned map.
+	 * through its descendants. Each child is classified as either a directory or a
+	 * file and its relative path is added to the corresponding list in the returned
+	 * map.
 	 * </p>
 	 *
 	 * @param dirPath    the path to the target directory to list contents of.
@@ -73,7 +79,7 @@ public class FileFunctionTools implements FunctionTools {
 	 * @return a {@link Map} containing two key-value pairs:
 	 *         <ul>
 	 *         <li>{@code "directories"} - a {@link List} of relative paths for all
-	 *         subdirectories found.</li>
+	 *         subdirectories found recursively.</li>
 	 *         <li>{@code "files"} - a {@link List} of relative paths for all files
 	 *         found.</li>
 	 *         </ul>
@@ -112,6 +118,7 @@ public class FileFunctionTools implements FunctionTools {
 	 * @param projectDir  root used to compute project-relative paths
 	 * @param directories destination list for discovered directory paths
 	 * @param files       destination list for discovered file paths
+	 * @throws SecurityException if a security manager denies access to a child
 	 */
 	private void collectRecursive(File currentDir, File projectDir, List<String> directories, List<String> files) {
 		File[] listFiles = currentDir.listFiles();
@@ -137,7 +144,7 @@ public class FileFunctionTools implements FunctionTools {
 	 *
 	 * @param path       the relative or absolute path of the directory to scan
 	 * @param maxCount   the maximum number of files allowed in the result; throws
-	 *                   an error if exceeded
+	 *                   an error if exceeded. Must be non-negative.
 	 * @param projectDir the root project directory context
 	 * @return a {@link List} of relative file path strings, or a message string
 	 *         indicating no files were found
@@ -213,7 +220,8 @@ public class FileFunctionTools implements FunctionTools {
 	 *
 	 * @param dir        directory path relative to {@code projectDir} to start
 	 *                   scanning from
-	 * @param maxCount   maximum number of folders allowed in the result
+	 * @param maxCount   maximum number of folders allowed in the result; must be
+	 *                   non-negative
 	 * @param projectDir project root used to resolve the directory
 	 * @return project-relative folder paths as a list, or a message when none are
 	 *         found
@@ -267,7 +275,7 @@ public class FileFunctionTools implements FunctionTools {
 	 * @param text        content to write
 	 * @param charsetName character set used to encode the content
 	 * @param projectDir  project root used to resolve the file
-	 * @return a success message or an error message when writing fails
+	 * @return a success message after the file has been written
 	 * @throws IOException              if the file cannot be created or written
 	 * @throws IllegalArgumentException if the requested path is invalid or outside
 	 *                                  {@code projectDir}
@@ -336,12 +344,13 @@ public class FileFunctionTools implements FunctionTools {
 	 * @param charsetName  the name of the requested charset used to decode the file
 	 * @param maxFileSize  the maximum allowed character length of the file content
 	 * @param projectDir   project root used to resolve the file
-	 * @param configurator configuration used to substitute URL and header values
+	 * @param configurator configuration used to substitute variables in the file
+	 *                     path before resolving it
 	 * @return the complete file contents as text
-	 * @throws IOException              if the file does not exist, is a directory, or cannot be read
-	 * @throws IllegalArgumentException if the file content length exceeds the allowed {@code maxFileSize} limit, 
-	 *                                  the requested path is invalid or outside {@code projectDir}, or {@code charsetName}
-	 *                                  does not identify a supported character set
+	 * @throws IOException              if the file does not exist, is a directory, cannot be read, or
+	 *                                  {@code charsetName} is not a supported character set
+	 * @throws IllegalArgumentException if the file content length exceeds the allowed {@code maxFileSize} limit,
+	 *                                  or the requested path is invalid or outside {@code projectDir}
 	 */
 	@Tool(name = "read_file", description = "Read the contents of a file from the disk.")
 	public String readFile(@Param(name = "path", description = "The path to the file to be read.") File filePath,
@@ -457,7 +466,7 @@ public class FileFunctionTools implements FunctionTools {
 	 * @param charsetName character set used to read and write the file
 	 * @param projectDir  project root used to resolve the file
 	 * @return a success message, or a failure message containing the underlying
-	 *         error detail
+	 *         error detail; failures are returned as text rather than thrown
 	 */
 	@Tool(name = "apply_patch_to_file", description = "Use this tool to update a part of a file efficiently "
 			+ "by applying a targeted diff patch. Supports two formats:\n"

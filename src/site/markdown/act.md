@@ -126,7 +126,7 @@ Inspect ${public.prompt}.
 
 Each `enabledTools` item is a regular-expression pattern. A tool is identified internally as `<ClassName>:<toolName>`—for example, `org.example.Tools:read_file`; the tool name is its declared name, or the method name when no explicit name exists. A tool is registered only when its full identifier matches at least one pattern. If `enabledTools` is `null` or omitted, all available tools are registered without filtering. Use precise patterns when an act needs limited capabilities. The patterns are not display labels: write the fully qualified implementation-class name followed by `:` and the declared tool or method name.
 
-Prompt and instruction lines can include content using `>>> URL` or `>>> file://relative/path`; included UTF-8 content is processed recursively. Public configuration values can be substituted in prompt metadata and text.
+Prompt and instruction lines can include content using `>>> https://example.org/prompt.md` or `>>> file://docs/prompt.md`; the marker must begin the line, and the referenced UTF-8 content is processed recursively. Relative `file://` paths are resolved from the project directory, including in nested includes (they are not relative to the including file's folder). Public configuration values can be substituted in prompt metadata and text.
 
 ### Automatic tool selection: `enabledTools: auto`
 
@@ -176,13 +176,12 @@ This runs episodes 1 and 3 with the supplied request, then stops rather than con
 The YAML input parameters recognized specially by `AIFileProcessor` are:
 
 - `gw.model` — overrides the configured AI model/provider for the prompt.
-- `enabledTools` — a string or YAML list of regular-expression patterns controlling registered tools.
+- `enabledTools` — a string or YAML list of regular-expression patterns controlling registered tools; in an Act episode, `auto` requests provider-assisted tool selection.
+- `gw.interactive` — enables or disables interactive processing for that request.
 - `errorHandling` — when configured, controls provider error handling for the request.
-- Other YAML values are retained as prompt configuration; string values are resolved through the active configurator, but they do not by themselves change processing behavior.
+- Other YAML values are retained in the layered configuration and can be used for configuration lookup and substitution; string values are resolved through the active configurator, but they do not by themselves change processing behavior.
 
 For every processed item, Ghostwriter supplies processing information containing `PROCESSED_FILE_REL_PATH`, `OS_NAME`, and (in non-interactive mode) the notice `Do not ask any question because this is not-interactive process mode.` The act additionally prepends JSON execution metadata containing the current episode information. Project-context tools receive the project name, IDs, directories, source/test/document folders, modules, and operating-system context.
-
-For a detailed look at how an episode's file-selection settings (such as `path`, `excludes`, and `nonRecursive`) determine which modules and files are visited, and in what order, see [Module & Project File Processing during Act Steps](module-file-act-processing.html).
 
 ## Interactive and non-interactive acts
 
@@ -193,12 +192,10 @@ Set `gw.interactive = true` when the act should operate as a chat. Interactive m
 - Enter `>` (`AIFileProcessor.CONTINUE_SPECIAL_PROMPT_COMMAND`) to accept the current response and continue processing without another AI prompt.
 - Enter `.` (`AIFileProcessor.EXIT_SPECIAL_PROMPT_COMMAND`) to terminate the act successfully.
 - Enter `>>` (`NO_INTERACTIVE_SPECIAL_PROMPT_COMMAND`) to accept the current response and switch the remaining work to non-interactive processing. This is useful when a conversation has clarified the task and the remaining episodes should finish unattended.
-- An empty entry has no special command meaning; when the hosting environment supplies it, it is treated as ordinary follow-up input rather than as a continue or exit command.
+- An empty entry is not a special command: if the hosting environment supplies an empty string, it is sent as an empty follow-up prompt; if input is unavailable (`null`), no follow-up is sent.
 - Enter any other text to send it as the next chat prompt.
 
 These are literal command values: `AIFileProcessor.CONTINUE_SPECIAL_PROMPT_COMMAND` is `>`, and `AIFileProcessor.EXIT_SPECIAL_PROMPT_COMMAND` is `.`. Enter the character by itself after a response, not as part of a longer request.
-
-The source guidance also asks about an empty value written as ``. No constant or command is associated with that empty value in `AIFileProcessor`, so there is no runtime value to enter or document; use the named commands above instead.
 
 Interactive input requires an environment that supports it. The base `AIFileProcessor` does not read a console by itself: an embedding command-line or UI implementation must provide the next input. In a non-interactive execution environment, acts proceed without chat input; use a predefined non-interactive act when the task must run unattended.
 

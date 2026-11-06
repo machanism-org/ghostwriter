@@ -72,8 +72,10 @@
  * such as {@code review#1,3!}, selects episodes 1 and 3 and disables continuation
  * in normal order. Act outputs and merged properties are available through
  * {@link ActProcessor#getResults()} and {@link ActProcessor#getActProperties()}.
- * Episode front matter may request {@code enabledTools: auto}, optionally with a
- * mapping that constrains provider-assisted tool selection.
+ * Episode front matter may request {@code enabledTools: auto} to select tools
+ * for that episode through a provider-assisted request; an {@code auto} mapping
+ * may provide query text to guide that selection, rather than directly disabling
+ * tools. Selected tools are cached for the act episode.
  * </p>
  * <p>
  * {@link Episodes} owns the ordered prompts of an act. It supports regular

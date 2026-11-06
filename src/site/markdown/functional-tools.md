@@ -153,42 +153,42 @@ Retrieves an asynchronous guidance-processing report. Until the report file is a
 
 ## Project context tools
 
-`ProjectContextFunctionTools` is annotated with `@SupportedFor(excludes = GuidanceProcessor.class)`; its tools are intended for supported processors other than `GuidanceProcessor`. They maintain project-scoped state shared between Acts, episodes, and prompt templates, not operating-system environment variables.
+`ProjectContextFunctionTools` is annotated with `@SupportedFor(excludes = GuidanceProcessor.class)`; its tools are intended for supported processors other than `GuidanceProcessor`. They maintain project-scoped state shared between Acts, episodes, and prompt templates, not operating-system environment variables. Each operation can instead target an application-wide context shared across projects by setting `global` to `true`.
 
 ### `put_project_context_variable`
 Creates or replaces a named project context value.
 
 **Availability:** Supported by `ProjectContextFunctionTools` for processors other than `GuidanceProcessor`.
 
-**Inputs:** `name` — variable name; `value` — value to store.
+**Inputs:** `name` — variable name; `value` — value to store; `global` — store in the application-wide context shared across projects instead of the current project's context (default `false`).
 
 ### `get_project_context_variables`
 Returns a map containing the requested context names and their stored values. Missing names have null values; no context for the project is an error.
 
 **Availability:** Supported by `ProjectContextFunctionTools` for processors other than `GuidanceProcessor`.
 
-**Input:** `names` — list of variable names.
+**Inputs:** `names` — list of variable names; `global` — read from the application-wide context shared across projects instead of the current project's context (default `false`).
 
 ### `push_project_context_variable`
 Appends a value to a context variable, creating a list when needed or converting an existing string into a list.
 
 **Availability:** Supported by `ProjectContextFunctionTools` for processors other than `GuidanceProcessor`.
 
-**Inputs:** `name` — variable name; `value` — value to append.
+**Inputs:** `name` — variable name; `value` — value to append; `global` — append to the application-wide context shared across projects instead of the current project's context (default `false`).
 
 ### `pop_project_context_variable`
 Removes and returns a context value. Lists support LIFO or FIFO removal, and are simplified or removed when they become shorter.
 
 **Availability:** Supported by `ProjectContextFunctionTools` for processors other than `GuidanceProcessor`.
 
-**Inputs:** `name` — variable name; `mode` — `LIFO` or `FIFO`, default LIFO behavior.
+**Inputs:** `name` — variable name; `mode` — `LIFO` or `FIFO` (default behavior is LIFO); `global` — remove from the application-wide context shared across projects instead of the current project's context (default `false`).
 
 ## Web tools
 
-`WebFunctionTools` has no `@SupportedFor` annotation. It provides HTTP GET and general REST access, with optional headers, timeouts, response encodings, CSS selection, plain-text rendering, Basic authentication through URL user information, and runtime property substitution.
+`WebFunctionTools` has no `@SupportedFor` annotation. It provides HTTP GET and general REST access, with optional headers, timeouts, response encodings, CSS selection, plain-text rendering, Basic authentication through URL user information, and runtime property substitution. Relative `file:` URLs resolve against the project directory; absolute file paths are also accepted.
 
 ### `get_web_content`
-Fetches an HTTP(S) page with GET or reads a project-scoped `file:` URL. It can return HTML, select matching CSS elements, and optionally render the response as plain text.
+Fetches an HTTP(S) page with GET or reads a `file:` URL. Relative file paths resolve against the project directory, while absolute file paths are also accepted. It can return HTML, select matching CSS elements, and optionally render the response as plain text.
 
 **Inputs:** `url` — web or file URL; `headers` — optional request headers; `timeout` — milliseconds, default `0`; `charset` — response encoding, default `UTF-8`; `text_only` — strip HTML, default `false`; `selector` — optional CSS selector.
 

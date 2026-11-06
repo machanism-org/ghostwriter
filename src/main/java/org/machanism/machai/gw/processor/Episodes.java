@@ -71,7 +71,7 @@ public class Episodes {
     /** Prefix that identifies a first-level Markdown episode heading. */
     private static final String HEADER_MARKER = "# ";
 
-    /** Logger for documentation input processing events. */
+    /** Logger for episode execution boundaries and callback results. */
     private static final Logger logger = LoggerFactory.getLogger(Episodes.class);
 
     /** Ordered list of act episode prompts to execute. */
@@ -156,6 +156,7 @@ public class Episodes {
      * @param startEpisodeId starting 1-based episode index
      * @param func callback used to execute an episode
      * @throws IndexOutOfBoundsException if a requested episode index is invalid
+     * @throws EpisodeNotFoundException if a move request names an unknown episode
      */
     public void regularOrder(Integer startEpisodeId, BiFunction<Integer, String, String> func) {
         Integer moveToEpisodeId = startEpisodeId;

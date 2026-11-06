@@ -446,6 +446,8 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 *
 	 * @param path pattern candidate
 	 * @return matcher or {@code null} when {@code path} is not a pattern
+	 * @throws IllegalArgumentException if {@code path} contains an invalid
+	 *                                  path-matcher expression
 	 */
 	static PathMatcher getPatternPath(String path) {
 		if (StringUtils.isNotBlank(path) && isPathPattern(path)) {
@@ -460,7 +462,11 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 *
 	 * @param projectLayout layout describing sources, tests, docs, and modules
 	 * @throws IllegalArgumentException if project files cannot be listed or
-	 *                                  processed
+	 *                                  processed; underlying I/O failures are
+	 *                                  wrapped in this exception
+	 * @throws IOException              declared by the parent API; this
+	 *                                  implementation wraps listing I/O failures
+	 *                                  in {@code IllegalArgumentException}
 	 */
 	@Override
 	public void processFolder(ProjectLayout projectLayout) throws IOException {
@@ -485,6 +491,8 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 *                   matcher
 	 * @return matching files/directories
 	 * @throws IOException if directory traversal fails
+	 * @throws IllegalArgumentException if {@code pattern} is an invalid path
+	 *                                  matcher expression
 	 */
 	List<File> listFiles(File projectDir, String pattern) throws IOException {
 		List<File> result = new ArrayList<>();
@@ -533,6 +541,8 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * @param layout      project layout
 	 * @param filePattern directory path, {@code glob:}, or {@code regex:} pattern
 	 * @throws IOException if matching files cannot be listed or processed
+	 * @throws IllegalArgumentException if {@code filePattern} is an invalid path
+	 *                                  matcher expression
 	 */
 	public void processProjectDir(ProjectLayout layout, String filePattern) throws IOException {
 		List<File> files = listFiles(layout.getProjectDir(), filePattern);

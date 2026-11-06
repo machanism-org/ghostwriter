@@ -34,8 +34,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @SupportedFor(excludes = GuidanceProcessor.class)
 public class ProjectContextFunctionTools implements FunctionTools {
 
+	/** Sentinel project directory used to store context shared across all projects. */
 	private static final File GLOBAL_CONTEXTE = new File("__global__");
 
+	/** Error text used when a project directory is required but was not supplied. */
 	private static final String PROJECT_DIR_MUST_BE_CONFIGURED_MSG = "projectDir must be configured when 'global' is false";
 
 	/**
@@ -64,9 +66,11 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 *
 	 * @param name       The name of the context variable to set or update.
 	 * @param value      The value to assign to the context variable.
+	 * @param global     Whether to store the value in the application-wide context
+	 *                   shared across projects.
 	 * @param projectDir The project directory with which the context variable is
-	 *                   associated.
-	 * @throws JsonProcessingException
+	 *                   associated; ignored when {@code global} is {@code true}.
+	 * @throws JsonProcessingException If the value cannot be serialized to JSON.
 	 */
 	@Tool(name = "put_project_context_variable", description = "Sets or updates a project context variable used exclusively to save and share data between acts and workflow steps. Cannot be used to set environment variables.")
 	public static void putProjectContextVariable(
@@ -141,6 +145,9 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 * @param projectDir The project directory with which the context variable is
 	 *                   associated. May be {@code null} only if {@code global} is
 	 *                   {@code true}.
+	 * @param names      The names of the context variables to retrieve.
+	 * @param global     Whether to retrieve values from the application-wide
+	 *                   context shared across projects.
 	 * @return A map containing an entry for every requested name. Entries whose
 	 *         variables are absent have a {@code null} value.
 	 * @throws IllegalArgumentException If {@code global} is {@code false} and
@@ -198,8 +205,10 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 *
 	 * @param name       The name of the context variable.
 	 * @param value      The value to push to the context variable.
+	 * @param global     Whether to push to the application-wide context shared
+	 *                   across projects.
 	 * @param projectDir The project directory with which the context variable is
-	 *                   associated.
+	 *                   associated; ignored when {@code global} is {@code true}.
 	 * @return A success message, or an error message if the operation fails or the
 	 *         existing variable has an unsupported type.
 	 */
@@ -272,8 +281,10 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 *
 	 * @param name       The name of the context variable.
 	 * @param mode       Pop mode, either "LIFO" (default) or "FIFO".
+	 * @param global     Whether to pop from the application-wide context shared
+	 *                   across projects.
 	 * @param projectDir The project directory with which the context variable is
-	 *                   associated.
+	 *                   associated; ignored when {@code global} is {@code true}.
 	 * @return The removed value, or a message if the context or variable does not
 	 *         exist, the list is empty, the variable type is unsupported, or an
 	 *         error occurs.

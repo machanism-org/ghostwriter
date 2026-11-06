@@ -202,8 +202,8 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 * retrieval using the process ID.
 	 * </p>
 	 *
-	 * @param projectDir The project directory in which to scan for files. The
-	 *                   directory must be readable by the process.
+	 * @param instructions Optional global guidance instructions or prompt overrides
+	 *                     applied during processing.
 	 * @param properties Optional map of Act properties, such as configuration
 	 *                   overrides or parameters for the guidance processing. If
 	 *                   {@code null}, only the main configuration is used.
@@ -214,6 +214,11 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 *                   names, glob patterns (e.g., "glob:**.java"), or regex
 	 *                   patterns (e.g., "regex:^.[^/]+\\.java$"). Default:
 	 *                   "${project_dir}".
+	 * @param async      {@code true} to run processing in the background and return
+	 *                   a process identifier immediately; {@code false} to wait for
+	 *                   processing to finish and return its report.
+	 * @param projectDir The project directory in which to scan for files. The
+	 *                   directory must be readable by the process.
 	 * @param config     The configuration object for property resolution and
 	 *                   default values. It is layered with the supplied properties.
 	 * @return In asynchronous mode, a map containing the unique {@code process_id}

@@ -86,8 +86,11 @@ public class ActFunctionTools implements FunctionTools {
 	 *
 	 * @param actName      The name of the Act to load.
 	 * @param projectDir   The project directory containing custom Act definitions.
-	 * @param configurator The configuration used to locate custom Act definitions.
-	 * @return A map containing the matching custom and/or built-in Act details.
+	 * @param configurator The configuration used to locate custom Act definitions;
+	 *                     its Acts-location setting is used when searching the
+	 *                     project.
+	 * @return A map containing the matching custom and/or built-in Act details,
+	 *         keyed by {@code custom} and/or {@code built-in}.
 	 * @throws IOException           If an error occurs while loading an Act
 	 *                               definition.
 	 * @throws FileNotFoundException If no custom or built-in definition matches the
@@ -126,13 +129,15 @@ public class ActFunctionTools implements FunctionTools {
 	/**
 	 * Runs an Act in the background and persists its result for later polling.
 	 *
-	 * @param actProcessor processor configured for the Act
+	 * @param actProcessor processor configured for the Act whose results are
+	 *                     persisted
 	 * @param projectDir   project directory to scan
 	 * @param path         scan path supplied to the processor
 	 * @param actName      Act name used in completion logging
-	 * @param tempFile     file that receives the serialized result
-	 * @throws IllegalArgumentException If the result file cannot be created or
-	 *                                  written.
+	 * @param tempFile     file that receives the serialized result; it is created
+	 *                     if it does not already exist
+	 * @throws IllegalArgumentException If creating the result file or writing its
+	 *                                  serialized result fails.
 	 */
 	private void saveAsyncActResult(ActProcessor actProcessor, File projectDir, String path, String actName,
 			File tempFile) {
@@ -151,7 +156,7 @@ public class ActFunctionTools implements FunctionTools {
 	/**
 	 * Writes the Act completion banner when INFO logging is enabled.
 	 *
-	 * @param actName completed Act name; used in the lifecycle log message
+	 * @param actName completed Act name used in the lifecycle log message
 	 */
 	private void logActCompletion(String actName) {
 		if (logger.isInfoEnabled()) {
@@ -168,14 +173,17 @@ public class ActFunctionTools implements FunctionTools {
 	 * </p>
 	 *
 	 * @param actName    The name of the Act to perform.
-	 * @param projectDir The project directory where the Act will be executed.
+	 * @param projectDir The project directory where the Act will be executed and
+	 *                   whose absolute path is used as the default scan path.
 	 * @param properties Act properties to override default configuration values;
-	 *                   may be {@code null}.
+	 *                   values may reference existing configuration settings, and
+	 *                   the map may be {@code null}.
 	 * @param async      If {@code true}, the Act will be executed asynchronously,
 	 *                   and the method will return immediately with a process ID.
 	 *                   If {@code false}, the Act will be executed synchronously,
 	 *                   and the method will return the Act's result.
-	 * @param config     The configuration object.
+	 * @param config     The base configuration object layered with the supplied
+	 *                   property overrides.
 	 * @return A response object containing the Act's result (for synchronous
 	 *         execution) or a process ID and status (for asynchronous execution).
 	 * @throws IOException If an error occurs during Act processing.
@@ -263,7 +271,8 @@ public class ActFunctionTools implements FunctionTools {
 	/**
 	 * Builds the project-temporary relative file name for an Act result.
 	 *
-	 * @param processId asynchronous execution identifier
+	 * @param processId asynchronous execution identifier used as the result-file
+	 *                  name
 	 * @return result file name relative to the temporary directory
 	 */
 	private String getFileName(final String processId) {
@@ -329,7 +338,8 @@ public class ActFunctionTools implements FunctionTools {
 	 * AI prompt template that instructs the caller to execute an Act identified by
 	 * name. The returned template is resolved from the MCP prompt resource bundle.
 	 *
-	 * @param actName The name of the Act to perform.
+	 * @param actName The name of the Act to perform. The current resource-bundle
+	 *                template is generic and does not interpolate this value.
 	 * @return The prompt template used to perform the Act. The template is loaded
 	 *         from the {@code process_act} resource-bundle entry.
 	 */

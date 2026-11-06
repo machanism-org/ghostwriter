@@ -430,6 +430,8 @@ public class CommandFunctionTools implements FunctionTools {
 	 * @param output        bounded output buffer
 	 * @param lineConsumer  callback invoked for each line read
 	 * @param errorConsumer callback invoked if reading fails
+	 * @throws IllegalArgumentException if {@code charsetName} is not a supported
+	 *                                  character set
 	 */
 	private void readStream(java.io.InputStream inputStream, String charsetName, LogBuilder output,
 			LineConsumer lineConsumer, ErrorConsumer errorConsumer) {

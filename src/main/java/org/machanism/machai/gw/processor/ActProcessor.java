@@ -90,6 +90,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * definitions.</li>
  * <li>{@value #BASED_ON_PROPERTY_NAME} &mdash; property name used to declare
  * act inheritance.</li>
+ * <li>{@value #SUPER_VALUE_PLACEHOLDER} &mdash; placeholder used in inherited
+ * string values and episode prompts to insert the corresponding parent value.</li>
  * <li>{@value #INSTRUCTIONS_PROPERTY_NAME} and {@value #INPUTS_PROPERTY_NAME}
  * &mdash; TOML property names for system instructions and episode prompt
  * definitions supplied to an act.</li>
@@ -241,6 +243,7 @@ public class ActProcessor extends AIFileProcessor {
 	/** Cached automatically selected tools, keyed by act name and episode ID. */
 	private Map<String, String[]> autoToolsMap = new ConcurrentHashMap<>();
 
+	/** Act name used to expand commands beginning with {@link #DEFAULT_TASK_MARKER}. */
 	private String defaultActName = "task";
 
 	/**
@@ -1280,10 +1283,23 @@ public class ActProcessor extends AIFileProcessor {
 		return actProperties;
 	}
 
+	/**
+	 * Returns the act name used to expand shorthand task commands.
+	 *
+	 * @return the default act name, or {@code null} when shorthand expansion is
+	 *         disabled
+	 */
 	public String getDefaultActName() {
 		return defaultActName;
 	}
 
+	/**
+	 * Sets the act name used to expand commands beginning with
+	 * {@link #DEFAULT_TASK_MARKER}.
+	 *
+	 * @param defaultActName act name to use, or {@code null} to disable shorthand
+	 *                       expansion
+	 */
 	public void setDefaultActName(String defaultActName) {
 		this.defaultActName = defaultActName;
 	}
