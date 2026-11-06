@@ -2,7 +2,9 @@ package org.machanism.machai.gw.reviewer;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.MalformedInputException;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.MessageFormat;
@@ -62,13 +64,17 @@ public class JavaReviewer implements Reviewer {
 	 * @param guidancesFile the Java file to analyze
 	 * @return a formatted prompt fragment, or {@code null} when the file does not contain guidance
 	 * @throws IOException if an error occurs while reading the file
-	 * @throws IllegalArgumentException if the file cannot be decoded as UTF-8
+	 * @throws IllegalArgumentException if the file contains bytes that are not valid UTF-8
 	 */
 	@Override
 	public String perform(File projectDir, File guidancesFile) throws IOException {
 		String result = null;
 		try {
-			String content = new String(Files.readAllBytes(guidancesFile.toPath()), StandardCharsets.UTF_8);
+			String content = StandardCharsets.UTF_8.newDecoder()
+					.onMalformedInput(CodingErrorAction.REPORT)
+					.onUnmappableCharacter(CodingErrorAction.REPORT)
+					.decode(ByteBuffer.wrap(Files.readAllBytes(guidancesFile.toPath())))
+					.toString();
 
 			if (Strings.CS.contains(content, GuidanceProcessor.GUIDANCE_TAG_NAME)) {
 				Pattern pattern = Pattern.compile(
@@ -87,7 +93,7 @@ public class JavaReviewer implements Reviewer {
 					}
 				}
 			}
-		} catch (MalformedInputException e) {
+		} catch (CharacterCodingException e) {
 			throw new IllegalArgumentException("File: " + guidancesFile.getAbsolutePath(), e);
 		}
 		return result;
@@ -96,8 +102,9 @@ public class JavaReviewer implements Reviewer {
 	/**
 	 * Extracts the declared package name from a Java source snippet.
 	 *
-	 * <p>The first declaration matching the Java package-name syntax is returned;
-	 * this method does not attempt to parse comments or string literals.
+	 * <p>The first declaration matching the method's package-declaration pattern
+	 * is returned. This is a lightweight text search and does not attempt to
+	 * parse comments or string literals.
 	 *
 	 * @param content the full text content of a Java source file
 	 * @return the declared package name, or {@code "<default package>"} when no package declaration is present
