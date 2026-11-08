@@ -177,7 +177,7 @@ The positional `<path>` can be a relative path inside the project, a directory n
 2. Add precise `@guidance` directives to the files that should govern their own processing, or create/select an Act workflow.
 3. Start with a narrow file path or pattern and supply exclusions where needed.
 4. Run the CLI, review the resulting changes and command logs, and refine the guidance or Act.
-5. Reuse the same configuration and scoped command in CI/CD after validating it locally. Supply explicit instruction/Act values, choose non-interactive workflows, provision credentials through the CI secret store, and validate the resulting diff and tests before publishing.
+5. Reuse the same configuration and scoped command in CI/CD after validating it locally. Prefer Guidance mode for bounded batch runs, provision credentials through the CI secret store, and validate the resulting diff and tests before publishing. Act mode has a continuing CLI execution loop, even with an explicit Act value; do not assume a named Act is a one-shot pipeline command. Validate the workflow's termination behavior and enforce a job timeout before automating it.
 
 ### Java Version and Functional Requirements
 
@@ -233,7 +233,7 @@ java -jar gw.jar . --act "code-doc"
 java -jar gw.jar . --act "> Summarize the project and update its documentation."
 ```
 
-Use `--acts "acts,shared-acts" --act documentation-update` only after creating those directories and the requested custom Act. The built-in help also illustrates directory and relative-path scans, `"glob:**/*.java"`, and `"regex:^.*/[^/]+\.java$"`. In automation, always supply values for `--instructions` and `--act` if those flags are used, since omitting their values prompts on standard input.
+Use `--acts "acts,shared-acts" --act documentation-update` only after creating those directories and the requested custom Act. The built-in help also illustrates directory and relative-path scans, `"glob:**/*.java"`, and `"regex:^.*/[^/]+\.java$"`. In automation, always supply values for `--instructions` and `--act` if those flags are used, since omitting their values prompts on standard input. Supplying an Act value avoids that initial prompt but does not disable the CLI's continuing Act loop: after a scan, it selects and executes the Act again. Act-mode automation therefore also needs tested termination behavior and an external timeout; there is no one-shot CLI option in the current entry point.
 
 ## Resources
 

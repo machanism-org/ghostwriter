@@ -57,7 +57,7 @@ At a high level, `ActProcessor.setAct(...)` interprets the act name, optional re
 
 1. Choose a built-in act, for example `unit-tests`, or create `my-review.toml` in your configured acts directory.
 2. Run the act by name with `gw --act <name>`, optionally adding a request after the name. For example, `gw --act unit-tests Focus on the parser package`.
-3. The text after the name is the requested task. When the act has not already supplied `public.prompt` (including through a default), it becomes the user prompt available to the TOML template as `${public.prompt}`.
+3. The text after the name is the requested task. It becomes the user prompt available to the TOML template as `${public.prompt}` and overrides the act's default request. If no request text is supplied, the processor uses its existing default prompt, or the act's `default.public.prompt` when that prompt is `null`.
 4. The act loads its instructions, tools, inputs, defaults, and any parent act. It then processes the selected project files or project-level episodes.
 5. Review the result. In interactive acts, continue the conversation or end it using the commands described below.
 
@@ -93,20 +93,20 @@ interactive = true
 
 ### Default user prompt: the `prompt` property
 
-The prompt property used by an act is the dotted TOML key `public.prompt` (not a separate top-level `prompt` key). Set `default.public.prompt` in the TOML file to provide the default request used when no direct `public.prompt` value has already been configured:
+The user-request property used by an act is the dotted TOML key `public.prompt` (not a separate top-level `prompt` key). Set `default.public.prompt` in the TOML file to provide a default request for a run without user request text or an existing processor default prompt. Keep `inputs` at the TOML root, before `[default]`; keys written after a table header belong to that table:
 
 ```toml
-[default]
-public.prompt = "Review the project for documentation gaps."
-
 inputs = '''
 Perform this request: ${public.prompt}
 '''
+
+[default]
+public.prompt = "Review the project for documentation gaps."
 ```
 
-The resulting value is stored as `public.prompt` and can be inserted anywhere in the prompt with `${public.prompt}`. A value already supplied as `public.prompt` is retained rather than replaced. Defaults are applied before the request text appended to the act name is bound. Consequently, an act that defines `default.public.prompt` retains that default unless the caller supplies `public.prompt` through configuration; appended request text does not replace it. If an act must use the text appended after its name, do not set a competing `default.public.prompt`, or arrange for the caller to set `public.prompt` explicitly.
+The resulting request is stored as `public.prompt` and can be inserted into the prompt with `${public.prompt}`. Defaults are applied first, but request binding then writes `public.prompt` again. Explicit text appended to the act name therefore replaces the default. If the processor's prompt is `null`, request binding reads the raw `default.public.prompt` value from the act. A preconfigured `public.prompt` alone is not a reliable override of this binding; an empty (rather than `null`) processor prompt also does not trigger that fallback.
 
-For example, `gw --act doc-audit` uses the configured default when no `public.prompt` has been supplied. A caller that needs a different default can set `public.prompt` through its configuration before starting the act; keep `${public.prompt}` unchanged in the TOML template so that runtime substitution can occur.
+For example, on a fresh processor without an existing default prompt, `gw --act doc-audit` uses the act's documentation-gap request. `gw --act doc-audit Check installation instructions` uses the appended request instead. Keep `${public.prompt}` unchanged in the TOML template so that runtime substitution can occur.
 
 ### Prompt front matter and tools
 
@@ -218,9 +218,11 @@ inputs = [
 gw.threads = 2
 ```
 
-The child definition is read and its `basedOn` parent is then loaded into the same property map. During this merge, the value already in the map is the overriding value. For strings, `${super.value}` in that overriding value is replaced with the inherited value; without the placeholder, the overriding value remains unchanged. Input arrays are handled by position: an entry containing `${super.value}` incorporates the corresponding inherited episode, while entries beyond the other array are kept. A custom act with the same name as a built-in act is also loaded and can override or extend the bundled definition.
+The custom definition is read first, then the same-named built-in definition, and finally the `basedOn` parent is loaded recursively into the same property map. For strings, the value already in the map takes precedence: `${super.value}` in that value is replaced with the inherited value; without the placeholder, the overriding string remains unchanged. Input arrays are handled by position: an entry containing `${super.value}` incorporates the corresponding inherited episode, while entries beyond the other array are kept. When inherited input text is inserted into an existing input slot, its leading YAML front matter is removed; define the desired model and tools in the child's episode front matter rather than expecting the parent's metadata to be combined automatically.
 
-`[default]` entries are fallbacks. A `default.some.key` value is copied to `some.key` only when no non-default act value exists; an existing configurator value can replace that fallback. When string act data is later applied, `${super.value}` can also be resolved from the current configurator value. In practice: use `basedOn` for reusable templates, `${super.value}` to preserve or append inherited/configured content, and `[default]` for values that should be available only when no direct value was set.
+This string/list precedence is not a universal rule for all TOML types. Boolean and numeric entries are converted to strings and assigned directly as each definition loads, so a later-loaded built-in or parent value can overwrite a child's value of those types. Check the merged properties with `ActProcessor.getActProperties()` when such settings occur in both definitions.
+
+`[default]` entries are fallbacks. A `default.some.key` value is copied to `some.key` only when no non-default act value exists; an existing configurator value can replace that fallback. When string act data is later applied, `${super.value}` can also be resolved from the current configurator value. User-prompt binding is a separate final step with the precedence described in the default-prompt section. Act instructions are applied only if the processor does not already have instructions. In practice: use `basedOn` for reusable templates, `${super.value}` to preserve or append inherited/configured content, and `[default]` for fallback settings.
 
 For example, this child keeps the parent's instructions and adds one rule:
 
@@ -261,7 +263,9 @@ If `base-review` says `Review carefully.`, the effective instruction includes bo
 
 ## Finding act files
 
-Built-in acts are classpath resources under `/acts/` and end in `.toml`. External acts can be loaded from a configured local acts directory or an HTTP(S) location. Relative local locations are resolved from the project root. You can also use an **absolute path to a TOML file** as the act name, for example `C:\work\acts\my-review.toml`. In that case, the file is loaded directly; classpath-resource hierarchy is not supported for that file.
+Built-in acts are classpath resources under `/acts/` and end in `.toml`. External acts can be loaded from a configured local acts directory or an HTTP(S) location. Relative local locations are resolved from the project root. The directory loader also accepts an **absolute path to a TOML file** as the act name. In that case, classpath-resource hierarchy is not supported for that file.
+
+There is a current Windows limitation: the normal `loadAct` path still attempts classpath lookup after reading the external file, and that lookup rejects names containing backslashes. A Windows absolute path with backslashes can therefore fail even though the directory loader accepts it. Prefer an act name in a configured local acts directory for normal command-line use; do not depend on an absolute file path to combine bundled definitions.
 
 ## Built-in acts
 
@@ -287,11 +291,11 @@ Retrieves SonarQube findings, fixes eligible quality and security issues, adds o
 
 ### `task`
 
-Provides the minimal general-purpose project-aware assistant workflow. Use it for a custom request that does not need a specialized act; the `>` shorthand selects this act automatically.
+Provides the minimal general-purpose project-aware assistant workflow. Use it for a custom request that does not need a specialized act; the `>` shorthand selects this act automatically. It enables interactive mode and asks for confirmation before work with side effects, so it is best used in a chat-capable environment.
 
 ### `unit-tests`
 
-Builds the project, analyzes JaCoCo coverage, and creates or improves unit tests for under-covered code. Use it when you need meaningful test coverage improvements, especially for a specified source area.
+Builds the Maven project, analyzes JaCoCo coverage, and creates or improves unit tests for under-covered code, aiming for at least 90% coverage in the requested source area. Use it when you need meaningful test coverage improvements. Its configured scan path is `glob:**/test/java`; it may update test dependencies or refactor production code when needed for testability without changing external behavior.
 
 ## Module & Project File Processing by Act
 

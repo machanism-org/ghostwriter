@@ -31,7 +31,7 @@ Runs a named Act in the current project. It can return the completed result sync
 **Inputs:** `name` — Act name; `properties` — optional configuration overrides; `async` — whether to run in the background (default `true`).
 
 ### `get_act_result`
-Polls a background Act started by `perform_act`. It returns `status: done` and the result when serialization is complete, or `status: processing` while the result is still being written.
+Polls a background Act started by `perform_act`. It returns `status: done` and the result when serialization is complete, or `status: processing` when reading encounters an incomplete serialized result. A missing result file raises a file-not-found error rather than returning a processing status.
 
 **Availability:** Supported by `ActFunctionTools` for processors other than `GuidanceProcessor`.
 
@@ -42,11 +42,11 @@ Polls a background Act started by `perform_act`. It returns `status: done` and t
 `ActSpecFunctionTools` is annotated with `@SupportedFor({ ActProcessor.class })`; these tools are intended for `ActProcessor` workflows. They signal control flow by throwing an internal workflow exception rather than returning a normal result.
 
 ### `move_to_episode`
-Explicitly jumps to an episode identified by an ID or name. Use it only when a workflow must navigate to a requested episode; normal progression to the next episode is automatic.
+Explicitly jumps to an episode identified by an ID or name. Use it only when the user explicitly requests navigation to a particular episode; normal progression to the next episode is automatic.
 
 **Availability:** Supported by `ActSpecFunctionTools` for `ActProcessor` workflows.
 
-**Inputs:** `id` — episode ID; `name` — episode name.
+**Inputs:** `id` — integer episode ID; `name` — episode name.
 
 ### `repeate_episode`
 Requests another pass through the current episode while preserving workflow context. It is useful after validation failure or when another input pass is required.
@@ -86,7 +86,7 @@ Requests application termination by raising a controlled termination signal. Use
 **Inputs:** `message` — optional host-facing message, default `Execution terminated by function tool.`; `exit_code` — exit code, default `0`.
 
 ### `end_task`
-Completes the current task without shutting down the application, allowing the host to accept later tasks.
+Completes the current task without shutting down the application, allowing the host to accept later tasks. Use it when the user requests ending the task, particularly to conclude an interactive session.
 
 **Availability:** Supported by `CommandSpecFunctionTools` for `AIFileProcessor` workflows.
 
@@ -131,7 +131,7 @@ Applies either a standard unified diff or the supported simplified search-and-re
 `GuidanceFunctionTools` is annotated with `@SupportedFor(excludes = GuidanceProcessor.class)`; its tools are intended for supported processors other than `GuidanceProcessor`. These operations discover files containing `@guidance` tags, process them with the configured model, and retrieve asynchronous reports.
 
 ### `get_guidance_tagged_files`
-Scans matching files and groups files containing guidance tags by project directory. This is a discovery operation and does not apply the instructions.
+Scans matching files and groups files containing guidance tags by project directory. Use it only as the first step when the user explicitly requests guidance-tag processing, not for general searching, test fixing, or ordinary file inspection. This is a discovery operation and does not apply the instructions; files outside the supplied pattern are not inspected.
 
 **Availability:** Supported by `GuidanceFunctionTools` for processors other than `GuidanceProcessor`.
 
@@ -142,10 +142,10 @@ Applies guidance processing to matching files using optional global instructions
 
 **Availability:** Supported by `GuidanceFunctionTools` for processors other than `GuidanceProcessor`.
 
-**Inputs:** `instructions` — optional global instructions; `properties` — optional processing overrides; `path` — scan path or pattern, default `.`; `async` — background mode, default `true`.
+**Inputs:** `instructions` — optional global instructions that supplement or take precedence over embedded directives; `properties` — optional processing overrides; `path` — raw scan path, `glob:` pattern, or `regex:` pattern, default `.`; `async` — background mode, default `true`.
 
 ### `get_guidance_tagged_files_process_result`
-Retrieves an asynchronous guidance-processing report. Until the report file is available it returns a processing status; afterward it returns the completed result.
+Retrieves an asynchronous guidance-processing report. A missing report file returns `status: processing`; a successfully read report returns `status: done` with the result. An unreadable or partially written report raises an I/O error. Background failures are logged and can leave the report unavailable, so a processing status alone does not guarantee the job is still running.
 
 **Availability:** Supported by `GuidanceFunctionTools` for processors other than `GuidanceProcessor`.
 
@@ -188,11 +188,11 @@ Removes and returns a context value. Lists support LIFO or FIFO removal, and are
 `WebFunctionTools` has no `@SupportedFor` annotation. It provides HTTP GET and general REST access, with optional headers, timeouts, response encodings, CSS selection, plain-text rendering, Basic authentication through URL user information, and runtime property substitution. Relative `file:` URLs resolve against the project directory; absolute file paths are also accepted.
 
 ### `get_web_content`
-Fetches an HTTP(S) page with GET or reads a `file:` URL. Relative file paths resolve against the project directory, while absolute file paths are also accepted. It can return HTML, select matching CSS elements, and optionally render the response as plain text.
+Fetches an HTTP(S) page with GET or reads a `file:` URL. Relative file paths resolve against the project directory, while absolute file paths are also accepted. HTTP responses include a status line before the body unless HTML selection or text rendering changes the output. It can select matching CSS elements and optionally render the response as plain text; use `text_only: false` and omit `selector` to retain the unfiltered content.
 
 **Inputs:** `url` — web or file URL; `headers` — optional request headers; `timeout` — milliseconds, default `0`; `charset` — response encoding, default `UTF-8`; `text_only` — strip HTML, default `false`; `selector` — optional CSS selector.
 
 ### `call_rest_api`
-Sends a REST request with a configurable method, headers, body, timeout, and response encoding. The response includes its HTTP status line followed by the body.
+Sends a REST request with a configurable method, headers, body, timeout, and response encoding. A nonempty request body is sent only for POST, PUT, or PATCH, using the selected character set. The method must be supported by the underlying Java HTTP connection; unsupported methods can raise an error. The response includes its HTTP status line followed by the body, or a response-code summary when no response stream is available.
 
-**Inputs:** `url` — endpoint; `method` — HTTP method, default `GET`; `headers` — optional request headers; `body` — optional request body; `timeout` — milliseconds, default `0`; `charset` — response encoding, default `UTF-8`.
+**Inputs:** `url` — HTTP(S) endpoint; `method` — HTTP method, default `GET`; `headers` — optional request headers; `body` — request body, default empty; `timeout` — connection and read timeout in milliseconds, default `0` (connection defaults); `charset` — response decoding and request-body encoding, default `UTF-8`.

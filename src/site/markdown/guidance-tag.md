@@ -84,7 +84,8 @@ The exact comment format matters. The Markdown reviewer looks for the marker ins
 2. Add an HTML comment near the top.
 3. State the audience, required content, and anything that must not change.
 4. Run Ghostwriter for the project or a targeted scan path.
-5. Check the proposed update and improve the instruction before rerunning if necessary.
+5. Ghostwriter reads the page and its instruction, then uses the selected AI service to update the surrounding content—for this example, installation steps, a usage example, and support information. The guidance comment stays in place for future runs.
+6. Check the update, confirm that license details remain intact, and improve the instruction before rerunning if necessary.
 
 ```markdown
 <!-- @guidance:
@@ -106,7 +107,7 @@ Use the comment style appropriate to the language. In Java, for example:
  */
 ```
 
-TypeScript accepts block or `//` comments. Python accepts either a line comment with text on the same line or a triple-quoted string:
+TypeScript accepts block or `//` comments. Python accepts either a line comment with text on the same line or a triple-quoted string. Prefer a `#` comment when you want an instruction that is strictly a comment; a triple-quoted string is Python code and can become a docstring depending on where you place it:
 
 ```python
 '''
@@ -159,9 +160,11 @@ The model selection applies to the run. Run separate scans when different folder
 
 ## What happens during a run?
 
-`GuidanceProcessor` loads reviewers through Java's service-provider mechanism and selects one by normalized file extension. The built-in reviewers cover Markdown (`.md`), HTML/HTML fragments/XML (`.html`, `.htm`, `.xml`), Java (`.java`), TypeScript (`.ts`), Python (`.py`), PlantUML (`.puml`), and the exact folder file `@guidance.txt` (handled through `.txt`). If no reviewer supports the file, Ghostwriter normally leaves it alone; a configured default instruction is the exception for matching files. A reviewer checks for the marker in the comment or string style it supports and builds the material for that file. Markdown, HTML/XML, Java, and PlantUML reviewers provide file content with project-relative context; Python and TypeScript reviewers provide the non-blank instruction they find with that context. Java `package-info.java` receives package-level context, while the text reviewer reads the full contents of `@guidance.txt` and identifies its parent folder. Reviewer loading is extensible: projects can provide additional `Reviewer` implementations through the same service-provider mechanism.
+The **GuidanceProcessor** is the part of Ghostwriter that coordinates guidance processing. It chooses a file reader, called a **reviewer**, based on the file's extension. That reader checks for the supported tag style and prepares the instruction and file context described above. Unsupported files, or files without recognized guidance, are normally left alone; a configured default instruction can also be used for matching files. Developers can add readers for other file formats without changing the way users write plain-language instructions.
 
-Ghostwriter then invokes the configured provider with the standard instructions and the reviewer material. Its optional functional tools can inspect and modify files, run commands and examine logs, or obtain web information. Tools that modify files, run commands, or make network requests must be enabled and controlled by your settings.
+Ghostwriter sends its standard processing rules and the reviewer's material to your selected AI service. File, command, and web tools let the assistant inspect and update files, run checks, examine logs, and look up information when the task requires it. If the provider has no tools configured, the processor adds its built-in file, command, and web tools. Review your tool settings and permissions before running, especially for actions that change files, execute commands, or access the network.
+
+The processor collects file paths and processing messages in a report and logs the total number of processed files. Use the messages to review the run, but also inspect the actual changes and run any relevant tests: a completion message alone does not prove that the result is correct.
 
 Guidance processing is deliberately focused on the file or folder instruction. It is a lightweight choice for local, repeatable rules. Use an **Act** instead when you need a reusable, multi-step workflow with explicit sequencing across a wider task.
 
