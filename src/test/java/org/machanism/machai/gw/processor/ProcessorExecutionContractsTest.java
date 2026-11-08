@@ -24,6 +24,7 @@ import org.apache.commons.cli.Options;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.machai.gw.tools.EndTaskException;
 import org.machanism.machai.gw.tools.MoveToEpisodeException;
 import org.machanism.machai.gw.tools.RepeatEpisodeException;
 import org.machanism.machai.process.provider.AbstractAIProvider;
@@ -99,7 +100,7 @@ class ProcessorExecutionContractsTest {
 		assertEquals("glob:docs{,/**}", processor.parsePath(temporaryDirectory.toFile(), "docs"));
 		processor.defaultPrompt = "folder prompt";
 		assertEquals("glob:docs", processor.parsePath(temporaryDirectory.toFile(), nested.getPath()));
-		assertThrows(IllegalArgumentException.class,
+		assertThrows(EndTaskException.class,
 				() -> processor.parsePath(temporaryDirectory.toFile(),
 						temporaryDirectory.resolveSibling("outside").toString()));
 	}

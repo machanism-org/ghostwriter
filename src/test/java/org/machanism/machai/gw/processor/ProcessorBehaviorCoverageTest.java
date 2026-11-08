@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.machai.gw.tools.EndTaskException;
 import org.machanism.machai.gw.tools.MoveToEpisodeException;
 
 /** Covers episode redirection and scanning configurations not exercised by basic tests. */
@@ -68,7 +69,7 @@ class ProcessorBehaviorCoverageTest {
 
         // Assert
         assertTrue(rootPattern.startsWith("glob:"));
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(EndTaskException.class,
                 () -> processor.parsePath(project.toFile(), tempDir.resolveSibling("outside").toString()));
         assertEquals(project.toFile(), processor.getPath());
     }

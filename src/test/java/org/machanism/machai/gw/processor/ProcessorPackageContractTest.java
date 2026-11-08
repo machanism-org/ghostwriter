@@ -17,6 +17,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.machai.gw.tools.EndTaskException;
 import org.machanism.machai.project.layout.DefaultProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.tomlj.Toml;
@@ -88,7 +89,7 @@ class ProcessorPackageContractTest {
         assertTrue(info.contains("PROCESSED_FILE_REL_PATH: src"));
         assertTrue(info.contains("OS_NAME:"));
         assertTrue(info.contains("not-interactive"));
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(EndTaskException.class,
                 () -> processor.parsePath(tempDir.toFile(), tempDir.resolveSibling("outside").toString()));
     }
 

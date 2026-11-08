@@ -21,6 +21,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.machai.gw.tools.EndTaskException;
 import org.machanism.machai.project.layout.DefaultProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.tomlj.Toml;
@@ -136,7 +137,7 @@ class ProcessorAdditionalQualityTest {
         // Assert
         assertTrue(relativePattern.startsWith("glob:"));
         assertTrue(relativePattern.endsWith("{,/**}"));
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(EndTaskException.class,
                 () -> subject.parsePath(tempDir.toFile(), tempDir.getParent().toString()));
         assertNull(subject.getDirInfoLine(Collections.emptyList(), layout.getProjectDir()));
         assertEquals(tempDir.toFile(), subject.getPath());
