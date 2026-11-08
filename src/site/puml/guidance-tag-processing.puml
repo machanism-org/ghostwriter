@@ -22,118 +22,104 @@ skinparam ActivityDiamondBackgroundColor #FFF3CD
 skinparam NoteBackgroundColor #EDF7ED
 skinparam PartitionBorderColor #999999
 
-|#E8EEF7|GuidanceProcessor (init)|
+|#E8EEF7|GuidanceProcessor|
 start
-:new GuidanceProcessor(rootDir, genai, configurator);
-:loadReviewers()
-- ServiceLoader<Reviewer>
-- index reviewers by normalized file extension;
+:Construct GuidanceProcessor
+(extends AIFileProcessor, not ActProcessor);
+:Load reviewers with ServiceLoader<Reviewer>;
+:Index reviewers by normalized file extension;
 
-|#E8EEF7|AbstractFileProcessor (inherited traversal)|
-:scanFolder(projectDir)
-creates projectLayout = getProjectLayout(projectDir);
-
-partition "Module traversal (inherited)" {
+|#E8EEF7|AbstractFileProcessor traversal|
+:scanFolder(projectDir) creates ProjectLayout;
+if (nonRecursive enabled?) then (yes)
+  :Skip module discovery;
+else (no)
+  :Discover ProjectLayout.getModules();
+  :Process relevant modules serially or with
+  the configured worker count;
   note right
-    Unless nonRecursive is enabled, modules from
-    ProjectLayout.getModules() are processed (serially
-    or with the configured worker count); each accepted
-    module re-enters scanFolder(). GuidanceProcessor's
-    processModule() only recurses when the configured
-    scan `path` matches / is inside the module.
-    NO Act episodes are involved.
+    Each module re-enters scanFolder(). GuidanceProcessor's
+    processModule() recurses into all modules when no scan
+    path is set; otherwise the module must match or contain
+    the configured scan path. No Act episodes are run.
   end note
-  :recurse into matching modules -> scanFolder(moduleDir);
-}
+endif
 
 |#EDF3EC|GuidanceProcessor.processParentFiles|
-:children = listFiles(projectDir)
-(recursive, excluding configured paths);
-:remove children that are module dirs
-(isModuleDir) or that do not match();
-
-repeat :next eligible child;
-
+:List children with projectLayout.listFiles(projectDir);
+if (child list null or empty?) then (yes)
+  :Fall back to projectDir.listFiles()
+  (immediate children, or an empty list);
+endif
+:Remove module directories and children that do not match();
+while (more eligible children?) is (yes)
+  :Take next eligible child;
   |#FDF3E7|GuidanceProcessor.processFile|
-  if (match(file, projectDir)?) then (yes)
+  if (match(file, projectLayout)?) then (yes)
+    :For regular files, look up the Reviewer
+    by file extension;
+    if (Reviewer available?) then (yes)
+      :guidance = reviewer.perform(projectDir, file);
+      note right
+        The extension-specific Reviewer extracts supported
+        @guidance: comment content, or returns null. The
+        processor does not alter the marker in the source.
+      end note
+    else (no)
+      :guidance = null (unsupported type
+      or non-regular file);
+    endif
 
-    partition "Guidance extraction (parseFile)" {
-      :if file is regular: extension =
-      FilenameUtils.getExtension(file);
-      :reviewer = getReviewerForExtension(extension);
-      if (reviewer == null?) then (yes)
-        :guidance = null
-        (unsupported file type);
-      else (no)
-        :guidance = reviewer.perform(projectDir, file);
-        note right
-          The extension-specific Reviewer extracts
-          @guidance: comment content (or returns null).
-          The processor
-          does not alter marker comments itself.
-        end note
-      endif
-    }
-
-    if (guidance != null?) then (yes)
-      :select extracted guidance;
+    if (guidance found?) then (yes)
+      :Choose guidance_rules and extracted guidance;
     else (no)
       if (default prompt configured?) then (yes)
-        :select default prompt;
+        :Choose default prompt (without guidance_rules);
       else (no)
-        :skip file (perform = null);
+        :Skip file;
       endif
     endif
 
-    if (guidance or default prompt?) then (yes)
-
-      |#EDF7ED|process(...) -> provider|
-      partition "process(...)" {
-        :assemble system instructions,
-        processInfo (file path, mode, OS), and
-        extracted guidance + guidance_rules
-        OR the default prompt;
-        :extract YAML front matter (gw.model,
-        enabledTools); resolve public substitutions
-        and >>> includes; configure enabled tools;
-        :send prompts to Genai provider
-        (AIFileProcessor);
-        :perform = provider output;
-      }
-      note right
-        Per-file traversal calls AIFileProcessor's protected\n        process(...) directly. GuidanceProcessor then normalizes\n        blank output to OK and increments the processed-file count;\n        processFile() logs nonblank output and records\n        { file, message } in getReport(). The folder-level fallback\n        uses the public three-argument process(...) overload, which\n        also records a report entry.\n      end note
+    if (guidance or default prompt selected?) then (yes)
+      |#EDF7ED|AIFileProcessor / provider|
+      :Use guidance system instructions
+      (including configured user instructions)
+      and the selected prompts;
+      :Extract YAML front matter (gw.model,
+      enabledTools); resolve public substitutions
+      and prompt includes; configure tools;
+      :Send system instructions, getProcessInfo()
+      (file path, OS, and non-interactive instruction),
+      and selected prompts to configured GenAI provider;
+      :Execute provider.perform() (no Act episodes);
+      :Return provider output;
 
       |#FDF3E7|GuidanceProcessor.processFile|
-      if (perform is not blank?) then (yes)
-        :log provider output;
-      endif
+      :Normalize blank output to OK and increment
+      the processed-file count;
+      :Log output and record { file, message }
+      in getReport();
     endif
-
   else (no)
-    :skip file;
+    :Skip child;
   endif
-
-repeat while (more eligible children?) is (yes)
-->no;
+  |#EDF3EC|GuidanceProcessor.processParentFiles|
+endwhile (no)
 
 if (project directory matches and default prompt configured?) then (yes)
-  :process project directory with the default prompt
-  (public process(...) overload);
-  note right
-    This folder-level fallback is handled by
-    processParentFiles() after child traversal and records
-    the provider response in getReport().
-  end note
-  if (perform is not blank?) then (yes)
-    :log provider output;
-  endif
+  |#EDF7ED|AIFileProcessor / provider|
+  :Process project directory with guidance_rules
+  and default prompt using the public process(...) overload;
+  :Return provider output and add a getReport() entry;
+  |#EDF3EC|GuidanceProcessor.processParentFiles|
+  :Log nonblank output;
 else (no)
-  :no folder-level fallback;
+  :No folder-level fallback;
 endif
 
 |#E8EEF7|GuidanceProcessor|
-:getReport() returns guidance-mode report entries
-(not ActProcessor.getResults());
+:getReport() returns guidance-mode report entries,
+separate from ActProcessor.getResults();
 stop
 
 legend right

@@ -17,58 +17,47 @@ start
 
 :Parse the act command;
 note right
-  Expands ">" shorthand, defaults blank input to
-  "help", separates the act name from its prompt,
-  and reads an episode selector such as "#1,3!".
+  Expands shorthand, applies the "help" default,
+  and separates the act, prompt, and episode selector.
 end note
 
 :Load the act definition and configure it;
 note right
-  Loads built-in and custom TOML, resolves
-  "basedOn" inheritance, applies defaults and
-  prompt values, and prepares the episode list.
+  Loads built-in or custom TOML, resolves inheritance,
+  and applies defaults and prompt values.
 end note
 
 :Find project files to process;
 note right
-  Module traversal is handled by the shared
-  project processor. Parent-project children are
-  filtered by match rules and exclusions. If no
-  child matches, the project directory is used.
+  The shared project processor applies module,
+  match-rule, and exclusion handling.
 end note
-
-:Process each selected file in turn;
 
 if (Specific episodes were requested?) then (yes)
   :Run the selected episodes in request order;
 else (no)
-  :Start with episode 1;
+  :Run episodes in their defined order;
 endif
 
-:Run the episode sequence;
+:Process each selected file through its episode sequence;
 note right
-  Each episode combines act metadata, process
-  information, instructions, and its prompt;
-  it resolves episode tools and calls the provider.
-  Repeat requests rerun the episode, while move
-  requests jump to a numeric or named episode.
+  Episodes use the act context and prompt, resolve
+  their tools, and call the provider. Repeat and move
+  requests control the sequence; an end-task result
+  stops further file processing.
 end note
 
 :Collect the file result;
 note right
-  Continue with the next matching file unless an
-  episode signals that the task should end. After
-  all files complete, the accumulated act results
-  are available to the caller.
+  Accumulate results for the caller after processing
+  the matching files.
 end note
 
 stop
 
 legend right
   * Episodes are ordered steps within one act.
-  * A caller can select specific episodes and choose
-    whether normal order continues afterward.
-  * Each episode receives act metadata and can repeat,
-    jump to another episode, or end task processing.
+  * A caller can select episodes; otherwise, defined order is used.
+  * Episodes can repeat, move, or end task processing.
 endlegend
 @enduml

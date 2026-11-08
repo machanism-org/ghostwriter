@@ -17,56 +17,32 @@ start
 
 :Scan the project folder;
 
-if (Non-recursive mode?) then (yes)
-  note right: Skip module recursion; only this project's files are processed.
+if (Recursive module processing enabled?) then (yes)
+  :Discover and process modules recursively;
+  note right
+    Each module is scanned like the top-level project,
+    including its own files and Act episodes.
+    Modules run sequentially or in parallel when enabled.
+  end note
 else (no)
-  :Find modules in this project;
-  if (Modules found?) then (yes)
-    :Recursively scan and process each module;
-    note right
-      Each module is scanned and processed
-      like the top-level project, including
-      its own project files and Act episodes.
-      Modules run sequentially, or in parallel
-      when multi-threading is enabled.
-    end note
-  endif
+  note right: Skip module recursion; process only this project's files.
 endif
 
-:Collect this project's own files;
+:Collect this project's files;
 note right
-  Module directories are excluded here,
-  and remaining files are filtered by the
-  configured match rules and exclusions.
-  If nothing matches, the project folder
-  itself is processed instead.
+  Module directories are excluded. Apply configured
+  match rules and exclusions; if nothing matches,
+  process the project folder itself.
 end note
 
-:For each collected project file;
-
-:Run the act's episodes for this file;
+:For each collected file, run the act's episodes;
 note right
-  Episodes are selected and ordered by the act.
-  A file's processing can stop early if
-  the act signals that the task should end.
+  Episodes follow the act's selection and order.
+  Processing may stop early, skipping remaining files.
 end note
 
 :Record the result;
 
-note right
-  This flow repeats for every collected file,
-  unless processing was stopped early.
-end note
-
 stop
-
-legend right
-  * Modules are discovered from the project layout and processed
-    recursively, each one scanned the same way as the top level.
-  * Non-recursive mode limits work to the current project only.
-  * Files inside module folders are not processed again as
-    "parent" files - they belong to their own module's pass.
-  * Stopping early during a file skips any remaining files.
-endlegend
 
 @enduml
