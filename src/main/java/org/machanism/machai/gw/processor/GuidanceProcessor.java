@@ -2,6 +2,7 @@ package org.machanism.machai.gw.processor;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.PathMatcher;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -191,12 +192,17 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 */
 	@Override
 	protected boolean match(File file, ProjectLayout projectLayout) {
+
+		file = new File(ProjectLayout.getRelativePath(getRootDir(), file));
+
 		File projectDir = projectLayout.getProjectDir();
 		boolean result = false;
 
-		if (getPathMatcher() != null && getPath() == null) {
-			result = getPathMatcher().matches(file.toPath());
-		} else if (getPathMatcher() == null) {
+		PathMatcher pathMatcher = getPathMatcher();
+
+		if (pathMatcher != null && getPath() == null) {
+			result = pathMatcher.matches(file.toPath());
+		} else if (pathMatcher == null) {
 			result = getDefaultPrompt() == null || Objects.equals(file, projectDir);
 		} else {
 			result = super.match(file, projectLayout);
