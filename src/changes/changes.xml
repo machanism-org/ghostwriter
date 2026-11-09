@@ -3,6 +3,21 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
   <body>
+    <release version="1.4.3" date="2026-11-08" description="Adds commit reporting and project context capabilities while improving guidance, act, logging, and report processing.">
+      <action dev="dev" type="add">Commit Processing: Added commit report generation and detailed change analysis requirements.</action>
+      <action dev="dev" type="add">Project Context: Added support for global project context.</action>
+      <action dev="dev" type="fix">Guidance Processing: Matched guidance patterns against root-relative paths, resolved dot-prefixed scan paths from the project directory, and rejected malformed UTF-8.</action>
+      <action dev="dev" type="fix">Act Processing: Improved interactive failure handling, prompt cleanup, act-name normalization, episode refresh, repeated-act processing, and error details.</action>
+      <action dev="dev" type="fix">Logging: Corrected logger configuration for ActMojo and components, and simplified interactive input prompts.</action>
+      <action dev="dev" type="fix">Report Generation: Generated reports for processed paths and preserved each processed path during report creation.</action>
+      <action dev="dev" type="update">Prompt Configuration: Exposed default processor prompt settings and preserved configured user prompts.</action>
+      <action dev="dev" type="fix">Project Context: Validated project context configuration.</action>
+      <action dev="dev" type="fix">Act Processing: Added the missing act exception.</action>
+    </release>
+    <release version="1.4.2" date="2026-10-23" description="Improves processor workflow handling and command security processing.">
+      <action dev="dev" type="refactor">Processor Workflow: Improved workflow handling across processors, reviewers, and tools.</action>
+      <action dev="dev" type="refactor">Command Security: Streamlined command security processing.</action>
+    </release>
     <release version="1.4" date="2026-09-01" description="Adds commit-act command tools and act-aware guidance processing while improving web-function handling, tool reliability, and provider integrations.">
       <action dev="dev" type="add">Command Tools: Enabled command tools for the commit act.</action>
       <action dev="dev" type="add">Guidance Processing: Added support metadata to limit guidance tools to act-processing contexts.</action>
@@ -28,10 +43,6 @@
       <action dev="dev" type="add">Act and Configuration Enhancements: Added fallback and mutable configurator support for more flexible runtime configuration.</action>
       <action dev="dev" type="fix">Function Tool Execution: Fixed get_recursive_file_list, tool calls through ToolsProvider, perform_act result returns, load_act_details, path parameter naming, return values, end_task handling, act lookup diagnostics, and log chunk naming.</action>
       <action dev="dev" type="fix">Runtime Reliability: Fixed model override handling, asynchronous act and guidance execution, stacktrace output, request session parameter naming, web content fetching, and error handling behavior.</action>
-    </release>
-    <release version="1.4.2" date="2026-10-23" description="Improves processor workflow handling and command security processing.">
-      <action dev="dev" type="refactor">Processor Workflow: Improved workflow handling across processors, reviewers, and tools.</action>
-      <action dev="dev" type="refactor">Command Security: Streamlined command security processing.</action>
     </release>
   </body>
 </document>

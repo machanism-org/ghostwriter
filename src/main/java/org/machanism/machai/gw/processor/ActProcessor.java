@@ -91,7 +91,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * <li>{@value #BASED_ON_PROPERTY_NAME} &mdash; property name used to declare
  * act inheritance.</li>
  * <li>{@value #SUPER_VALUE_PLACEHOLDER} &mdash; placeholder used in inherited
- * string values and episode prompts to insert the corresponding parent value.</li>
+ * string values and episode prompts to insert the corresponding parent
+ * value.</li>
  * <li>{@value #INSTRUCTIONS_PROPERTY_NAME} and {@value #INPUTS_PROPERTY_NAME}
  * &mdash; TOML property names for system instructions and episode prompt
  * definitions supplied to an act.</li>
@@ -243,7 +244,9 @@ public class ActProcessor extends AIFileProcessor {
 	/** Cached automatically selected tools, keyed by act name and episode ID. */
 	private Map<String, String[]> autoToolsMap = new ConcurrentHashMap<>();
 
-	/** Act name used to expand commands beginning with {@link #DEFAULT_TASK_MARKER}. */
+	/**
+	 * Act name used to expand commands beginning with {@link #DEFAULT_TASK_MARKER}.
+	 */
 	private String defaultActName = "task";
 
 	/**
@@ -308,8 +311,8 @@ public class ActProcessor extends AIFileProcessor {
 	 * @throws IOException if an error occurs while loading the action definitions
 	 *                     from the target storage location
 	 */
-	public void setAct(String act) throws IOException {
-		
+	public void setAct(String act) throws ActNotFoundException {
+
 		episodes = new Episodes(this);
 
 		act = StringUtils.trim(act);
@@ -464,7 +467,7 @@ public class ActProcessor extends AIFileProcessor {
 	 *                     be found in either location
 	 */
 	public static void loadAct(String name, Map<String, Object> properties, String actsLocation, File rootDir)
-			throws IOException {
+			throws ActNotFoundException {
 		TomlParseResult customToml = null;
 		try {
 			customToml = tryLoadActFromDirectory(properties, name, actsLocation, rootDir);
@@ -500,7 +503,7 @@ public class ActProcessor extends AIFileProcessor {
 	 * @throws IOException if the resource cannot be read
 	 */
 	public static TomlParseResult tryLoadActFromClasspath(Map<String, Object> properties, String name)
-			throws IOException {
+			throws ActNotFoundException {
 		if (name == null || name.isEmpty() || name.contains("..") || name.contains("\\")) {
 			throw new IllegalArgumentException("Invalid act name: `" + name + "`");
 		}
@@ -512,25 +515,32 @@ public class ActProcessor extends AIFileProcessor {
 		}
 
 		String tomlStr;
-		URLConnection conn = resource.openConnection();
-		conn.setUseCaches(false);
-		try (InputStream in = conn.getInputStream()) {
-			tomlStr = IOUtils.toString(in, StandardCharsets.UTF_8);
+		URLConnection conn;
+		try {
+			conn = resource.openConnection();
+
+			conn.setUseCaches(false);
+			try (InputStream in = conn.getInputStream()) {
+				tomlStr = IOUtils.toString(in, StandardCharsets.UTF_8);
+			} catch (IOException e) {
+				throw new ActNotFoundException("Unable to read act `" + name + "` from " + resource);
+			}
+
+			TomlParseResult toml = Toml.parse(tomlStr);
+			if (toml.hasErrors()) {
+				throw new ActNotFoundException("Act `" + name + "` has TOML errors: " + toml.errors());
+			}
+			setActData(properties, toml);
+
+			if (logger.isDebugEnabled()) {
+				logger.debug("Load act: `{}` from classpath.", name);
+			}
+			return toml;
+
 		} catch (IOException e) {
-			throw new IOException("Unable to read act `" + name + "` from " + resource, e);
+			throw new ActNotFoundException("Unable to read act `" + name + "` from " + resource);
 		}
 
-		TomlParseResult toml = Toml.parse(tomlStr);
-		if (toml.hasErrors()) {
-			throw new IOException("Act `" + name + "` has TOML errors: " + toml.errors());
-		}
-		setActData(properties, toml);
-
-		if (logger.isDebugEnabled()) {
-			logger.debug("Load act: `{}` from classpath.", name);
-		}
-
-		return toml;
 	}
 
 	/**
