@@ -1,18 +1,20 @@
 package org.machanism.machai.gw.tools;
 
-import org.machanism.machai.process.tools.SpecialException;
+import org.machanism.machai.process.tools.ToolException;
 
 /*@guidance: >>> ${guidances}/def-class-javadoc.md */
 /**
  * Runtime control-flow exception that requests host application termination.
  *
- * <p>The host should use {@link #getExitCode()} when completing termination.
- * This exception represents an intentional workflow transition rather than an
- * ordinary application failure.</p>
+ * <p>
+ * The host should use {@link #getExitCode()} when completing termination. This
+ * exception represents an intentional workflow transition rather than an
+ * ordinary application failure.
+ * </p>
  *
  * @author Viktor Tovstyi
  */
-public class ProcessTerminationException extends SpecialException {
+public class ProcessTerminationException extends ToolException {
 	/** Serialization version for this control-flow exception. */
 	private static final long serialVersionUID = 1L;
 	/** Exit code that the host should use when terminating execution. */
@@ -21,7 +23,7 @@ public class ProcessTerminationException extends SpecialException {
 	/**
 	 * Creates a termination request with a detail message and exit code.
 	 *
-	 * @param message message to expose to the host
+	 * @param message  message to expose to the host
 	 * @param exitCode desired process exit code
 	 */
 	public ProcessTerminationException(String message, int exitCode) {
@@ -32,8 +34,8 @@ public class ProcessTerminationException extends SpecialException {
 	/**
 	 * Creates a termination request with a detail message, cause, and exit code.
 	 *
-	 * @param message message to expose to the host
-	 * @param cause underlying cause
+	 * @param message  message to expose to the host
+	 * @param cause    underlying cause
 	 * @param exitCode desired process exit code
 	 */
 	public ProcessTerminationException(String message, Throwable cause, int exitCode) {
