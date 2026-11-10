@@ -2,6 +2,8 @@ package org.machanism.machai.gw.processor;
 
 import java.io.FileNotFoundException;
 
+import org.machanism.machai.process.tools.SpecialException;
+
 /**
  * Signals that an act definition could not be found in the configured act
  * locations or on the classpath.
@@ -9,7 +11,7 @@ import java.io.FileNotFoundException;
  * <p>This exception extends {@link FileNotFoundException} so callers can handle
  * a missing act in the same way as other missing file resources.</p>
  */
-public class ActNotFoundException extends FileNotFoundException {
+public class ActNotFoundException extends SpecialException {
 
 	/**
 	 * Serialization version identifier for this exception type.

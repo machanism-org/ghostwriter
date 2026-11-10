@@ -1,6 +1,7 @@
 package org.machanism.machai.gw.tools;
 
 import org.machanism.machai.process.tools.SpecialException;
+import org.machanism.machai.process.tools.ToolException;
 
 /*@guidance: >>> ${guidances}/def-class-javadoc.md */
 /**
@@ -15,7 +16,7 @@ import org.machanism.machai.process.tools.SpecialException;
  * @author Viktor Tovstyi
  * @see SpecialException
  */
-public class EndTaskException extends SpecialException {
+public class EndTaskException extends ToolException {
 	/**
 	 * Serialization version for this control-flow exception.
 	 *

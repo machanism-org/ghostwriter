@@ -1,5 +1,7 @@
 package org.machanism.machai.gw.tools;
 
+import org.machanism.machai.process.tools.ToolException;
+
 /*@guidance: >>> ${guidances}/def-class-javadoc.md */
 /**
  * Signals that a command has failed a deny-list security check and must not be executed.
@@ -11,7 +13,7 @@ package org.machanism.machai.gw.tools;
  * @author Viktor Tovstyi
  * @see CommandSecurityChecker
  */
-public class DenyException extends Exception {
+public class DenyException extends ToolException {
 
 	/** Serialization version for this exception type. */
 	private static final long serialVersionUID = 3508879826779125812L;
