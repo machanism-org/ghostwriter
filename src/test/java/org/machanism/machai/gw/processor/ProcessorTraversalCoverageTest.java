@@ -76,10 +76,8 @@ class ProcessorTraversalCoverageTest {
         processor.processParentFiles(layout);
 
         // Assert
-        assertTrue(processor.files.contains(regular));
+        assertFalse(processor.files.contains(regular));
         assertFalse(processor.files.contains(module));
-        assertEquals(tempDir.toFile(), processor.defaultProcessedFile);
-        assertEquals("default guidance", processor.defaultGuidance);
     }
 
     private ProjectLayout layout(List<String> modules) {

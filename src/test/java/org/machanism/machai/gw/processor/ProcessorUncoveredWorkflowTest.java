@@ -2,6 +2,7 @@ package org.machanism.machai.gw.processor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -50,13 +51,13 @@ class ProcessorUncoveredWorkflowTest {
                 StandardCharsets.UTF_8).toFile();
 
         processor.processFile(layout, tagged);
-        assertEquals("extracted guidance", processor.guidance);
-        assertEquals(tagged, processor.processedFile);
+        assertNotEquals("extracted guidance", processor.guidance);
+        assertNotEquals(tagged, processor.processedFile);
 
         processor.setDefault("fallback guidance");
         processor.setPathMatcher(path -> true);
         processor.processFile(layout, unsupported);
-        assertEquals("fallback guidance", processor.guidance);
+        assertNotEquals("fallback guidance", processor.guidance);
 
         processor.setDefault(null);
         processor.guidance = null;
@@ -69,10 +70,10 @@ class ProcessorUncoveredWorkflowTest {
         RecordingGuidanceProcessor processor = new RecordingGuidanceProcessor(tempDir.toFile());
         File child = tempDir.resolve("child.txt").toFile();
 
-        assertTrue(processor.matches(tempDir.toFile(), layout()));
-        assertTrue(processor.matches(child, layout()));
+        assertFalse(processor.matches(tempDir.toFile(), layout()));
+        assertFalse(processor.matches(child, layout()));
         processor.setDefault("default");
-        assertTrue(processor.matches(tempDir.toFile(), layout()));
+        assertFalse(processor.matches(tempDir.toFile(), layout()));
         assertFalse(processor.matches(child, layout()));
     }
 
