@@ -60,11 +60,14 @@ public class JavaReviewer implements Reviewer {
 	 * the package-level prompt containing its relative path. Only the first
 	 * matching guidance comment is required to produce a result.
 	 *
-	 * @param projectDir    the project root directory used to compute a project-relative path for context
+	 * @param projectDir    the project root directory used to compute a
+	 *                      project-relative path for context
 	 * @param guidancesFile the Java file to analyze
-	 * @return a formatted prompt fragment, or {@code null} when the file does not contain guidance
+	 * @return a formatted prompt fragment, or {@code null} when the file does
+	 *         not contain a matching guidance comment
 	 * @throws IOException if an error occurs while reading the file
-	 * @throws IllegalArgumentException if the file contains bytes that are not valid UTF-8
+	 * @throws IllegalArgumentException if the file contains bytes that are not
+	 *                                  valid UTF-8
 	 */
 	@Override
 	public String perform(File projectDir, File guidancesFile) throws IOException {
@@ -107,7 +110,8 @@ public class JavaReviewer implements Reviewer {
 	 * parse comments or string literals.
 	 *
 	 * @param content the full text content of a Java source file
-	 * @return the declared package name, or {@code "<default package>"} when no package declaration is present
+	 * @return the declared package name, or {@code "<default package>"} when no
+	 *         package declaration is present
 	 */
 	public static String extractPackageName(String content) {
 		Pattern pattern = Pattern.compile("\\bpackage\\s+([a-zA-Z_][\\w\\.]*);");

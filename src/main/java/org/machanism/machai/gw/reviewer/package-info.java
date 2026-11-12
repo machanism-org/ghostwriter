@@ -41,6 +41,10 @@
  *     guidance text following the tag in a line comment or triple-quoted
  *     string, then supplies the file name, project-relative path, and extracted
  *     text.</li>
+ * <li>{@link BasicReviewer} supports VBA {@code bas}, {@code cls}, and
+ *     {@code frm} files. It extracts non-blank guidance text from a VBA line
+ *     comment, then supplies the file name, project-relative path, and
+ *     extracted text.</li>
  * <li>{@link TypeScriptReviewer} supports {@code ts} files. It extracts
  *     non-blank guidance text from a line or block comment and supplies the
  *     file name, project-relative path, and extracted text.</li>
