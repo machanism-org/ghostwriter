@@ -192,7 +192,7 @@ public final class Ghostwriter {
 		if (LOGGER.isInfoEnabled()) {
 			// Sonar java:S2629: avoid formatting the banner when INFO is disabled.
 			String version = Objects.toString(Ghostwriter.class.getPackage().getImplementationVersion(), "DEVELOPMENT");
-			LOGGER.info("{}", StringUtils.center(" Starting Ghostwriter CLI " + version + " (machanism.org/machai) ",
+			LOGGER.info("{}", StringUtils.center(" Starting Ghostwriter CLI " + version + " (machai.machanism.org) ",
 					GWConstants.LOG_LINE_LENGTH, "-"));
 		}
 	}
