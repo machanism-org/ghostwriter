@@ -81,6 +81,7 @@ public final class Ghostwriter {
 	private static final String ACTS_OPTION = "acts";
 	/** Long option name for selecting a configuration file. */
 	private static final String CONFIG_OPTION = "config";
+	private static final String VERBOSE_OPTION = "verbose";
 	/** Exit code returned for a handled processing failure. */
 	private static final int EXIT_CODE_ERROR = 1;
 
@@ -136,6 +137,7 @@ public final class Ghostwriter {
 				"Specify the path to the project directory for file processing."));
 		options.addOption(new Option("c", CONFIG_OPTION, true,
 				"Specify the path to the configuration file."));
+		options.addOption(new Option("v", VERBOSE_OPTION, false, "Enable verbose output with detailed logging."));
 		options.addOption(Option.builder("t").longOpt(THREADS_OPTION)
 				.desc("Number of concurrent threads to use for processing (e.g., 4). Higher values can improve "
 						+ "performance on multi-core systems but increase resource and AI provider usage.")
@@ -222,6 +224,10 @@ public final class Ghostwriter {
 				configFileName = cmd.getOptionValue(CONFIG_OPTION);
 			} else {
 				configFileName = System.getProperty(GWConstants.CONFIG_PROP_NAME, null);
+			}
+
+			if (cmd.hasOption(VERBOSE_OPTION)) {
+				System.setProperty("org.slf4j.simpleLogger.log.org.machanism.machai", "info");
 			}
 
 			String conf;
@@ -473,18 +479,24 @@ public final class Ghostwriter {
 			applyCommonSettings(processor, settings);
 			int exitCode = processPathectories(processor, settings.paths, settings.projectDir);
 
-			while (processor instanceof ActProcessor) {
-				try {
-					processor.setDefaultPrompt(null);
-					configureDefaultAct(cmd, config, scanner, (ActProcessor) processor);
-					applyCommonSettings(processor, settings);
-					exitCode = processPathectories(processor, settings.paths, settings.projectDir);
-				} catch (ActNotFoundException e) {
-					LOGGER.info("Act not found: {}", e.getMessage());
-				} catch (ProcessTerminationException | EndTaskException e) {
-					throw e;
-				} catch (Exception e) {
-					LOGGER.info("Act processing failed.", e.getMessage());
+			String defaultPrompt = cmd.hasOption(ACT_OPTION) ? cmd.getOptionValue(ACT_OPTION)
+					: config.get(GWConstants.ACT_PROP_NAME, null);
+			if (cmd.hasOption(ACT_OPTION) && defaultPrompt == null) {
+				while (processor instanceof ActProcessor) {
+					try {
+						processor.setDefaultPrompt(null);
+						defaultPrompt = promptForValue(scanner, "Act: ");
+						((ActProcessor) processor).setAct(defaultPrompt);
+						applyCommonSettings(processor, settings);
+						exitCode = processPathectories(processor, settings.paths, settings.projectDir);
+
+					} catch (ActNotFoundException e) {
+						LOGGER.info("Act not found: {}", e.getMessage());
+					} catch (ProcessTerminationException | EndTaskException e) {
+						throw e;
+					} catch (Exception e) {
+						LOGGER.info("Act processing failed.", e.getMessage());
+					}
 				}
 			}
 
