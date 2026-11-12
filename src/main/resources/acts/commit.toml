@@ -38,18 +38,27 @@ enabledTools:
 ---
 Execute these steps strictly in order.
 
-1. Discover repositories. Run `git submodule status --recursive` to list all submodules (empty output means none). Build a list of repositories: root plus every submodule, ordered from the DEEPEST submodule up to the root (children always before their parent).
+0. Detect the mode.
+   - Run `git rev-parse --show-toplevel`. If it fails, call the `end_task` tool and output: "Not a git repository." Otherwise use the printed path as the root repository for all following steps.
+   - Run `git -C <root> submodule status --recursive`.
+   - If the output is empty, the mode is SINGLE (one plain repository, no submodules). If it is not empty, the mode is MULTI.
+   - In SINGLE mode, ignore every step or sub-step that mentions submodules, pointers or parents; they do not apply. Everything else applies to the root repository exactly as written.
+
+1. Discover repositories.
+   - SINGLE mode: the list contains only the root.
+   - MULTI mode: the list contains the root plus every submodule from the status output, ordered from the DEEPEST submodule up to the root (children always before their parent).
 
 2. Check status per repository. For each repository in that order, run `git -C <repo> status --short` and `git -C <repo> diff --cached --name-only`.
    - If a repository already has staged files that you did not stage, do not commit it; report it as "skipped: pre-staged changes".
-   - If a submodule is in detached HEAD (`git -C <repo> symbolic-ref -q HEAD` fails) and has changes, do not commit in it; report it as "skipped: detached HEAD" and also skip its parents' pointer update.
+   - MULTI mode only: if a submodule is in detached HEAD (`git -C <repo> symbolic-ref -q HEAD` fails) and has changes, do not commit in it; report it as "skipped: detached HEAD" and also skip its parents' pointer update.
+   - In SINGLE mode, a detached HEAD in the root does not block committing; just mention it in the report as a note.
 
-3. Read history per repository. Run `git -C <repo> log -n 10 --pretty=%s` and follow that repository's own subject style (scope format, language, capitalization, length).
+3. Read history per repository. Run `git -C <repo> log -n 10 --pretty=%s` and follow that repository's own subject style (scope format, language, capitalization, length). If the repository has no commits yet, use the Conventional Commits style (type: subject, English, lowercase after the colon).
 
 4. Analyze the changes in depth. Do this BEFORE grouping or writing any message. Never base a message on file names or `git status` output alone.
    a. For every modified or deleted file, run `git -C <repo> diff -- <file>` and read the actual hunks. For large diffs, read them in chunks (e.g. `git -C <repo> diff -U5 -- <file>`) rather than skipping them.
    b. For every untracked file, read its content (limit to the first ~200 lines for very large files and infer the rest from structure).
-   c. For modified submodule pointers, run `git -C <repo> diff --submodule=log -- <submodule path>` to see which commits are included.
+   c. MULTI mode only: for modified submodule pointers, run `git -C <repo> diff --submodule=log -- <submodule path>` to see which commits are included.
    d. If a changed function, class, config key or API is used elsewhere and the effect of the change is unclear, inspect the call sites (`git -C <repo> grep -n "<symbol>"`) to understand the real impact.
    e. For each change, determine:
       - WHAT changed: concrete functions, classes, endpoints, config options, UI elements, schemas, dependencies.
@@ -58,7 +67,7 @@ Execute these steps strictly in order.
    f. Distinguish real functional changes from noise (formatting, renames, import reordering, comment edits). Mention noise only briefly and never present it as a functional change.
    g. Tests: if tests were added or changed, state which behavior they cover.
 
-5. Group changes. Groups are built inside ONE repository only (never mix files from different repositories). Each group must be one logical, self-contained change (one feature, one fix, one refactor), based on the functional analysis from step 4, not on file location. Split unrelated changes inside a single file only if they can be separated by whole files; never use `git add -p` or other interactive commands. Choose the scope: feat, fix, docs, refactor, test, perf, build, chore, etc.
+5. Group changes. Groups are built inside ONE repository only (never mix files from different repositories). Each group must be one logical, self-contained change (one feature, one fix, one refactor), based on the functional analysis from step 4, not on file location. Split unrelated changes inside a single file only if they can be separated by whole files; never use `git add -p` or other interactive commands. Choose the scope: feat, fix, docs, refactor, test, perf, build, chore, etc. In SINGLE mode all groups belong to the root repository.
 
 6. Write commit messages. Every message consists of:
    - Subject (first line): active voice, present tense, max ~72 characters, in the repository's own style, naming the main functional result (e.g. "fix: prevent duplicate orders when payment callback is retried"), not the files touched.
@@ -78,14 +87,18 @@ Execute these steps strictly in order.
      EOF
    - Write the heredoc lines without leading indentation. Only if no real bash shell is available (e.g. PowerShell), use `git -C <repo> commit -m "<subject>" -m "<entire body as ONE string with real line breaks>"`, still never with "\n".
 
-7. Commit, bottom-up. For each repository in the order from step 1:
+7. Commit.
+   SINGLE mode: for each group in the root repository, run `git -C <root> add -- <files of the group>` and then commit using the heredoc form from step 6. Do not stage anything outside the group. Continue to step 8 afterwards.
+   MULTI mode, bottom-up, for each repository in the order from step 1:
    a. `git -C <repo> add -- <files of the group>` for each group, then commit using the heredoc form from step 6 (`git -C <repo> commit -F - <<'EOF' ... EOF`), with one blank line after the subject and no blank lines inside the body. Never use "\n" inside a message.
    b. After a submodule is committed, its parent now sees a changed pointer. In the parent, stage it with `git -C <parent> add -- <submodule path>` and include it in a dedicated group "chore: update <submodule> pointer" (or in the parent's own group if logically related). For pointer commits, the body must summarize the functional changes brought by the submodule commits (based on `git diff --submodule=log`). Never stage a submodule pointer before the commit inside the submodule is done.
    c. Never stage a submodule pointer if the submodule still has uncommitted changes (`git -C <sub> status --short` is not empty).
 
-8. Verify. Run `git submodule status --recursive` (no line may start with `+`, which would mean the pointer is out of sync) and `git status --short` in the root. Report any remaining discrepancy.
+8. Verify.
+   - SINGLE mode: run `git -C <root> status --short`. The output should be empty unless files were intentionally skipped; report any remaining change.
+   - MULTI mode: run `git submodule status --recursive` (no line may start with `+`, which would mean the pointer is out of sync) and `git status --short` in the root. Report any remaining discrepancy.
 
-9. If there are NO changes in any repository, call the `end_task` tool and output: "No changes detected."
+9. If there are NO changes in any repository (in SINGLE mode: the root has no changes), call the `end_task` tool and output: "No changes detected."
 
 10. Push the commit report to the global context variable: `REPORT`.
 
