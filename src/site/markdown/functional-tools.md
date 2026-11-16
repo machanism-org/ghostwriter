@@ -122,7 +122,7 @@ Reads a text file under the project root and enforces a maximum returned charact
 **Inputs:** `path` — file to read; `charset` — encoding, default `UTF-8`; `max_file_size` — maximum character count, default `100000`.
 
 ### `apply_patch_to_file`
-Applies either a standard unified diff or the supported simplified search-and-replace patch to a project file. Use it for focused edits rather than replacing an entire file.
+Applies either a standard unified diff or the supported simplified search-and-replace patch to a project file. Use it for focused edits rather than replacing an entire file. It returns a success message when applied, or a text failure message with the error detail when it cannot be applied.
 
 **Inputs:** `file` — target file; `patch` — patch text; `charset` — encoding, default `UTF-8`.
 
@@ -154,6 +154,8 @@ Retrieves an asynchronous guidance-processing report. A missing report file retu
 ## Project context tools
 
 `ProjectContextFunctionTools` is annotated with `@SupportedFor(excludes = GuidanceProcessor.class)`; its tools are intended for supported processors other than `GuidanceProcessor`. They maintain project-scoped state shared between Acts, episodes, and prompt templates, not operating-system environment variables. Each operation can instead target an application-wide context shared across projects by setting `global` to `true`.
+
+Context values are held in application memory; these tools do not persist them across application restarts.
 
 ### `put_project_context_variable`
 Creates or replaces a named project context value.

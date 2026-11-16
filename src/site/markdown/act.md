@@ -195,7 +195,7 @@ Set `gw.interactive = true` when the act should operate as a chat. Interactive m
 - An empty entry is not a special command: if the hosting environment supplies an empty string, it is sent as an empty follow-up prompt; if input is unavailable (`null`), no follow-up is sent.
 - Enter any other text to send it as the next chat prompt.
 
-These are literal command values: `AIFileProcessor.CONTINUE_SPECIAL_PROMPT_COMMAND` is `>`, and `AIFileProcessor.EXIT_SPECIAL_PROMPT_COMMAND` is `.`. Enter the character by itself after a response, not as part of a longer request.
+These are literal command values: `AIFileProcessor.CONTINUE_SPECIAL_PROMPT_COMMAND` is `>`, `AIFileProcessor.EXIT_SPECIAL_PROMPT_COMMAND` is `.`, and the processor's `NO_INTERACTIVE_SPECIAL_PROMPT_COMMAND` value is `>>` (that constant is private). Enter the chosen characters by themselves after a response, not as part of a longer request. The `>>` command accepts the response and turns off further interactive input; `>` accepts the response and continues in interactive mode.
 
 Interactive input requires an environment that supports it. The base `AIFileProcessor` does not read a console by itself: an embedding command-line or UI implementation must provide the next input. In a non-interactive execution environment, acts proceed without chat input; use a predefined non-interactive act when the task must run unattended.
 
