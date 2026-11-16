@@ -177,7 +177,7 @@ The positional `<path>` can be a relative path inside the project, a directory n
 2. Add precise `@guidance` directives to the files that should govern their own processing, or create/select an Act workflow.
 3. Start with a narrow file path or pattern and supply exclusions where needed.
 4. Run the CLI, review the resulting changes and command logs, and refine the guidance or Act.
-5. Reuse the same configuration and scoped command in CI/CD after validating it locally. Prefer Guidance mode for bounded batch runs, provision credentials through the CI secret store, and validate the resulting diff and tests before publishing. Act mode has a continuing CLI execution loop, even with an explicit Act value; do not assume a named Act is a one-shot pipeline command. Validate the workflow's termination behavior and enforce a job timeout before automating it.
+5. Reuse the same configuration and scoped command in CI/CD after validating it locally. Provision credentials through the CI secret store and validate the resulting diff and tests before publishing. Supply an explicit value for `--act` to run an Act over the selected targets without entering the CLI's continuing input loop. A valueless `--act` prompts for an initial Act and then keeps prompting for further Acts. Individual workflows can still request input or repeat episodes, so validate their termination behavior and enforce a job timeout before automating them.
 
 ### Java Version and Functional Requirements
 
@@ -194,6 +194,7 @@ Explicit command-line values take precedence over the corresponding startup conf
 | `-h`, `--help` | Print the usage header, positional path rules, all options, and examples, then exit without processing. | Not enabled |
 | `-d <dir>`, `--projectDir <dir>` | Set the project root used for scanning and processing. | `project.dir`; otherwise the current working directory (`user.dir`) |
 | `-c <file>`, `--config <file>` | Select a configuration properties file. Relative paths use the initial project directory, before `--projectDir` is applied. | `gw.properties`; `-Dgw.config=...` can select another file when `--config` is absent |
+| `-v`, `--verbose` | Request more detailed logging by setting `org.slf4j.simpleLogger.log.org.machanism.machai` to `info` during configuration initialization. Effective output depends on the logging backend and when it initializes. | Not enabled; existing logging settings apply |
 | `-t <n>`, `--threads <n>` | Set module-processing concurrency; must be a positive integer. Higher values increase resource and provider use. | `gw.threads`; otherwise serial module processing (internal thread field starts at `0`) |
 | `-m <provider:model>`, `--model <provider:model>` | Select the GenAI provider and model, for example `OpenAI:gpt-5.1`. | `gw.model`, otherwise unset |
 | `-i [text]`, `--instructions [text]` | Set system instructions. When used without text, prompt for the instructions on standard input. | `gw.instructions`, otherwise unset |
@@ -201,7 +202,7 @@ Explicit command-line values take precedence over the corresponding startup conf
 | `-as <list>`, `--acts <list>` | In Act mode, set comma- or space-separated local directories or HTTP(S) base locations for external Act definitions. Relative directories use the project root and must exist. | `gw.acts`; otherwise no external location, with built-in Acts available on the classpath |
 | `-a [name or prompt]`, `--act [name or prompt]` | Enable Act mode and select a named Act or `> task` shorthand; read standard input when supplied without a value. Blank input selects the built-in help Act. | Guidance mode unless this flag is present; `gw.act` alone does not enable Act mode or supply a value to a valueless CLI flag |
 
-These are all nine CLI options; there are no separate CLI flags for request logging, non-recursive traversal, or interactive settings. A missing default configuration file is tolerated; an explicitly selected file that cannot be loaded fails startup. Because configuration loading precedes applying `--projectDir`, use an explicit configuration path when the file is in a different project directory.
+These are all ten CLI options; there are no separate CLI flags for LLM request-input logging, non-recursive traversal, or interactive settings. A missing default configuration file is tolerated. An I/O failure loading an explicitly selected file propagates from startup, while runtime configuration exceptions are logged as warnings and startup continues. Because configuration loading precedes applying `--projectDir`, use an explicit configuration path when the file is in a different project directory.
 
 ### Example
 
@@ -233,7 +234,7 @@ java -jar gw.jar . --act "code-doc"
 java -jar gw.jar . --act "> Summarize the project and update its documentation."
 ```
 
-Use `--acts "acts,shared-acts" --act documentation-update` only after creating those directories and the requested custom Act. The built-in help also illustrates directory and relative-path scans, `"glob:**/*.java"`, and `"regex:^.*/[^/]+\.java$"`. In automation, always supply values for `--instructions` and `--act` if those flags are used, since omitting their values prompts on standard input. Supplying an Act value avoids that initial prompt but does not disable the CLI's continuing Act loop: after a scan, it selects and executes the Act again. Act-mode automation therefore also needs tested termination behavior and an external timeout; there is no one-shot CLI option in the current entry point.
+Use `--acts "acts,shared-acts" --act documentation-update` only after creating those directories and the requested custom Act. The built-in help also illustrates directory and relative-path scans, `"glob:**/*.java"`, and `"regex:^.*/[^/]+\.java$"`. In automation, always supply values for `--instructions` and `--act` if those flags are used, since omitting their values prompts on standard input. An explicit Act value runs over the selected targets and then returns without entering the CLI's continuing Act-input loop. A valueless `--act` enters that loop after the initial scan, prompting for another Act on each iteration. Workflow-level input or episode repetition can still occur with an explicit value, so test termination behavior and use a job timeout in CI/CD.
 
 ## Resources
 
