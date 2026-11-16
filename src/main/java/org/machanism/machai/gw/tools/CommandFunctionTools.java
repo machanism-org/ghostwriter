@@ -25,6 +25,7 @@ import org.apache.maven.shared.utils.cli.CommandLineUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.Substitutor;
 import org.machanism.machai.process.provider.AbstractAIProvider;
+import org.machanism.machai.process.tools.CommandResult;
 import org.machanism.machai.process.tools.ErrorResultException;
 import org.machanism.machai.process.tools.FunctionTools;
 import org.machanism.machai.process.tools.Param;
@@ -112,16 +113,16 @@ public class CommandFunctionTools implements FunctionTools {
 	 * @param configurator   configuration used for substitutions and security rules
 	 * @return command execution report, or an error message for an invalid
 	 *         directory
-	 * @throws IOException if the project or working directory cannot be resolved,
-	 *                     the process cannot be started, or its output cannot be
-	 *                     read
+	 * @throws IOException          if the project or working directory cannot be
+	 *                              resolved, the process cannot be started, or its
+	 *                              output cannot be read
 	 * @throws ErrorResultException if command execution, output collection, or the
 	 *                              command itself fails
 	 */
 	@Tool(name = "run_sys_command", description = "Executes a system command for operation system: `${OS_NAME}` while ensuring safe execution.\n"
 			+ "Only explicitly allowed commands can be executed for security reasons.\n"
 			+ "Supports setting environment variables, working directory, output tail size, and character encoding.")
-	public Object executeCommand(
+	public CommandResult executeCommand(
 			@Param(name = "command", description = "The command to execute.") String command,
 			@Param(name = "env", description = "Environment variables for the subprocess."
 					+ "If omitted, the subprocess inherits the current process environment.", defaultValue = Param.NULL) Map<String, String> properties,
@@ -134,21 +135,25 @@ public class CommandFunctionTools implements FunctionTools {
 		String logId = Long.toHexString(RANDOM.nextLong());
 		command = Substitutor.replace(command, configurator);
 		File workingDir = resolveWorkingDir(projectDir, dir);
+		CommandResult report = new CommandResult();
 		if (workingDir == null) {
-			return "Error: Invalid working directory.";
+			report.setMessage("Error: Invalid working directory.");
+			report.setExitCode(-1);
+			return report;
 		}
 
 		Path projectPath = projectDir.toPath().toRealPath();
 		Path workingPath = workingDir.toPath().toRealPath();
 		if (!workingPath.startsWith(projectPath)) {
-			return "Error: Working directory must be within project directory.";
+			report.setMessage("Error: Working directory must be within project directory.");
+			report.setExitCode(-1);
+			return report;
 		}
 
 		Process prc = null;
 		LogBuilder output = new LogBuilder(LOG_FOLDER, tailResultSize, logId, projectDir);
 
 		int exitCode = -1;
-		Map<String, Object> report = new HashMap<>();
 
 		try (ExecutorServiceAutoCloseable executor = new ExecutorServiceAutoCloseable(
 				Executors.newFixedThreadPool(2))) {
@@ -195,17 +200,19 @@ public class CommandFunctionTools implements FunctionTools {
 			stderrFuture.get(5, TimeUnit.SECONDS);
 
 			exitCode = process.exitValue();
-			report.put("exitCode", exitCode);
-			report.put("log", logReport);
+			report.setLog(logReport);
+			report.setExitCode(exitCode);
 
 		} catch (InterruptedException e) {
 			// Sonar java:S2142: preserve the interruption signal for the calling thread.
 			Thread.currentThread().interrupt();
-			report = output.getReport();
-			throw new ErrorResultException(report, e);
+			report.setLog(output.getReport());
+			report.setMessage(e.getMessage());
+			report.setExitCode(-1);
 		} catch (Exception e) {
-			report = output.getReport();
-			throw new ErrorResultException(report, e);
+			report.setLog(output.getReport());
+			report.setMessage(e.getMessage());
+			report.setExitCode(-1);
 
 		} finally {
 			if (prc != null && prc.isAlive()) {
@@ -213,9 +220,6 @@ public class CommandFunctionTools implements FunctionTools {
 			}
 		}
 
-		if (exitCode != 0) {
-			throw new ErrorResultException(report);
-		}
 		return report;
 	}
 
@@ -237,7 +241,7 @@ public class CommandFunctionTools implements FunctionTools {
 	 * @param currentTailOffset offset at which the current tail begins
 	 * @param charsetName       character set used to decode the log
 	 * @return the requested preceding log fragment
-	 * @throws IOException if the log cannot be found or read
+	 * @throws IOException              if the log cannot be found or read
 	 * @throws IllegalArgumentException if {@code charsetName} is not a supported
 	 *                                  character set
 	 */
@@ -281,7 +285,7 @@ public class CommandFunctionTools implements FunctionTools {
 	 * @param regexp      Java regular expression used to find matches
 	 * @param charsetName character set used to decode the log
 	 * @return a list of matching text segments and their positions
-	 * @throws IOException if the log cannot be found or read
+	 * @throws IOException              if the log cannot be found or read
 	 * @throws IllegalArgumentException if {@code charsetName} is not a supported
 	 *                                  character set or {@code regexp} is invalid
 	 */
