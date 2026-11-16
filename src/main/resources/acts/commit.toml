@@ -49,7 +49,6 @@ Execute these steps strictly in order.
    - MULTI mode: the list contains the root plus every submodule from the status output, ordered from the DEEPEST submodule up to the root (children always before their parent).
 
 2. Check status per repository. For each repository in that order, run `git -C <repo> status --short` and `git -C <repo> diff --cached --name-only`.
-   - If a repository already has staged files that you did not stage, do not commit it; report it as "skipped: pre-staged changes".
    - MULTI mode only: if a submodule is in detached HEAD (`git -C <repo> symbolic-ref -q HEAD` fails) and has changes, do not commit in it; report it as "skipped: detached HEAD" and also skip its parents' pointer update.
    - In SINGLE mode, a detached HEAD in the root does not block committing; just mention it in the report as a note.
 
