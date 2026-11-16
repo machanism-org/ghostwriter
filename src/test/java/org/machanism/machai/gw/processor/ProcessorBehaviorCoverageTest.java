@@ -15,8 +15,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.gw.tools.EndTaskException;
 import org.machanism.machai.gw.tools.MoveToEpisodeException;
+import org.machanism.machai.process.tools.EndTaskException;
 
 /** Covers episode redirection and scanning configurations not exercised by basic tests. */
 class ProcessorBehaviorCoverageTest {

@@ -3,6 +3,7 @@ package org.machanism.machai.gw.tools;
 import java.io.File;
 
 import org.machanism.machai.gw.processor.AIFileProcessor;
+import org.machanism.machai.process.tools.EndTaskException;
 import org.machanism.machai.process.tools.FunctionTools;
 import org.machanism.machai.process.tools.Param;
 import org.machanism.machai.process.tools.SupportedFor;

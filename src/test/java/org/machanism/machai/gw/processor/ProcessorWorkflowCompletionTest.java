@@ -16,7 +16,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.gw.tools.EndTaskException;
+import org.machanism.machai.process.tools.EndTaskException;
 import org.tomlj.Toml;
 
 /** Exercises act-definition merging and processor boundary behavior without a provider. */

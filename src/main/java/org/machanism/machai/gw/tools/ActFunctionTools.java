@@ -20,6 +20,7 @@ import org.machanism.macha.core.commons.configurator.Substitutor;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.GWConstants;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
+import org.machanism.machai.process.tools.EndTaskException;
 import org.machanism.machai.process.tools.FunctionTools;
 import org.machanism.machai.process.tools.Param;
 import org.machanism.machai.process.tools.Prompt;

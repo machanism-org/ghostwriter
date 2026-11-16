@@ -24,10 +24,10 @@ import org.apache.commons.cli.Options;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.gw.tools.EndTaskException;
 import org.machanism.machai.gw.tools.MoveToEpisodeException;
 import org.machanism.machai.gw.tools.RepeatEpisodeException;
 import org.machanism.machai.process.provider.AbstractAIProvider;
+import org.machanism.machai.process.tools.EndTaskException;
 import org.machanism.machai.process.tools.FunctionTools;
 import org.machanism.machai.project.layout.ProjectLayout;
 

@@ -67,7 +67,7 @@
  * {@link org.machanism.machai.gw.tools.RepeatEpisodeException}. In contrast,
  * {@link org.machanism.machai.gw.tools.CommandSpecFunctionTools} is restricted
  * to file-processing workflows and signals task completion or application
- * termination through {@link org.machanism.machai.gw.tools.EndTaskException} and
+ * termination through {@link org.machanism.machai.process.tools.EndTaskException} and
  * {@link org.machanism.machai.gw.tools.ProcessTerminationException}.
  * {@link org.machanism.machai.gw.tools.DenyException} represents rejection by
  * command security policy rather than an ordinary command result.</p>
