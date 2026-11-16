@@ -43,7 +43,7 @@ This is Machai's **Guidance-Driven Processing (GDP)** approach: the instruction 
 1. Add an `@guidance:` tag in a supported file, or add a folder instruction file named `@guidance.txt`.
 2. Run Ghostwriter and choose a project folder and, optionally, a scan path.
 3. Ghostwriter—not the AI—finds matching supported files that contain guidance and gives each file its own processing context. If your run is configured with default guidance, matching files can instead use that default instruction.
-4. A file-type-aware reviewer recognizes the tag and provides the relevant instruction and file information to the processing request. Markdown and HTML/XML reviewers require the tag in an HTML/XML comment and supply the complete file content. The Java reviewer accepts block or line comments and supplies the complete source (with special package-level handling for `package-info.java`). TypeScript and Python reviewers accept their supported comment or string forms and supply the non-blank instruction they find. PlantUML files are reviewed when they contain the marker and supply the complete file content. The `@guidance.txt` reviewer uses that file's complete contents as the instruction for its folder.
+4. A file reader, called a **reviewer**, recognizes the tag using the file's supported comment style. It prepares the instruction and file information for the AI service. Depending on the file type, it includes the whole file or extracts the instruction text; the supported styles are listed below. A file named `@guidance.txt` supplies its full contents as guidance for its folder.
 5. Ghostwriter combines this material with its standard processing rules and sends it to your configured GenAI provider. Review the result, then revise the tag and run again if needed.
 
 This follows the Guided File Processing approach: natural-language instructions are treated as maintainable project assets and are kept in context with the files they describe. AI is useful for routine enrichment—explaining existing code, adding examples, or organizing text—but it cannot know your project-specific intent unless you state it in the guidance.
@@ -69,12 +69,15 @@ Reviewers recognize these built-in file types:
 | Java | `java` | A block or `//` comment |
 | TypeScript | `ts` | A block or `//` comment |
 | Python | `py` | A `#` comment or triple-quoted string |
+| VBA (Visual Basic for Applications) | `bas`, `cls`, `frm` | An apostrophe (`'`) or `Rem` line comment, with the instruction on the same line |
 | PlantUML | `puml` | Include the marker anywhere in the diagram; a PlantUML comment is the usual choice |
 | Folder instruction | exactly `@guidance.txt` | Put the instruction in that file |
 
 An ordinary `.txt` file is not an inline-guidance file: text files have no comment syntax. `@guidance.txt` is the exception and represents guidance for its folder. Java's `package-info.java` can also provide package-level guidance.
 
-The exact comment format matters. The Markdown reviewer looks for the marker inside an HTML comment and supplies the complete Markdown file. The HTML/XML reviewer likewise requires an HTML/XML comment and supplies the complete file. The Java reviewer accepts a block or line comment and supplies the complete source, except that `package-info.java` receives package-level context. TypeScript and Python reviewers extract non-blank text from their supported line, block, or triple-quoted forms. The PlantUML reviewer checks for the marker anywhere in the file and includes the complete file when it is present. `@guidance.txt` is identified by its exact filename rather than by an inline marker and supplies its complete contents. Tags are retained in the source so they can be found in a later run.
+The exact comment format matters. Markdown, HTML/XML, ordinary Java, and PlantUML files supply their complete contents when recognized guidance is present. Java's `package-info.java` instead supplies its path for package-level processing. TypeScript, Python, and VBA supply extracted, non-blank instruction text rather than the complete source. `@guidance.txt` is identified by its exact filename rather than by an inline marker and supplies its complete contents. Tags are retained in the source so they can be found in a later run.
+
+For TypeScript and Python, prefer one clear guidance comment: these readers use the first matching line instruction, or the first matching block or triple-quoted instruction if no line instruction is found. VBA uses the first matching line instruction. Keep a line-comment instruction on the same line as the marker; use a supported block form for longer instructions. These readers do not combine separate guidance comments into one instruction.
 
 ## Practical usage
 
@@ -117,6 +120,8 @@ TypeScript accepts block or `//` comments. Python accepts either a line comment 
 - Do not change runtime behavior.
 '''
 ```
+
+For a VBA module, class, or form, use a line comment such as `' @guidance: Document this module without changing its behavior.` or `Rem @guidance: Document this module without changing its behavior.` Keep the full instruction on that line. During processing, the VBA reader passes that instruction and the file's name and path to the AI service.
 
 For a PlantUML diagram, place the marker in a diagram comment:
 
