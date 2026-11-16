@@ -126,7 +126,7 @@ Inspect ${public.prompt}.
 
 Each `enabledTools` item is a regular-expression pattern. A tool is identified internally as `<ClassName>:<toolName>`—for example, `org.example.Tools:read_file`; the tool name is its declared name, or the method name when no explicit name exists. A tool is registered only when its full identifier matches at least one pattern. If `enabledTools` is `null` or omitted, all available tools are registered without filtering. Use precise patterns when an act needs limited capabilities. The patterns are not display labels: write the fully qualified implementation-class name followed by `:` and the declared tool or method name.
 
-Prompt and instruction lines can include content using `>>> https://example.org/prompt.md` or `>>> file://docs/prompt.md`; the marker must begin the line, and the referenced UTF-8 content is processed recursively. Relative `file://` paths are resolved from the project directory, including in nested includes (they are not relative to the including file's folder). Public configuration values can be substituted in prompt metadata and text.
+Prompt and instruction lines can include content using `>>> https://example.org/prompt.md` or `>>> file://docs/prompt.md`; the marker must begin the line after trimming whitespace, and the referenced UTF-8 content is processed recursively. Relative `file://` paths are resolved from the project directory, including in nested includes (they are not relative to the including file's folder). Public configuration values can be substituted in prompt metadata and text.
 
 ### Automatic tool selection: `enabledTools: auto`
 
@@ -179,13 +179,13 @@ The YAML input parameters recognized specially by `AIFileProcessor` are:
 - `enabledTools` — a string or YAML list of regular-expression patterns controlling registered tools; in an Act episode, `auto` requests provider-assisted tool selection.
 - `gw.interactive` — enables or disables interactive processing for that request.
 - `errorHandling` — when configured, controls provider error handling for the request.
-- Other YAML values are retained in the layered configuration and can be used for configuration lookup and substitution; string values are resolved through the active configurator, but they do not by themselves change processing behavior.
+- Other YAML values are retained in the layered configuration and can be used for configuration lookup and substitution; strings and strings inside lists are resolved through the active configurator, recursively for nested lists. Mapping values are not recursively substituted. These additional values do not by themselves change processing behavior.
 
 For every processed item, Ghostwriter supplies processing information containing `PROCESSED_FILE_REL_PATH`, `OS_NAME`, and (in non-interactive mode) the notice `Do not ask any question because this is not-interactive process mode.` The act additionally prepends JSON execution metadata containing the current episode information. Project-context tools receive the project name, IDs, directories, source/test/document folders, modules, and operating-system context.
 
 ## Interactive and non-interactive acts
 
-A non-interactive act is a predefined command: it can run from its configuration without asking for extra data. This is useful for repeatable tasks such as generating documentation or tests. Add request text only when you need to narrow or customize the work.
+A non-interactive act is a predefined command: it can run from its configuration without asking for extra data. This is useful for repeatable tasks such as generating documentation or tests. Add request text only when you need to narrow or customize the work. To define an unattended act explicitly, set `interactive = false` in its `[gw]` table and provide a complete `inputs` task, plus `default.public.prompt` if the task needs a fallback request. The task should not depend on answers to follow-up questions.
 
 Set `gw.interactive = true` when the act should operate as a chat. Interactive mode is useful when the desired action is not fully known at the beginning: the AI responds, then you can provide the next instruction. After a response:
 
@@ -268,6 +268,8 @@ Built-in acts are classpath resources under `/acts/` and end in `.toml`. Externa
 There is a current Windows limitation: the normal `loadAct` path still attempts classpath lookup after reading the external file, and that lookup rejects names containing backslashes. A Windows absolute path with backslashes can therefore fail even though the directory loader accepts it. Prefer an act name in a configured local acts directory for normal command-line use; do not depend on an absolute file path to combine bundled definitions.
 
 ## Built-in acts
+
+The following seven acts are bundled in `src/main/resources/acts`. Their instructions describe the intended workflows, not a guarantee that every tool or external service is available. Several bundled front-matter tool selections use short tool or class names rather than full identifiers. Under fully qualified regular-expression matching, these may not register the intended tools. When creating a custom override, use patterns matching `<ClassName>:<toolName>` as described above; do not copy a short-name selection and assume it grants tool access.
 
 ### `code-doc`
 

@@ -60,7 +60,7 @@ Requests another pass through the current episode while preserving workflow cont
 Command tools execute approved commands in a project-relative working directory and retain output for later inspection. `CommandFunctionTools` has no `@SupportedFor` annotation; command security checks still determine whether a command may run.
 
 ### `run_sys_command`
-Runs a command with controlled environment variables, working-directory validation, output capture, timeout handling, and character-set decoding. It returns an execution report and raises an error result when the command fails.
+Runs an approved command for tasks such as building a project or running tests, with controlled environment variables, working-directory validation, output capture, timeout handling, and character-set decoding. It returns an execution report containing the exit code and captured log information. A nonzero command exit code is reported rather than thrown; failures caught during execution return exit code `-1` and an explanatory message. Errors resolving an existing working directory can still propagate to the caller. The process timeout is 600 seconds and is not a caller-supplied input.
 
 **Inputs:** `command` — command line; `env` — optional child-process environment variables; `dir` — relative working directory, default `.`; `tail_result_size` — output tail length, default `1024`; `charset` — output encoding, default `UTF-8`.
 
@@ -70,7 +70,7 @@ Retrieves the portion of a saved command log immediately before the currently di
 **Inputs:** `command_log_id` — command log identifier; `tail_result_size` — requested preceding fragment length, default `1024`; `current_tail_offset` — start offset of the current tail; `charset` — log encoding, default `UTF-8`.
 
 ### `get_log_matches`
-Searches a saved command log using a Java regular expression and returns every match with its text, line number, and character positions.
+Searches each line of a saved command log using a Java regular expression and returns every match with its text, one-based line number, and zero-based start and end positions within that line (the end is exclusive). Use it to locate errors or extract diagnostic values; matches cannot span multiple lines.
 
 **Inputs:** `command_log_id` — command log identifier; `regexp` — Java regular expression; `charset` — log encoding, default `UTF-8`.
 
@@ -107,7 +107,7 @@ Returns project-relative files recursively below a directory. It returns a no-fi
 **Inputs:** `path` — root directory, default empty; `max_count` — maximum file count, default `50`.
 
 ### `get_recursive_folder_list`
-Returns only subdirectories recursively below a root, excluding the root itself and all files.
+Returns only subdirectories recursively below a root, excluding the root itself and all files. Use it to inspect project structure without loading file contents. Results exceeding `max_count` raise an error rather than being truncated.
 
 **Inputs:** `dir` — root directory, default empty; `max_count` — maximum folder count, default `50`.
 
@@ -158,11 +158,11 @@ Retrieves an asynchronous guidance-processing report. A missing report file retu
 Context values are held in application memory; these tools do not persist them across application restarts.
 
 ### `put_project_context_variable`
-Creates or replaces a named project context value.
+Creates or replaces a named project context value with a string. Use it to share a result or setting with later Acts or workflow steps.
 
 **Availability:** Supported by `ProjectContextFunctionTools` for processors other than `GuidanceProcessor`.
 
-**Inputs:** `name` — variable name; `value` — value to store; `global` — store in the application-wide context shared across projects instead of the current project's context (default `false`).
+**Inputs:** `name` — variable name; `value` — string value to store; `global` — store in the application-wide context shared across projects instead of the current project's context (default `false`).
 
 ### `get_project_context_variables`
 Returns a map containing the requested context names and their stored values. Missing names have null values; no context for the project is an error.
@@ -176,7 +176,7 @@ Appends a value to a context variable, creating a list when needed or converting
 
 **Availability:** Supported by `ProjectContextFunctionTools` for processors other than `GuidanceProcessor`.
 
-**Inputs:** `name` — variable name; `value` — value to append; `global` — append to the application-wide context shared across projects instead of the current project's context (default `false`).
+**Inputs:** `name` — variable name; `value` — string value to append; `global` — append to the application-wide context shared across projects instead of the current project's context (default `false`).
 
 ### `pop_project_context_variable`
 Removes and returns a context value. Lists support LIFO or FIFO removal, and are simplified or removed when they become shorter.
