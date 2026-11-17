@@ -101,6 +101,8 @@ Execute these steps strictly in order.
 
 10. Push the commit report to the global context variable: `REPORT`.
 
+11. Language: All commit messages must be written in English, including the subject and body. When following a repository’s existing style, preserve its format and tone while writing the message in English.
+
 # Special User Instruction
 
 ${public.prompt}
