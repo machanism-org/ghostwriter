@@ -113,11 +113,9 @@ public class CommandFunctionTools implements FunctionTools {
 	 * @param configurator   configuration used for substitutions and security rules
 	 * @return command execution report, or an error message for an invalid
 	 *         directory
-	 * @throws IOException          if the project or working directory cannot be
-	 *                              resolved, the process cannot be started, or its
-	 *                              output cannot be read
 	 * @throws ErrorResultException if command execution, output collection, or the
 	 *                              command itself fails
+	 * @throws Exception 
 	 */
 	@Tool(name = "run_sys_command", description = "Executes a system command for operation system: `${OS_NAME}` while ensuring safe execution.\n"
 			+ "Only explicitly allowed commands can be executed for security reasons.\n"
@@ -131,7 +129,7 @@ public class CommandFunctionTools implements FunctionTools {
 			@Param(name = "tail_result_size", description = "The maximum number of characters to display from the end of the command output.", defaultValue = DEFAULT_RESULT_TAIL_SIZE) int tailResultSize,
 			@Param(name = "charset", description = "The character encoding to use for reading command output.", defaultValue = DEFAULT_CHARSET) String charsetName,
 			File projectDir, Configurator configurator)
-			throws IOException {
+			throws Exception {
 		String logId = Long.toHexString(RANDOM.nextLong());
 		command = Substitutor.replace(command, configurator);
 		File workingDir = resolveWorkingDir(projectDir, dir);
@@ -204,15 +202,12 @@ public class CommandFunctionTools implements FunctionTools {
 			report.setExitCode(exitCode);
 
 		} catch (InterruptedException e) {
-			// Sonar java:S2142: preserve the interruption signal for the calling thread.
 			Thread.currentThread().interrupt();
 			report.setLog(output.getReport());
 			report.setMessage(e.getMessage());
 			report.setExitCode(-1);
 		} catch (Exception e) {
-			report.setLog(output.getReport());
-			report.setMessage(e.getMessage());
-			report.setExitCode(-1);
+			throw e;
 
 		} finally {
 			if (prc != null && prc.isAlive()) {
