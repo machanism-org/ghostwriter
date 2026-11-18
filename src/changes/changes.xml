@@ -13,6 +13,8 @@
       <action dev="dev" type="update">Prompt Configuration: Exposed default processor prompt settings and preserved configured user prompts.</action>
       <action dev="dev" type="fix">Project Context: Validated project context configuration.</action>
       <action dev="dev" type="fix">Act Processing: Added the missing act exception.</action>
+      <action dev="dev" type="fix">Command Execution: Returned structured reports for failed commands.</action>
+      <action dev="dev" type="fix">Commit Processing: Allowed commits when changes are already staged.</action>
     </release>
     <release version="1.4.2" date="2026-10-23" description="Improves processor workflow handling and command security processing.">
       <action dev="dev" type="refactor">Processor Workflow: Improved workflow handling across processors, reviewers, and tools.</action>
