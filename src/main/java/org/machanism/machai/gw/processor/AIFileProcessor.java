@@ -251,7 +251,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * Example interactive input: {@code >>}
 	 * </p>
 	 */
-	private static final String NO_INTERACTIVE_SPECIAL_PROMPT_COMMAND = ">>";
+	public static final String NO_INTERACTIVE_SPECIAL_PROMPT_COMMAND = ">>";
 
 	/**
 	 * The specific AI model identifier or provider label being utilized for

@@ -315,6 +315,12 @@ public class ActProcessor extends AIFileProcessor {
 
 		episodes = new Episodes(this);
 
+		Boolean interactive = null;
+		if (Strings.CS.endsWith(act, AIFileProcessor.NO_INTERACTIVE_SPECIAL_PROMPT_COMMAND)) {
+			act = StringUtils.substringBeforeLast(act, AIFileProcessor.NO_INTERACTIVE_SPECIAL_PROMPT_COMMAND);
+			interactive = false;
+		}
+
 		act = StringUtils.trim(act);
 		if (Strings.CS.startsWith(act, DEFAULT_TASK_MARKER) && defaultActName != null) {
 			act = defaultActName + " " + StringUtils.substringAfter(act, DEFAULT_TASK_MARKER);
@@ -356,6 +362,10 @@ public class ActProcessor extends AIFileProcessor {
 		String model = (String) actProperties.get(GWConstants.MODEL_PROP_NAME);
 		if (model != null) {
 			setModel(model);
+		}
+
+		if (interactive != null) {
+			setInteractive(interactive);
 		}
 	}
 
