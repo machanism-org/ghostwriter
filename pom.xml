@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.machanism.machai</groupId>
 		<artifactId>machai</artifactId>
-		<version>1.4.3</version>
+		<version>1.4.4-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>ghostwriter</artifactId>
@@ -31,7 +31,7 @@
 				<dependency>
 					<groupId>org.machanism.machai</groupId>
 					<artifactId>bindex-core</artifactId>
-					<version>1.4.3</version>
+					<version>1.4.4-SNAPSHOT</version>
 				</dependency>
 			</dependencies>
 
@@ -114,22 +114,27 @@
 		</profile>
 	</profiles>
 
+	<!-- @guidance: Summarize the `src/site/markdown/index.md` introduction
+	section and put this conten to the `description` tag.  -->
 	<description>
-		Ghostwriter is an advanced documentation engine that automatically
-		scans, analyzes, and assembles project documentation using embedded
-		guidance tags and AI-powered synthesis.
+		Machai Ghostwriter is an AI-powered agent for maintaining entire projects,
+		including source code, tests, documentation, website content, configuration,
+		diagrams, and other relevant files. Built on Guidance-Driven Processing
+		(GDP) and Act-Driven Workflows (ADW), it uses embedded guidance and reusable
+		workflows to automate documentation maintenance and structured project
+		changes while preserving project-specific intent and supporting CI/CD.
 	</description>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.machanism.machai</groupId>
 			<artifactId>project-layout</artifactId>
-			<version>1.4.3</version>
+			<version>1.4.4-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.machanism.machai</groupId>
 			<artifactId>genai-client</artifactId>
-			<version>1.4.3</version>
+			<version>1.4.4-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
