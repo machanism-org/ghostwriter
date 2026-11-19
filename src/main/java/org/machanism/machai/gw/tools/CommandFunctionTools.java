@@ -198,6 +198,7 @@ public class CommandFunctionTools implements FunctionTools {
 			stderrFuture.get(5, TimeUnit.SECONDS);
 
 			exitCode = process.exitValue();
+			report.setMessage("OK");
 			report.setLog(logReport);
 			report.setExitCode(exitCode);
 
@@ -206,6 +207,7 @@ public class CommandFunctionTools implements FunctionTools {
 			report.setLog(output.getReport());
 			report.setMessage(e.getMessage());
 			report.setExitCode(-1);
+			
 		} catch (Exception e) {
 			throw e;
 
