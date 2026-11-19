@@ -1,149 +1,197 @@
 {
   "$schema": "https://raw.githubusercontent.com/machanism-org/bindex-core/refs/heads/main/src/main/resources/schema/bindex-schema-v2.json",
-  "id": "org.machanism.machai:ghostwriter:1.4.2",
+  "id": "org.machanism.machai:ghostwriter:1.4.3",
   "name": "org.machanism.machai:ghostwriter",
-  "version": "1.4.2",
-  "description": "Machai Ghostwriter is a Java 8 project-wide AI-assisted documentation and maintenance engine. It scans source code, tests, Markdown and HTML site content, XML, TypeScript, Python, PlantUML diagrams, configuration, and other selected project files. In guidance mode it discovers embedded @guidance instructions or folder-level @guidance.txt instructions, uses format-aware reviewers to assemble file context, and sends bounded requests to a configured GenAI provider. In Act mode it executes reusable TOML-defined workflows with ordered episodes, inherited defaults, configurable scan scope, optional interactive follow-up, and controlled functional tools. Ghostwriter supports project-relative file reads and edits, approved command execution, web and REST access, shared project context, workflow control, configurable provider/model selection, glob and regular-expression paths, exclusions, module-aware traversal, and parallel processing. It is intended for repeatable local development and Maven or CI/CD automation that keeps code, tests, documentation, diagrams, and configuration aligned.",
-  "authors": [
-    {
-      "name": "Viktor Tovstyi",
-      "email": "viktor.tovstyi@gmail.com",
-      "website": "https://machanism.org"
-    },
-    {
-      "name": "Machanism.org",
-      "website": "https://machanism.org"
-    }
-  ],
-  "license": "Apache License, Version 2.0",
-  "classification": {
-    "type": "CLI application and Maven-integrated automation library",
-    "domains": [
-      "Artificial Intelligence",
-      "Developer Tooling",
-      "Documentation Generation",
-      "Project Automation",
-      "CI/CD",
-      "Code Quality",
-      "Workflow Automation"
-    ],
-    "languages": [
-      {
-        "name": "Java",
-        "version": "8"
-      }
-    ],
-    "layers": [
-      "Infrastructure",
-      "Adapters",
-      "Utils"
-    ],
-    "usageContext": [
-      "Command-line project maintenance",
-      "Maven builds",
-      "CI/CD pipelines",
-      "AI-assisted documentation updates",
-      "Repository-wide source and configuration processing",
-      "Reusable Act-driven workflows"
-    ],
-    "targetEnvironment": [
-      "Java"
-    ],
-    "integrations": [
-      "Maven",
-      "SonarQube",
-      "Syft",
-      "Grype",
-      "Git",
-      "SVN"
-    ]
-  },
-  "constructors": [],
-  "features": [
-    {
-      "package": "org.machanism.machai.gw.processor",
-      "name": "Ghostwriter command-line entry point",
-      "signature": "public static void main(java.lang.String[] args) throws java.io.IOException, org.apache.commons.cli.ParseException",
-      "description": "Starts Ghostwriter. The entry point parses command-line options, loads persisted configuration, gives command-line values precedence, chooses guidance mode by default or Act mode when --act is present, invokes the appropriate processor, and maps recognized processing failures to JVM exit codes. Use --help to print usage without starting processing.",
-      "examples": [
-        {
-          "snippet": "# 1. Build the CLI delivery artifact from the project root.\nmvn -Ppack install\n\n# 2. Configure the GenAI provider and model in gw.properties.\ngw.model=CodeMie:your-model\n\n# 3. Scan Markdown files whose embedded guidance describes the required update.\njava -jar target/gw.jar \"glob:**/*.md\"",
-          "description": "Builds the Java CLI, configures a provider/model in the standard properties file, and runs guided processing for project Markdown files. Provider credentials and endpoint settings must be supplied through the configured provider mechanism rather than committed to source control."
-        },
-        {
-          "snippet": "# Run a reusable workflow against the current project.\njava -jar target/gw.jar . --act unit-tests",
-          "description": "Invokes the built-in unit-tests Act. Acts are TOML-defined multi-step workflows that can inspect the project, use permitted tools, and perform repeatable maintenance work."
-        }
-      ]
-    },
-    {
-      "package": "org.machanism.machai.gw.processor",
-      "name": "Guidance-driven file processing",
-      "signature": "org.machanism.machai.gw.processor.GuidanceProcessor",
-      "description": "Processes selected project files using instructions embedded near the content. Built-in reviewers recognize guidance in Java, Markdown, HTML/XML, TypeScript, Python, PlantUML, and the folder-level @guidance.txt convention. This is suited to durable, reviewable instructions that remain versioned with the artifact they govern.",
-      "examples": [
-        {
-          "snippet": "<!-- @guidance:\nUpdate this page for new users.\nPreserve existing license details.\n-->\n\n# Then execute:\njava -jar target/gw.jar \"glob:src/site/**/*.md\"",
-          "description": "Adds a Markdown guidance comment and runs a scoped scan. Ghostwriter finds the tag, prepares context for the matching file, and requests the configured AI-assisted update."
-        }
-      ]
-    },
-    {
-      "package": "org.machanism.machai.gw.processor",
-      "name": "Act-driven workflows",
-      "signature": "org.machanism.machai.gw.processor.ActProcessor",
-      "description": "Loads and executes named TOML Act definitions. An Act can define stable instructions, one or more ordered episodes, defaults, inheritance, scan settings, interactive behavior, and YAML-front-matter enabledTools rules. Tool patterns match fully qualified tool identifiers, allowing a workflow to restrict available capabilities or request automatic tool selection.",
-      "examples": [
-        {
-          "snippet": "# acts/doc-audit.toml\ndescription = \"Review Markdown documentation.\"\ninstructions = \"Explain recommendations clearly.\"\ninputs = '''\n---\nenabledTools:\n  - org\\.machanism\\..*:read_file\n---\nReview the selected documentation.\n'''\n\n[gw]\npath = \"glob:src/site/**/*.md\"\n\n# Invoke the configured Act.\njava -jar target/gw.jar . --acts acts --act doc-audit",
-          "description": "Creates a custom documentation-review Act, limits it to read-file tools through a regular-expression rule, scopes it to site Markdown, and invokes it from the CLI."
-        }
-      ]
-    }
-  ],
-  "studs": [],
-  "examples": [
-    {
-      "title": "Install, configure, and run Ghostwriter in a Maven project",
-      "steps": [
-        "Install Java 8 or newer and Maven 3.x.",
-        "Build the delivery artifact with mvn -Ppack install, or download and unpack the Ghostwriter CLI pack.",
-        "Create or update gw.properties with the configured GenAI provider, model, credentials, and endpoint required by that provider.",
-        "Add an @guidance instruction to a supported project file, describing the outcome and protected content.",
-        "Run java -jar target/gw.jar \"glob:**/*.md\" from the project root and review the generated changes before committing them."
-      ],
-      "description": "This scenario applies repeatable guidance-driven documentation maintenance to all Markdown files selected by a glob. Start with a narrow path before moving the command into CI/CD."
-    },
-    {
-      "title": "Run an unattended reusable workflow",
-      "steps": [
-        "Choose a built-in Act such as unit-tests or place a custom TOML Act in the configured acts directory.",
-        "Set its [gw] path, excludes, and tool permissions to the smallest scope that supports the task.",
-        "Run java -jar target/gw.jar . --act unit-tests.",
-        "Inspect results, tests, and build output; then reuse the verified command in an automation job."
-      ],
-      "description": "Acts provide named, versionable workflows for multi-step automation. Non-interactive Acts are appropriate for routine jobs where all required settings are supplied beforehand."
-    }
-  ],
-  "dependencies": [
-    "org.machanism.machai:project-layout:1.4.2",
-    "org.machanism.machai:genai-client:1.4.2",
-    "commons-cli:commons-cli:1.11.0",
-    "org.apache.commons:commons-lang3:3.20.0",
-    "org.apache.maven.shared:maven-shared-utils:3.4.2",
-    "org.jsoup:jsoup:1.22.1",
-    "net.htmlparser.jericho:jericho-html:3.4",
-    "org.apache.commons:commons-text:1.15.0",
-    "org.slf4j:slf4j-api:2.0.17"
-  ],
+  "version": "1.4.3",
   "location": {
     "repositoryType": "Maven",
     "repositoryUrl": "https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter",
     "coordinates": {
       "group": "org.machanism.machai",
       "artifactId": "ghostwriter",
-      "version": "1.4.2",
+      "version": "1.4.3",
       "extension": "jar"
     }
-  }
+  },
+  "description": "Machai Ghostwriter is a Java command-line application and project-aware GenAI automation framework for processing source code, tests, Markdown and other documentation, configuration, diagrams, and project files. Its default Guidance mode scans project scopes and uses format-aware reviewers to find embedded @guidance instructions; Act mode runs reusable, TOML-defined workflows with ordered episodes, inherited configuration, scoped tools, and optional interactive chat. Both modes traverse project modules and matching files, compose context, and dispatch work to configured GenAI providers. Built-in functional tools support controlled file operations, security-checked system commands, web and REST access, guidance discovery, Act execution and episode control, log inspection, and project context. Ghostwriter is useful for repeatable documentation and code maintenance, test generation, project-wide reviews, and CI/CD automation. It is distributed as a Maven artifact and can be packaged as a standalone CLI delivery pack. The project targets Java 8 bytecode; runtime requirements can also depend on bundled dependencies and the selected provider.",
+  "authors": [
+    {
+      "name": "Machanism"
+    }
+  ],
+  "license": "Apache License, Version 2.0",
+  "classification": {
+    "type": "Java command-line application and GenAI project automation framework",
+    "domains": [
+      "Artificial intelligence",
+      "Generative AI",
+      "Developer tools",
+      "Project-wide code and documentation maintenance",
+      "Guided file processing",
+      "Workflow automation",
+      "Build and CI/CD automation",
+      "Software testing"
+    ],
+    "languages": [
+      {
+        "name": "Java",
+        "version": "8"
+      },
+      {
+        "name": "TOML",
+        "version": "1.0"
+      },
+      {
+        "name": "Markdown",
+        "version": "CommonMark-compatible Markdown"
+      }
+    ],
+    "layers": [
+      "Adapters",
+      "Infrastructure",
+      "Interactors"
+    ],
+    "usageContext": [
+      "Standalone command-line application",
+      "Maven-based Java projects",
+      "Local developer workflows",
+      "Continuous integration and delivery pipelines",
+      "Project-wide source, test, documentation, and configuration processing",
+      "GenAI provider integrations",
+      "Custom reusable AI-assisted workflows"
+    ],
+    "targetEnvironment": [
+      "Java"
+    ],
+    "integrations": [
+      "Maven",
+      "Git",
+      "Subversion",
+      "SonarQube",
+      "Syft",
+      "Grype",
+      "OpenAI-compatible GenAI services",
+      "CodeMie GenAI services"
+    ]
+  },
+  "constructors": [],
+  "features": [
+    {
+      "name": "Ghostwriter command-line entry point",
+      "package": "org.machanism.machai.gw.processor",
+      "signature": "public static void main(java.lang.String[] args) throws java.io.IOException, org.apache.commons.cli.ParseException",
+      "description": "Parses command-line options, initializes persisted configuration, resolves effective project, model, instruction, scan path, exclusion, and concurrency settings, then starts either default guidance processing or Act mode. Command-line values take precedence over properties; properties take precedence over built-in defaults. Supports help output, explicit project/configuration paths, model and instruction selection, exclusions, threads, Act locations, and Acts or prompts.",
+      "examples": [
+        {
+          "snippet": "org.machanism.machai.gw.processor.Ghostwriter.main(new java.lang.String[] {\"glob:**/*.md\", \"--projectDir\", \".\", \"--model\", \"OpenAI:gpt-5.1\"});",
+          "description": "From a Java launcher or embedding application, invoke the CLI entry point to scan Markdown files in the current project using the selected provider and model. Configure valid provider credentials and project settings before running."
+        }
+      ]
+    },
+    {
+      "name": "Guidance-driven file processing",
+      "package": "org.machanism.machai.gw.processor",
+      "signature": "org.machanism.machai.gw.processor.GuidanceProcessor",
+      "description": "Processes matching project files according to inline @guidance comments, supported folder-level @guidance.txt instructions, or configured default guidance. It selects a format-aware reviewer, builds context for eligible files, and delegates processing to the configured AI provider. Useful for durable, reviewable instructions that live beside the content they govern.",
+      "examples": [
+        {
+          "snippet": "<!-- @guidance:\nUpdate this page for new users. Include installation and a practical example. Preserve existing license and support information.\n-->\n# Project guide",
+          "description": "Place this HTML comment at the beginning of a Markdown page, configure a GenAI provider, and run the Ghostwriter CLI against a narrow Markdown glob. The guidance remains in the file for future processing; review the resulting changes before accepting them."
+        }
+      ]
+    },
+    {
+      "name": "Reusable Act workflows",
+      "package": "org.machanism.machai.gw.processor",
+      "signature": "org.machanism.machai.gw.processor.ActProcessor",
+      "description": "Loads named TOML Acts from bundled resources or configured external locations and executes their instructions, prompt inputs, optional inherited values, and ordered episodes against selected project files. Acts can restrict tools using fully qualified tool identifier regular-expression patterns, request automatic tool selection, and run interactively or non-interactively. Results are collected for callers. Use Acts for repeatable multi-step tasks such as test generation, documentation updates, security remediation, or custom project reviews.",
+      "examples": [
+        {
+          "snippet": "description = \"Review project documentation.\"\ninstructions = \"Explain findings clearly and preserve existing behavior.\"\ninputs = \"Review the Markdown files and address: ${public.prompt}\"\n\n[default]\npublic.prompt = \"Check for missing setup instructions.\"\n\n[gw]\npath = \"glob:src/site/**/*.md\"\ninteractive = false",
+          "description": "Save this TOML as doc-audit.toml in a configured Acts directory. Configure the GenAI provider and credentials in the application's properties or supported environment settings, then invoke `java -jar gw.jar . --acts acts --act doc-audit`. This is a practical unattended workflow: it scans the selected Markdown scope and uses the default request when no request text is supplied. Check all generated edits. Keep runtime placeholders such as ${public.prompt} unchanged in the TOML template."
+        }
+      ]
+    },
+    {
+      "name": "Project and module traversal",
+      "package": "org.machanism.machai.gw.processor",
+      "signature": "org.machanism.machai.gw.processor.AIFileProcessor",
+      "description": "Coordinates AI-assisted processing across a project layout, recursively discovered modules, and matching files. Supports scoped paths and patterns, exclusions, non-recursive handling, and configurable module concurrency. Interactive processing is not suitable for multi-module parallel execution; when thread count exceeds one, interactive mode is disabled for module processing.",
+      "examples": [
+        {
+          "snippet": "java -jar gw.jar \"glob:**/*.java\" --projectDir . --threads 1 --excludes \"target,.git\"",
+          "description": "Run a focused Java-source scan from the project root, exclude build and version-control directories, and use sequential processing. Configure the model and credentials before invoking the command."
+        }
+      ]
+    },
+    {
+      "name": "Functional tool integration",
+      "package": "org.machanism.machai.gw.tools",
+      "signature": "org.machanism.machai.gw.tools",
+      "description": "Supplies callable capabilities for Act inspection and execution, episode movement and repetition, file listing and updates, approved command execution, command-log retrieval and search, guidance processing, project-context storage, and web or REST requests. Tools can be filtered by enabledTools patterns matching identifiers in the form fully.qualified.ImplementationClass:toolName. Review command security and network permissions before enabling tools for automated workflows.",
+      "examples": [
+        {
+          "snippet": "enabledTools:\n  - org.machanism.machai.gw.tools.FileFunctionTools:read_file\n  - org.machanism.machai.gw.tools.FileFunctionTools:write_file",
+          "description": "In Act YAML front matter, allow only the file reader and writer by their fully qualified implementation class and tool names. This limits registered capabilities for the request; use patterns that match the actual tool identifiers and separately review the effect of any write-enabled workflow."
+        }
+      ]
+    }
+  ],
+  "customizations": [
+    {
+      "name": "Act TOML definitions",
+      "package": "org.machanism.machai.gw.processor",
+      "description": "Add custom TOML workflow definitions to an Acts directory and configure that location with the --acts option or gw.acts property. Definitions can specify instructions, input prompts, YAML front matter, episodes, defaults, inheritance through basedOn, file paths, interaction settings, and tool selection. Prompt placeholders in the ${...} format are runtime substitution points and must remain unchanged in templates.",
+      "type": "configuration",
+      "examples": [
+        {
+          "snippet": "java -jar gw.jar . --acts \"acts,shared-acts\" --act documentation-update",
+          "description": "Install and configure a reusable custom Act by placing documentation-update.toml in one of the configured existing Acts directories, then run it against the current project. Configure the GenAI provider separately and use explicit scopes and tool restrictions for unattended use."
+        }
+      ]
+    },
+    {
+      "name": "Format-aware guidance reviewers",
+      "package": "org.machanism.machai.gw.reviewer",
+      "description": "Guidance processing can be extended with reviewers that recognize guidance syntax for additional file formats and prepare suitable file context. Built-in reviewers support common formats such as Markdown, HTML/XML, Java, TypeScript, Python, VBA, PlantUML, and folder instructions through @guidance.txt.",
+      "type": "extension point"
+    },
+    {
+      "name": "GenAI provider and tool configuration",
+      "description": "Configure the available GenAI provider, model, credentials, tool implementations, and execution security policy through the supported application configuration and provider setup. Acts may further restrict registered tools for a prompt; automatic tool selection is a convenience rather than a strict denylist.",
+      "type": "configuration"
+    }
+  ],
+  "studs": [],
+  "examples": [
+    {
+      "title": "Install and run the standalone CLI",
+      "description": "Download and unpack the Ghostwriter CLI delivery pack from https://sourceforge.net/projects/machanism/files/machai/ghostwriter/gw.zip/download. Keep the executable gw.jar and its bundled libraries/plugins together. Configure a supported GenAI provider, model, and credentials through the supplied configuration or provider-supported environment settings. From the project directory, run `java -jar gw.jar \"glob:**/*.md\" --model \"OpenAI:gpt-5.1\"`. Use a narrow scan first, inspect the result, and validate changes before using the command in CI/CD.",
+      "installation": "Download and unpack the Ghostwriter CLI delivery pack. For a source build, use Maven with a compatible JDK; the project compiles for Java 8 bytecode, but runtime needs may depend on bundled libraries and provider plugins.",
+      "configuration": "Configure the AI provider and model, supply credentials securely, and optionally set project properties such as gw.path, gw.threads, gw.excludes, and gw.acts. Do not commit credentials.",
+      "invocation": "java -jar gw.jar \"glob:**/*.md\" --model \"OpenAI:gpt-5.1\""
+    },
+    {
+      "title": "Run a built-in Act",
+      "description": "With the delivery pack installed and the provider configured, run `java -jar gw.jar . --act unit-tests` to invoke the bundled unit-tests workflow on the project. Use an appropriate test scope, inspect generated tests and source changes, and run the project's test suite afterward. For a custom request, append task text after the Act name.",
+      "installation": "Install and unpack the Ghostwriter CLI delivery pack, or build the application using Maven.",
+      "configuration": "Set up a supported GenAI provider and its credentials. Ensure Maven and the project's test tooling are available if the workflow will build or test the project.",
+      "invocation": "java -jar gw.jar . --act unit-tests"
+    },
+    {
+      "title": "Use Ghostwriter from a Maven build",
+      "description": "The project is published as a Maven artifact. Add the dependency to a Java application that needs the Ghostwriter API, or build and package the CLI from the Ghostwriter project itself. CLI users should use the documented delivery pack so runtime dependencies and plugins are available; adding the library dependency alone does not create a standalone CLI installation.",
+      "dependency": "<dependency><groupId>org.machanism.machai</groupId><artifactId>ghostwriter</artifactId><version>1.4.3</version></dependency>",
+      "buildCommand": "mvn clean install",
+      "packaging": "For the CLI delivery pack, activate the project's pack profile and configure MACHANISM_PACK_DIR as documented by the project build."
+    }
+  ],
+  "dependencies": [
+    "org.machanism.machai:project-layout:1.4.3",
+    "org.machanism.machai:genai-client:1.4.3",
+    "commons-cli:commons-cli:1.11.0",
+    "org.jsoup:jsoup:1.22.1",
+    "net.htmlparser.jericho:jericho-html:3.4",
+    "org.apache.commons:commons-text:1.15.0"
+  ]
 }
