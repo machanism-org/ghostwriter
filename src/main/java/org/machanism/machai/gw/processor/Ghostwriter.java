@@ -3,8 +3,10 @@ package org.machanism.machai.gw.processor;
 import java.io.Console;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.Scanner;
 
 import org.apache.commons.cli.CommandLine;
@@ -56,6 +58,8 @@ import org.slf4j.LoggerFactory;
  * </p>
  */
 public final class Ghostwriter {
+
+	private static final String ACT_INPUT_PROMPT = "Act";
 
 	/** Logger for CLI lifecycle, configuration, and processing events. */
 	private static final Logger LOGGER = LoggerFactory.getLogger(Ghostwriter.class);
@@ -227,7 +231,7 @@ public final class Ghostwriter {
 			}
 
 			if (cmd.hasOption(VERBOSE_OPTION)) {
-				System.setProperty("org.slf4j.simpleLogger.log.org.machanism.machai", "info");
+				applyClasspathResource("verbose.properties");
 			}
 
 			String conf;
@@ -324,7 +328,7 @@ public final class Ghostwriter {
 			return instructions;
 		}
 		String optionValue = cmd.getOptionValue(INSTRUCTIONS_PROP_NAME);
-		return optionValue == null ? promptForValue(scanner, "Instructions: ") : optionValue;
+		return optionValue == null ? promptForValue(scanner, "Instructions") : optionValue;
 	}
 
 	/**
@@ -412,6 +416,7 @@ public final class Ghostwriter {
 	private static String promptForValue(Scanner scanner, String prompt) {
 		String input;
 		Console console = System.console();
+		prompt = prompt + ": ";
 		if (console != null) {
 			console.format(prompt);
 
@@ -485,7 +490,7 @@ public final class Ghostwriter {
 				while (processor instanceof ActProcessor) {
 					try {
 						processor.setDefaultPrompt(null);
-						defaultPrompt = promptForValue(scanner, "Act: ");
+						defaultPrompt = promptForValue(scanner, ACT_INPUT_PROMPT);
 						((ActProcessor) processor).setAct(defaultPrompt);
 						applyCommonSettings(processor, settings);
 						exitCode = processPathectories(processor, settings.paths, settings.projectDir);
@@ -672,9 +677,9 @@ public final class Ghostwriter {
 		String defaultPrompt = cmd.hasOption(ACT_OPTION) ? cmd.getOptionValue(ACT_OPTION)
 				: config.get(GWConstants.ACT_PROP_NAME, null);
 		if (cmd.hasOption(ACT_OPTION) && defaultPrompt == null) {
-			defaultPrompt = promptForValue(scanner, "Act: ");
+			defaultPrompt = promptForValue(scanner, ACT_INPUT_PROMPT);
 		} else {
-			logAbbreviatedMessage("Act", defaultPrompt);
+			logAbbreviatedMessage(ACT_INPUT_PROMPT, defaultPrompt);
 		}
 
 		actProcessor.setAct(defaultPrompt);
@@ -856,5 +861,18 @@ public final class Ghostwriter {
 		private File projectDir;
 		/** Scan directories or patterns to process. */
 		private String[] paths;
+	}
+
+	public static void applyClasspathResource(String resourceName) throws IOException {
+		try (InputStream in = Ghostwriter.class.getClassLoader()
+				.getResourceAsStream(resourceName)) {
+			if (in == null) {
+				throw new IOException("Resource not found on classpath: " + resourceName);
+			}
+			Properties props = new Properties();
+			props.load(in);
+			props.stringPropertyNames()
+					.forEach(name -> System.setProperty(name, props.getProperty(name)));
+		}
 	}
 }
