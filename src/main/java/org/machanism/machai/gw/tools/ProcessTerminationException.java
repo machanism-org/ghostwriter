@@ -1,5 +1,6 @@
 package org.machanism.machai.gw.tools;
 
+import org.machanism.machai.process.tools.SpecialException;
 import org.machanism.machai.process.tools.ToolException;
 
 /*@guidance: >>> ${guidances}/def-class-javadoc.md */
@@ -14,7 +15,7 @@ import org.machanism.machai.process.tools.ToolException;
  *
  * @author Viktor Tovstyi
  */
-public class ProcessTerminationException extends ToolException {
+public class ProcessTerminationException extends SpecialException {
 	/** Serialization version for this control-flow exception. */
 	private static final long serialVersionUID = 1L;
 	/** Exit code that the host should use when terminating execution. */
