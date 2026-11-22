@@ -60,7 +60,7 @@ Requests another pass through the current episode while preserving workflow cont
 Command tools execute approved commands in a project-relative working directory and retain output for later inspection. `CommandFunctionTools` has no `@SupportedFor` annotation; command security checks still determine whether a command may run.
 
 ### `run_sys_command`
-Runs an approved command for tasks such as building a project or running tests, with controlled environment variables, working-directory validation, output capture, timeout handling, and character-set decoding. It returns an execution report containing the exit code and captured log information. A nonzero command exit code is reported rather than thrown; failures caught during execution return exit code `-1` and an explanatory message. Errors resolving an existing working directory can still propagate to the caller. The process timeout is 600 seconds and is not a caller-supplied input.
+Runs an approved command for tasks such as building a project or running tests, with controlled environment variables, working-directory validation, output capture, timeout handling, and character-set decoding. It returns an execution report containing the exit code and captured log information. A nonzero command exit code is reported in that report rather than thrown. An invalid working directory or an interrupted run produces an exit code of `-1` and an explanatory message; other errors during command setup or execution can propagate to the caller. The process timeout is 600 seconds and is not a caller-supplied input.
 
 **Inputs:** `command` — command line; `env` — optional child-process environment variables; `dir` — relative working directory, default `.`; `tail_result_size` — output tail length, default `1024`; `charset` — output encoding, default `UTF-8`.
 
@@ -94,7 +94,7 @@ Completes the current task without shutting down the application, allowing the h
 
 ## File tools
 
-`FileFunctionTools` has no `@SupportedFor` annotation. Its operations resolve paths beneath the project root and support text encoding selection; use them for controlled project file inspection and updates.
+`FileFunctionTools` has no `@SupportedFor` annotation. Its operations resolve relative paths from the project root and accept absolute paths only when they remain inside that root. The text-reading and writing tools support encoding selection; use these tools for controlled project file inspection and updates.
 
 ### `list_files_in_directory`
 Recursively lists files and directories below a directory, returning separate `directories` and `files` lists with project-relative paths.

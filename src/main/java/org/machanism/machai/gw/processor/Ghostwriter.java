@@ -59,6 +59,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class Ghostwriter {
 
+	/** Prompt label used when requesting an act name interactively. */
 	private static final String ACT_INPUT_PROMPT = "Act";
 
 	/** Logger for CLI lifecycle, configuration, and processing events. */
@@ -85,6 +86,7 @@ public final class Ghostwriter {
 	private static final String ACTS_OPTION = "acts";
 	/** Long option name for selecting a configuration file. */
 	private static final String CONFIG_OPTION = "config";
+	/** Long option name for enabling verbose logging configuration. */
 	private static final String VERBOSE_OPTION = "verbose";
 	/** Exit code returned for a handled processing failure. */
 	private static final int EXIT_CODE_ERROR = 1;
@@ -863,6 +865,13 @@ public final class Ghostwriter {
 		private String[] paths;
 	}
 
+	/**
+	 * Loads properties from a classpath resource and applies them as system
+	 * properties, replacing any existing values with the resource values.
+	 *
+	 * @param resourceName classpath resource to load
+	 * @throws IOException if the resource cannot be found or read
+	 */
 	public static void applyClasspathResource(String resourceName) throws IOException {
 		try (InputStream in = Ghostwriter.class.getClassLoader()
 				.getResourceAsStream(resourceName)) {

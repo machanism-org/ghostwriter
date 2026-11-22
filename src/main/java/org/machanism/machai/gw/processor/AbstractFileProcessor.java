@@ -42,8 +42,8 @@ import org.machanism.machai.projectlayout.ProjectProcessor;
  * Ghostwriter CLI, such as:
  * </p>
  * <ul>
- * <li>Collecting files under a project directory while excluding common build
- * and tooling folders,</li>
+ * <li>Collecting files under a project directory while honoring configured
+ * exclusions and project-layout exclusions,</li>
  * <li>Supporting optional include matching via {@link PathMatcher} and optional
  * exclusion patterns, and</li>
  * <li>Delegating per-file work to subclasses via
@@ -73,7 +73,8 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 
 	/**
 	 * Number of worker threads used for module processing. A value greater than one
-	 * enables concurrent module processing.
+	 * enables concurrent module processing; zero or one processes modules on the
+	 * calling thread.
 	 */
 	private int threads;
 
@@ -90,6 +91,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 
 	/**
 	 * Optional exact paths or path-pattern expressions excluded from traversal.
+	 * Exact paths are compared with case-sensitive matching.
 	 */
 	private String[] excludes;
 
@@ -189,7 +191,9 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Shuts down an ExecutorService safely without throwing from a finally block.
+	 * Shuts down an {@link ExecutorService} and waits for termination for the
+	 * configured timeout. If the timeout expires or this thread is interrupted,
+	 * the executor is forcefully shut down. Interruption status is restored.
 	 * <p>
 	 * Sonar java:S1143/java:S1163 - do not throw from finally blocks; preserve the
 	 * thread interruption status.
@@ -331,11 +335,12 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Recursively lists all files under a directory, excluding known build/tooling
-	 * directories.
+	 * Recursively lists all entries under a directory, omitting entries that match
+	 * the configured exclusion rules. Results are sorted deepest path first.
 	 *
 	 * @param projectDir directory to traverse
-	 * @return list of files found
+	 * @return matching files and directories, or an empty list if the argument is
+	 *         {@code null} or is not a directory
 	 * @throws IOException if a directory cannot be listed
 	 */
 	List<File> listFiles(File projectDir) throws IOException {
@@ -385,9 +390,10 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Determines whether a relative path should be excluded according to
-	 *
-	 * {@link #excludes}.
+	 * Determines whether a relative path matches any configured exclusion in
+	 * {@link #excludes}. Entries beginning with {@code glob:} or {@code regex:}
+	 * use the default filesystem's path-matcher syntax; other non-null entries are
+	 * matched case-sensitively as exact paths or file names.
 	 *
 	 * @param path project-relative path
 	 * @return {@code true} when excluded
@@ -415,11 +421,14 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Adds a file to the result when it is eligible for the requested pattern.
+	 * Adds a file to the result when it is not excluded and, when a matcher is
+	 * supplied, its path matches that matcher. The matcher is applied to the file's
+	 * {@link File#toPath() path}, while exclusions are checked against its path
+	 * relative to {@code projectDir}.
 	 *
 	 * @param result     collection of matches
 	 * @param matcher    optional path matcher
-	 * @param projectDir project root
+	 * @param projectDir project root used to calculate relative exclusion paths
 	 * @param file       candidate file
 	 */
 	void addMatchingFile(List<File> result, PathMatcher matcher, File projectDir, File file) {
@@ -431,8 +440,8 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Tests whether a scan pattern string is a {@code glob:} or {@code regex:}
-	 * matcher.
+	 * Tests whether a scan pattern string uses the {@code glob:} or {@code regex:}
+	 * path-matcher syntax.
 	 *
 	 * @param pattern scan directory argument
 	 * @return {@code true} when the pattern uses a path-matcher prefix
@@ -464,9 +473,9 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * @throws IllegalArgumentException if project files cannot be listed or
 	 *                                  processed; underlying I/O failures are
 	 *                                  wrapped in this exception
-	 * @throws IOException              declared by the parent API; this
-	 *                                  implementation wraps listing I/O failures
-	 *                                  in {@code IllegalArgumentException}
+	 * @throws IOException              declared by the parent API; I/O failures
+	 *                                  encountered while listing or processing are
+	 *                                  wrapped in {@code IllegalArgumentException}
 	 */
 	@Override
 	public void processFolder(ProjectLayout projectLayout) throws IOException {
@@ -488,7 +497,8 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 *
 	 * @param projectDir project root
 	 * @param pattern    directory path, {@code glob:} matcher, or {@code regex:}
-	 *                   matcher
+	 *                   matcher; relative directory paths are resolved against
+	 *                   {@code projectDir}
 	 * @return matching files/directories
 	 * @throws IOException if directory traversal fails
 	 * @throws IllegalArgumentException if {@code pattern} is an invalid path
@@ -579,16 +589,17 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Returns the exclude patterns configured for this processor.
+	 * Returns the array of exclude patterns configured for this processor.
 	 *
-	 * @return exclude list
+	 * @return the configured exclude array, or {@code null} if no array was set
 	 */
 	public String[] getExcludes() {
 		return excludes;
 	}
 
 	/**
-	 * Sets exclude patterns or paths.
+	 * Sets the paths and patterns to exclude during traversal. The supplied array
+	 * is retained and returned by {@link #getExcludes()}.
 	 *
 	 * <p>
 	 * Each entry may be:

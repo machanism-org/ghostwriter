@@ -283,6 +283,10 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 */
 	protected List<FunctionTools> functionTools = new ArrayList<>();
 
+	/**
+	 * Model identifier supplied when this processor is constructed, retained as
+	 * the configured default model.
+	 */
 	private String defaultModel;
 
 	/**
@@ -899,7 +903,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * @param data       the instruction line to inspect
 	 * @param projectDir the root directory of the project, used as the base context
 	 *                   to resolve relative {@code file://} references
-	 * @param conf
+	 * @param conf       the configurator used to substitute public properties in
+	 *                   the resulting content
 	 * @return the resolved content, or the original line when no reference is
 	 *         found, or {@code null} when the input is {@code null}
 	 * @throws java.io.IOException if the referenced remote content or local file
@@ -1128,6 +1133,12 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		functionTools.add(toolFunction);
 	}
 
+	/**
+	 * Returns the model identifier originally supplied when this processor was
+	 * created.
+	 *
+	 * @return the configured default model identifier
+	 */
 	public String getDefaultModel() {
 		return defaultModel;
 	}

@@ -22,7 +22,7 @@ System_Ext(providerRuntime, "Process Provider Runtime", "Loads provider implemen
 System_Ext(modelProvider, "GenAI Provider", "External model service that processes prompts and requests registered tool calls.")
 
 Container_Boundary(ghostwriter, "Ghostwriter (Java application)") {
-  Component(cli, "CLI Entry Point", "Ghostwriter", "Parses command-line options, loads configuration, selects Guidance or Act mode, and starts scans.")
+  Component(cli, "CLI Entry Point", "Ghostwriter", "Parses command-line options, loads configuration, resolves runtime settings, selects a processing mode, and launches project scans.")
   Component(fileProcessor, "Project Scan Core", "AbstractFileProcessor", "Uses project-layout metadata to traverse files and modules, apply path filters and exclusions, and delegate processing.")
   Component(aiProcessor, "AI Processing Core", "AIFileProcessor", "Builds project context, resolves local and remote includes and layered settings, registers tools, and manages provider-backed prompts.")
   Component(guidanceProcessor, "Guidance Mode", "GuidanceProcessor", "Uses extension-specific reviewers to extract @guidance instructions and sends matching files for processing.")
@@ -38,14 +38,14 @@ Container_Boundary(ghostwriter, "Ghostwriter (Java application)") {
   Component(actTools, "Act Tools", "ActFunctionTools", "Inspects Act definitions, runs Acts synchronously or asynchronously, and supplies prompts and persisted results; excluded from Guidance mode.")
   Component(episodeTools, "Episode Control Tools", "ActSpecFunctionTools", "Signals repeat and jump requests through exceptions; available only in Act mode.")
   Component(guidanceTools, "Guidance Tools", "GuidanceFunctionTools", "Discovers and processes guidance-tagged files through tool calls.")
-  Component(contextTools, "Project Context Tools", "ProjectContextFunctionTools", "Stores and retrieves variables scoped to a project directory.")
+  Component(contextTools, "Project Context Tools", "ProjectContextFunctionTools", "Provides tools to store and retrieve project-scoped variables; unavailable in Guidance mode.")
 }
 
 Rel(user, cli, "Invokes")
 Rel(cli, projectFiles, "Loads configuration properties")
-Rel(cli, guidanceProcessor, "Selects default Guidance mode")
-Rel(cli, actProcessor, "Selects Act mode")
-Rel(cli, fileProcessor, "Configures scan paths and options")
+Rel(cli, guidanceProcessor, "Creates and configures default mode")
+Rel(cli, actProcessor, "Creates and configures selected Act mode")
+Rel(cli, aiProcessor, "Configures scan paths and options; starts scans")
 
 Rel(aiProcessor, fileProcessor, "Inherits scan lifecycle")
 Rel(guidanceProcessor, aiProcessor, "Extends and processes with")
@@ -72,7 +72,7 @@ Rel(aiProcessor, webTools, "Registers and exposes via provider runtime")
 Rel(aiProcessor, actTools, "Registers when supported and enabled")
 Rel(aiProcessor, episodeTools, "Registers for Act mode when enabled")
 Rel(aiProcessor, guidanceTools, "Registers when supported and enabled")
-Rel(aiProcessor, contextTools, "Registers and populates project context")
+Rel(aiProcessor, contextTools, "Registers where supported; populates layout context")
 
 Rel(fileTools, projectFiles, "Reads and writes")
 Rel(commandTools, projectFiles, "Runs commands in")
