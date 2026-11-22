@@ -8,7 +8,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.machanism.machai.project.layout.ProjectLayout;
+import org.machanism.machai.projectlayout.ProjectLayout;
 
 /*@guidance: >>> ${guidances}/def-class-javadoc.md */
 /**

@@ -29,7 +29,7 @@ import org.machanism.machai.gw.tools.RepeatEpisodeException;
 import org.machanism.machai.process.provider.AbstractAIProvider;
 import org.machanism.machai.process.tools.EndTaskException;
 import org.machanism.machai.process.tools.FunctionTools;
-import org.machanism.machai.project.layout.ProjectLayout;
+import org.machanism.machai.projectlayout.ProjectLayout;
 
 /** Verifies processor execution edge cases without invoking an AI provider. */
 class ProcessorExecutionContractsTest {

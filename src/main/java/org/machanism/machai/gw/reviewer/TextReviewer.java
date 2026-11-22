@@ -9,7 +9,7 @@ import java.util.ResourceBundle;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
-import org.machanism.machai.project.layout.ProjectLayout;
+import org.machanism.machai.projectlayout.ProjectLayout;
 
 /**
  * Reviewer implementation for generic guidance text files.

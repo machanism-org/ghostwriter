@@ -21,7 +21,7 @@ import org.machanism.machai.gw.tools.CommandFunctionTools;
 import org.machanism.machai.gw.tools.FileFunctionTools;
 import org.machanism.machai.gw.tools.WebFunctionTools;
 import org.machanism.machai.process.provider.ProcessProvider;
-import org.machanism.machai.project.layout.ProjectLayout;
+import org.machanism.machai.projectlayout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

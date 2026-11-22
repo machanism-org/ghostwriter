@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.reviewer.Reviewer;
-import org.machanism.machai.project.layout.ProjectLayout;
+import org.machanism.machai.projectlayout.ProjectLayout;
 
 /** Exercises processor workflows without making an external AI request. */
 class ProcessorUncoveredWorkflowTest {

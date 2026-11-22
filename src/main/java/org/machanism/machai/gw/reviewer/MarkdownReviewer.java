@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
-import org.machanism.machai.project.layout.ProjectLayout;
+import org.machanism.machai.projectlayout.ProjectLayout;
 
 /**
  * {@link Reviewer} implementation for Markdown files ({@code .md}).

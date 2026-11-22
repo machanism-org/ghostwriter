@@ -30,7 +30,7 @@ import org.machanism.machai.gw.tools.ProcessTerminationException;
 import org.machanism.machai.process.manager.ProcessProviderManager;
 import org.machanism.machai.process.provider.AbstractAIProvider;
 import org.machanism.machai.process.provider.ProcessProvider;
-import org.machanism.machai.project.layout.ProjectLayout;
+import org.machanism.machai.projectlayout.ProjectLayout;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 

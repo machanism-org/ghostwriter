@@ -10,7 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.machanism.machai.gw.processor.GuidanceProcessor;
-import org.machanism.machai.project.layout.ProjectLayout;
+import org.machanism.machai.projectlayout.ProjectLayout;
 
 /*@guidance: >>> ${guidances}/def-class-javadoc.md  */
 /**

@@ -19,8 +19,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.project.layout.DefaultProjectLayout;
-import org.machanism.machai.project.layout.ProjectLayout;
+import org.machanism.machai.projectlayout.DefaultProjectLayout;
+import org.machanism.machai.projectlayout.ProjectLayout;
 
 /** Additional boundary and filesystem tests for the processor package. */
 class ProcessorAdditionalCoverageTest {

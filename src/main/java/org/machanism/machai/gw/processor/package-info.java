@@ -16,7 +16,7 @@
  * <p>
  * The package is organized in layers. {@link AbstractFileProcessor} supplies the
  * filesystem layer: it obtains module information from
- * {@link org.machanism.machai.project.layout.ProjectLayout}, traverses project
+ * {@link org.machanism.machai.projectlayout.ProjectLayout}, traverses project
  * files, applies exact-path and {@code glob:} or {@code regex:} filters, honors
  * exclusions, and can process modules with a bounded worker pool. Subclasses
  * implement the work performed for files, modules, and parent directories while

@@ -23,8 +23,8 @@ import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.LayeredConfigurator;
 import org.machanism.macha.core.commons.configurator.MutableConfigurator;
-import org.machanism.machai.project.ProjectProcessor;
-import org.machanism.machai.project.layout.ProjectLayout;
+import org.machanism.machai.projectlayout.ProjectLayout;
+import org.machanism.machai.projectlayout.ProjectProcessor;
 
 /*@guidance: >>> ${guidances}/def-class-javadoc.md */
 /**

@@ -26,7 +26,7 @@ import org.machanism.machai.process.tools.Param;
 import org.machanism.machai.process.tools.Prompt;
 import org.machanism.machai.process.tools.SupportedFor;
 import org.machanism.machai.process.tools.Tool;
-import org.machanism.machai.project.layout.ProjectLayout;
+import org.machanism.machai.projectlayout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

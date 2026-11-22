@@ -9,7 +9,7 @@ import java.util.ResourceBundle;
 
 import org.apache.commons.io.FileUtils;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
-import org.machanism.machai.project.layout.ProjectLayout;
+import org.machanism.machai.projectlayout.ProjectLayout;
 
 /**
  * Reviewer implementation for PlantUML files (.puml).

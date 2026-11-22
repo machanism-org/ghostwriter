@@ -35,7 +35,7 @@ import org.machanism.machai.gw.tools.MoveToEpisodeException;
 import org.machanism.machai.process.manager.ProcessProviderManager;
 import org.machanism.machai.process.provider.ProcessProvider;
 import org.machanism.machai.process.tools.EndTaskException;
-import org.machanism.machai.project.layout.ProjectLayout;
+import org.machanism.machai.projectlayout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tomlj.MutableTomlTable;
@@ -314,6 +314,8 @@ public class ActProcessor extends AIFileProcessor {
 	public void setAct(String act) throws ActNotFoundException {
 
 		episodes = new Episodes(this);
+		actProperties.clear();
+		setModel(getDefaultModel());
 
 		Boolean interactive = null;
 		if (Strings.CS.endsWith(act, AIFileProcessor.NO_INTERACTIVE_SPECIAL_PROMPT_COMMAND)) {

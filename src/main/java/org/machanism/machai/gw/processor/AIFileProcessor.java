@@ -36,7 +36,7 @@ import org.machanism.machai.process.provider.ProcessProvider;
 import org.machanism.machai.process.tools.EndTaskException;
 import org.machanism.machai.process.tools.FunctionTools;
 import org.machanism.machai.process.tools.FunctionToolsLoader;
-import org.machanism.machai.project.layout.ProjectLayout;
+import org.machanism.machai.projectlayout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -283,6 +283,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 */
 	protected List<FunctionTools> functionTools = new ArrayList<>();
 
+	private String defaultModel;
+
 	/**
 	 * Loader utility responsible for discovering, instantiating, and applying
 	 * functional tools to the AI provider.
@@ -299,7 +301,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 */
 	public AIFileProcessor(File rootDir, Configurator configurator, String genai) {
 		super(rootDir, configurator);
-		this.model = genai;
+		this.defaultModel = genai;
+		setModel(genai);
 	}
 
 	/**
@@ -1123,5 +1126,9 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	public void addTool(FunctionTools toolFunction) {
 		logger.debug("FunctionTools: {}", toolFunction.getClass().getName());
 		functionTools.add(toolFunction);
+	}
+
+	public String getDefaultModel() {
+		return defaultModel;
 	}
 }
