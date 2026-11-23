@@ -1,0 +1,22 @@
+diff --git a/src/main/java/org/machanism/machai/gw/processor/Ghostwriter.java b/src/main/java/org/machanism/machai/gw/processor/Ghostwriter.java
+index b97b291..898964f 100644
+--- a/src/main/java/org/machanism/machai/gw/processor/Ghostwriter.java
++++ b/src/main/java/org/machanism/machai/gw/processor/Ghostwriter.java
+@@ -512,6 +512,8 @@ public final class Ghostwriter {
+ 			LOGGER.info(e.getMessage());
+ 		} catch (IOException e) {
+ 			LOGGER.error("Processing failed.", e);
++		} catch (ProcessTerminationException e) {
++			handleExitCode(handleProcessTermination(e));
+ 		}
+ 	}
+ 
+@@ -784,7 +786,7 @@ public final class Ghostwriter {
+ 				LOGGER.info("Finished scanning path: `{}`", path);
+ 			}
+ 		} catch (ProcessTerminationException e) {
+-			exitCode = handleProcessTermination(e);
++			throw e;
+ 		} catch (IllegalArgumentException e) {
+ 			exitCode = handleProcessingFailure("Error", e);
+ 		} catch (Exception e) {

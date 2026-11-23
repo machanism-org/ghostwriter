@@ -3,9 +3,11 @@ package org.machanism.machai.gw.processor;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.Scanner;
@@ -68,7 +70,7 @@ class GhostwriterAdditionalCoverageTest {
     }
 
     @Test
-    void processPaths_returnsSuccessTerminationAndFailureExitCodes() throws Exception {
+    void processPaths_returnsSuccessAndFailureCodes_butPropagatesTermination() throws Exception {
         // Arrange
         RecordingProcessor successful = new RecordingProcessor(tempDir.toFile(), null);
         RecordingProcessor terminated = new RecordingProcessor(tempDir.toFile(), new ProcessTerminationException(7));
@@ -78,16 +80,18 @@ class GhostwriterAdditionalCoverageTest {
         int success = (Integer) invoke("processPathectories",
                 new Class<?>[] { AIFileProcessor.class, String[].class, File.class }, successful, new String[] { "a", "b" },
                 tempDir.toFile());
-        int termination = (Integer) invoke("processPathectories",
-                new Class<?>[] { AIFileProcessor.class, String[].class, File.class }, terminated, new String[] { "a" },
-                tempDir.toFile());
+        InvocationTargetException termination = assertThrows(InvocationTargetException.class,
+                () -> invoke("processPathectories",
+                        new Class<?>[] { AIFileProcessor.class, String[].class, File.class }, terminated,
+                        new String[] { "a" }, tempDir.toFile()));
         int failure = (Integer) invoke("processPathectories",
                 new Class<?>[] { AIFileProcessor.class, String[].class, File.class }, failed, new String[] { "a" }, tempDir.toFile());
 
         // Assert
         assertEquals(0, success);
         assertEquals(2, successful.scans);
-        assertEquals(7, termination);
+        assertTrue(termination.getCause() instanceof ProcessTerminationException);
+        assertEquals(7, ((ProcessTerminationException) termination.getCause()).getExitCode());
         assertEquals(1, failure);
     }
 
