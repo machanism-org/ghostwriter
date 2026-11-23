@@ -233,7 +233,7 @@ public final class Ghostwriter {
 			}
 
 			if (cmd.hasOption(VERBOSE_OPTION)) {
-				applyClasspathResource("verbose.properties");
+				LoggingConfig.applyClasspathResource("verbose.properties");
 			}
 
 			String conf;
@@ -865,25 +865,5 @@ public final class Ghostwriter {
 		private File projectDir;
 		/** Scan directories or patterns to process. */
 		private String[] paths;
-	}
-
-	/**
-	 * Loads properties from a classpath resource and applies them as system
-	 * properties, replacing any existing values with the resource values.
-	 *
-	 * @param resourceName classpath resource to load
-	 * @throws IOException if the resource cannot be found or read
-	 */
-	public static void applyClasspathResource(String resourceName) throws IOException {
-		try (InputStream in = Ghostwriter.class.getClassLoader()
-				.getResourceAsStream(resourceName)) {
-			if (in == null) {
-				throw new IOException("Resource not found on classpath: " + resourceName);
-			}
-			Properties props = new Properties();
-			props.load(in);
-			props.stringPropertyNames()
-					.forEach(name -> System.setProperty(name, props.getProperty(name)));
-		}
 	}
 }
