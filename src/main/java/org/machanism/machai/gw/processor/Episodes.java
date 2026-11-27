@@ -252,7 +252,7 @@ public class Episodes {
      */
     private void logResult(String perform) {
         if (StringUtils.isNoneBlank(perform)) {
-            logger.info(AIFileProcessor.LOG_OUTPUT_PREFIX, perform);
+            logger.info(AIFileProcessor.LOG_OUTPUT_PREFIX, AIFileProcessor.prettyPrintIfJson(perform));
         }
     }
 

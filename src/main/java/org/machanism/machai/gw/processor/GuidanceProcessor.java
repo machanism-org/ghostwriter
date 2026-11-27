@@ -283,7 +283,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 		if (match && getDefaultPrompt() != null) {
 			String perform = process(projectLayout, projectDir, getDefaultPrompt());
 			if (StringUtils.isNoneBlank(perform)) {
-				logger.info(AIFileProcessor.LOG_OUTPUT_PREFIX, perform);
+				logger.info(AIFileProcessor.LOG_OUTPUT_PREFIX, AIFileProcessor.prettyPrintIfJson(perform));
 			}
 		}
 	}
@@ -316,7 +316,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 		}
 
 		if (StringUtils.isNoneBlank(perform)) {
-			logger.info(AIFileProcessor.LOG_OUTPUT_PREFIX, perform);
+			logger.info(AIFileProcessor.LOG_OUTPUT_PREFIX, AIFileProcessor.prettyPrintIfJson(perform));
 			Map<String, Object> resultMap = new HashMap<>();
 			resultMap.put("file", ProjectLayout.getRelativePath(getRootDir(), file));
 			resultMap.put("message", perform);

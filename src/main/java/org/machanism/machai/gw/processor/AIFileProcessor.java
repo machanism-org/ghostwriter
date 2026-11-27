@@ -33,6 +33,7 @@ import org.machanism.machai.gw.tools.ProjectContextFunctionTools;
 import org.machanism.machai.process.manager.ProcessProviderManager;
 import org.machanism.machai.process.provider.AbstractAIProvider;
 import org.machanism.machai.process.provider.ProcessProvider;
+import org.machanism.machai.process.tools.CommandResult;
 import org.machanism.machai.process.tools.EndTaskException;
 import org.machanism.machai.process.tools.FunctionTools;
 import org.machanism.machai.process.tools.FunctionToolsLoader;
@@ -42,7 +43,10 @@ import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
 /*@guidance:
@@ -138,6 +142,13 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * Logger for processing lifecycle, diagnostic, and included-content messages.
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(AIFileProcessor.class);
+
+	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
+
+	private static final ObjectMapper STRICT_MAPPER = new ObjectMapper()
+			.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
+	private static final String INDENT = "  ";
 
 	/**
 	 * Parameter name used to configure the list of tool definitions exposed to the
@@ -284,8 +295,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	protected List<FunctionTools> functionTools = new ArrayList<>();
 
 	/**
-	 * Model identifier supplied when this processor is constructed, retained as
-	 * the configured default model.
+	 * Model identifier supplied when this processor is constructed, retained as the
+	 * configured default model.
 	 */
 	private String defaultModel;
 
@@ -708,7 +719,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		String perform = provider.perform();
 		if (interactive) {
 			if (StringUtils.isNoneBlank(perform)) {
-				logger.info(LOG_OUTPUT_PREFIX, perform);
+				logger.info(LOG_OUTPUT_PREFIX, prettyPrintIfJson(perform));
 			}
 			String input = input();
 			if (input != null) {
@@ -1077,7 +1088,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		try {
 			String perform = process(projectLayout, projectLayout.getProjectDir(), getDefaultPrompt());
 			if (StringUtils.isNoneBlank(perform)) {
-				logger.info(LOG_OUTPUT_PREFIX, perform);
+				logger.info(LOG_OUTPUT_PREFIX, prettyPrintIfJson(perform));
 			}
 
 		} catch (Exception e) {
@@ -1141,5 +1152,108 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 */
 	public String getDefaultModel() {
 		return defaultModel;
+	}
+
+	public static String prettyPrintIfJson(String text) {
+		if (text == null) {
+			return null;
+		}
+		String trimmed = text.trim();
+		if (trimmed.isEmpty()
+				|| !((trimmed.startsWith("{") && trimmed.endsWith("}"))
+						|| (trimmed.startsWith("[") && trimmed.endsWith("]")))) {
+			return text;
+		}
+		try {
+			JsonNode node = OBJECT_MAPPER.readTree(trimmed);
+
+			CommandResult result = asCommandResult(node);
+			if (result != null) {
+				return formatCommandResult(result);
+			}
+			return OBJECT_MAPPER.writeValueAsString(node);
+		} catch (Exception e) {
+			// Not valid JSON, log as-is
+			return text;
+		}
+	}
+
+	/** Returns a CommandResult if the node looks like one, otherwise null. */
+	private static CommandResult asCommandResult(JsonNode node) {
+		// exitCode is a primitive int, so require it explicitly to avoid matching "{}"
+		// or similar
+		if (!node.isObject() || !node.has("exitCode")) {
+			return null;
+		}
+		try {
+			return STRICT_MAPPER.treeToValue(node, CommandResult.class);
+		} catch (Exception e) {
+			return null; // unknown fields or wrong types: not a CommandResult
+		}
+	}
+
+	private static String formatCommandResult(CommandResult result) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Command result:\n");
+		sb.append(INDENT).append("Exit code: ").append(result.getExitCode()).append('\n');
+
+		sb.append(INDENT).append("Message:");
+		appendValue(sb, result.getMessage(), 2);
+
+		Map<String, Object> report = result.getLogReport();
+		if (report != null && !report.isEmpty()) {
+			sb.append(INDENT).append("Log report:\n");
+			appendMap(sb, report, 2);
+		}
+		return stripTrailing(sb.toString());
+	}
+
+	private static void appendMap(StringBuilder sb, Map<?, ?> map, int level) {
+		String pad = repeat(INDENT, level);
+		for (Map.Entry<?, ?> e : map.entrySet()) {
+			sb.append(pad).append(e.getKey()).append(':');
+			appendValue(sb, e.getValue(), level + 1);
+		}
+	}
+
+	private static void appendValue(StringBuilder sb, Object value, int level) {
+		String pad = repeat(INDENT, level);
+		if (value instanceof Map) {
+			sb.append('\n');
+			appendMap(sb, (Map<?, ?>) value, level);
+		} else if (value instanceof Collection) {
+			sb.append('\n');
+			for (Object item : (Collection<?>) value) {
+				sb.append(pad).append("-");
+				appendValue(sb, item, level + 1);
+			}
+		} else if (value == null) {
+			sb.append(" -\n");
+		} else {
+			String s = String.valueOf(value);
+			if (s.contains("\n")) {
+				// multi-line text goes on its own indented lines
+				sb.append('\n');
+				for (String line : stripTrailing(s).split("\\r?\\n")) {
+					sb.append(pad).append(line).append('\n');
+				}
+			} else {
+				sb.append(' ').append(s).append('\n');
+			}
+		}
+	}
+
+	// Java 8 replacement for String.repeat (Java 11)
+	private static String repeat(String s, int times) {
+		StringBuilder sb = new StringBuilder(s.length() * Math.max(times, 0));
+		for (int i = 0; i < times; i++) {
+			sb.append(s);
+		}
+		return sb.toString();
+	}
+
+	// Java 8 replacement for String.stripTrailing (Java 11)
+	private static String stripTrailing(String s) {
+		return s.replaceAll("\\s+$", "");
 	}
 }

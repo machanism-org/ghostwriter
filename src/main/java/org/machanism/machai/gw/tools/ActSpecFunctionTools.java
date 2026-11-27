@@ -16,9 +16,9 @@ import org.slf4j.LoggerFactory;
  * within an {@link ActProcessor} context.
  * <p>
  * This {@link FunctionTools} implementation registers tools for moving to a
- * requested episode and for repeating the current episode in a project workflow.
- * It is intended for use with {@link ActProcessor} and integrates with the
- * {@link ProcessProvider} provider.
+ * requested episode and for repeating the current episode in a project
+ * workflow. It is intended for use with {@link ActProcessor} and integrates
+ * with the {@link ProcessProvider} provider.
  * </p>
  * <p>
  * Both operations signal control-flow changes by throwing their corresponding
@@ -50,7 +50,7 @@ public class ActSpecFunctionTools implements FunctionTools {
 	 * </p>
 	 *
 	 * @param targetId the identifier of the requested episode
-	 * @param name the name of the requested episode
+	 * @param name     the name of the requested episode
 	 * @throws MoveToEpisodeException always thrown to signal episode navigation
 	 */
 	@Tool(name = "move_to_episode", description = "Moves to a specific episode ONLY when the user explicitly requests to navigate to an episode by its 'id' or 'name'. "
@@ -66,8 +66,8 @@ public class ActSpecFunctionTools implements FunctionTools {
 	 * <p>
 	 * This method can re-execute an episode after a validation failure or when
 	 * additional user input is required. When {@code message} is non-null and
-	 * non-empty, it is emitted to the configured log before repetition is requested.
-	 * The method does not return normally.
+	 * non-empty, it is emitted to the configured log before repetition is
+	 * requested. The method does not return normally.
 	 * </p>
 	 *
 	 * @param message a custom response message to log before repeating the episode;
@@ -80,7 +80,7 @@ public class ActSpecFunctionTools implements FunctionTools {
 	public void repeateEpisode(
 			@Param(name = "message", description = "A custom response message to output before repeating the episode.", defaultValue = "") String message) {
 		if (message != null && !message.isEmpty()) {
-			logger.info(AIFileProcessor.LOG_OUTPUT_PREFIX, message);
+			logger.info(AIFileProcessor.LOG_OUTPUT_PREFIX, AIFileProcessor.prettyPrintIfJson(message));
 		}
 		throw new RepeatEpisodeException();
 	}
