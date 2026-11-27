@@ -3,10 +3,8 @@ package org.machanism.machai.gw.processor;
 import java.io.Console;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.Properties;
 import java.util.Scanner;
 
 import org.apache.commons.cli.CommandLine;
