@@ -143,11 +143,14 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(AIFileProcessor.class);
 
+	/** JSON mapper configured to pretty-print provider responses. */
 	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
 
+	/** JSON mapper that rejects unknown properties when recognizing command results. */
 	private static final ObjectMapper STRICT_MAPPER = new ObjectMapper()
 			.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
+	/** Indentation unit used when formatting command-result output. */
 	private static final String INDENT = "  ";
 
 	/**
@@ -1154,6 +1157,20 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return defaultModel;
 	}
 
+	/**
+	 * Pretty-prints a JSON provider response and formats command-result JSON as
+	 * readable text.
+	 * <p>
+	 * Non-JSON text, malformed JSON, and {@code null} are returned unchanged. A
+	 * JSON object recognized as a {@link CommandResult} is rendered as a labeled
+	 * command result; other valid JSON objects and arrays are serialized with
+	 * indentation.
+	 * </p>
+	 *
+	 * @param text the provider response, which may be {@code null}
+	 * @return the formatted response, or the original value when it is not valid
+	 *         JSON
+	 */
 	public static String prettyPrintIfJson(String text) {
 		if (text == null) {
 			return null;
@@ -1178,7 +1195,14 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		}
 	}
 
-	/** Returns a CommandResult if the node looks like one, otherwise null. */
+	/**
+	 * Converts a JSON node to a command result when it has the expected shape.
+	 * Unknown properties and incompatible values prevent recognition.
+	 *
+	 * @param node the JSON value to inspect
+	 * @return the corresponding command result, or {@code null} when the value is
+	 *         not a compatible command-result object
+	 */
 	private static CommandResult asCommandResult(JsonNode node) {
 		// exitCode is a primitive int, so require it explicitly to avoid matching "{}"
 		// or similar
@@ -1192,6 +1216,12 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		}
 	}
 
+	/**
+	 * Formats a command result as readable, labeled text, including any log report.
+	 *
+	 * @param result the command result to format
+	 * @return the formatted command-result text
+	 */
 	private static String formatCommandResult(CommandResult result) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Command result:\n");
@@ -1208,6 +1238,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return stripTrailing(sb.toString());
 	}
 
+	/** Appends a map's entries to the output with indentation for the given level. */
 	private static void appendMap(StringBuilder sb, Map<?, ?> map, int level) {
 		String pad = repeat(INDENT, level);
 		for (Map.Entry<?, ?> e : map.entrySet()) {
@@ -1216,6 +1247,13 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		}
 	}
 
+	/**
+	 * Appends a scalar, collection, or nested map value in readable form.
+	 *
+	 * @param sb    destination buffer
+	 * @param value value to append
+	 * @param level indentation depth
+	 */
 	private static void appendValue(StringBuilder sb, Object value, int level) {
 		String pad = repeat(INDENT, level);
 		if (value instanceof Map) {
@@ -1243,7 +1281,15 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		}
 	}
 
-	// Java 8 replacement for String.repeat (Java 11)
+	/**
+	 * Repeats a string a specified number of times without relying on newer JDK
+	 * APIs.
+	 *
+	 * @param s the string to repeat
+	 * @param times the number of repetitions; non-positive values produce an empty
+	 *              string
+	 * @return the repeated string
+	 */
 	private static String repeat(String s, int times) {
 		StringBuilder sb = new StringBuilder(s.length() * Math.max(times, 0));
 		for (int i = 0; i < times; i++) {
@@ -1252,7 +1298,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return sb.toString();
 	}
 
-	// Java 8 replacement for String.stripTrailing (Java 11)
+	/** Removes trailing whitespace without relying on newer JDK APIs. */
 	private static String stripTrailing(String s) {
 		return s.replaceAll("\\s+$", "");
 	}
