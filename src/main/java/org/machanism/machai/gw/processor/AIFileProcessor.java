@@ -146,7 +146,9 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	/** JSON mapper configured to pretty-print provider responses. */
 	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
 
-	/** JSON mapper that rejects unknown properties when recognizing command results. */
+	/**
+	 * JSON mapper that rejects unknown properties when recognizing command results.
+	 */
 	private static final ObjectMapper STRICT_MAPPER = new ObjectMapper()
 			.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
@@ -898,6 +900,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 					sb.append(content);
 				}
 			}
+		} catch (RuntimeException e) {
+			throw e;
 		} catch (Exception e) {
 			throw new IllegalArgumentException(e);
 		}
@@ -1094,6 +1098,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				logger.info(LOG_OUTPUT_PREFIX, prettyPrintIfJson(perform));
 			}
 
+		} catch (RuntimeException e) {
+			throw e;
 		} catch (Exception e) {
 			throw new IllegalArgumentException(e);
 		}
@@ -1238,7 +1244,9 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return stripTrailing(sb.toString());
 	}
 
-	/** Appends a map's entries to the output with indentation for the given level. */
+	/**
+	 * Appends a map's entries to the output with indentation for the given level.
+	 */
 	private static void appendMap(StringBuilder sb, Map<?, ?> map, int level) {
 		String pad = repeat(INDENT, level);
 		for (Map.Entry<?, ?> e : map.entrySet()) {
@@ -1285,7 +1293,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * Repeats a string a specified number of times without relying on newer JDK
 	 * APIs.
 	 *
-	 * @param s the string to repeat
+	 * @param s     the string to repeat
 	 * @param times the number of repetitions; non-positive values produce an empty
 	 *              string
 	 * @return the repeated string

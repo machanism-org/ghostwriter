@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -308,10 +309,11 @@ public class ActProcessor extends AIFileProcessor {
 	 * @param act the raw command or action string to parse and execute (e.g.,
 	 *            {@code "task run"}, {@code ">add javadoc"},
 	 *            {@code "bindex/java/mvn-project#2! use -DskipTests=true"})
-	 * @throws IOException if an error occurs while loading the action definitions
-	 *                     from the target storage location
+	 * @throws UnknownHostException
+	 * @throws IOException          if an error occurs while loading the action
+	 *                              definitions from the target storage location
 	 */
-	public void setAct(String act) throws ActNotFoundException {
+	public void setAct(String act) throws ActNotFoundException, UnknownHostException {
 
 		episodes = new Episodes(this);
 		actProperties.clear();
@@ -475,14 +477,17 @@ public class ActProcessor extends AIFileProcessor {
 	 * @param actsLocation optional directory containing user-defined (custom) act
 	 *                     files; may be {@code null}
 	 * @param rootDir      project root used to resolve relative act locations
-	 * @throws IOException if reading act content fails or the specified act cannot
-	 *                     be found in either location
+	 * @throws UnknownHostException
+	 * @throws IOException          if reading act content fails or the specified
+	 *                              act cannot be found in either location
 	 */
 	public static void loadAct(String name, Map<String, Object> properties, String actsLocation, File rootDir)
 			throws ActNotFoundException {
 		TomlParseResult customToml = null;
 		try {
 			customToml = tryLoadActFromDirectory(properties, name, actsLocation, rootDir);
+		} catch (UnknownHostException e) {
+			throw new ActNotFoundException("UnknownHostException: " + e.getMessage());
 		} catch (IOException e) {
 			// User-defined act not found.
 		}
@@ -578,6 +583,8 @@ public class ActProcessor extends AIFileProcessor {
 				try {
 					toml = loadActToml(absolutePath);
 					break;
+				} catch (UnknownHostException e) {
+					throw e;
 				} catch (IOException e) {
 					// TODO: handle exception
 				}

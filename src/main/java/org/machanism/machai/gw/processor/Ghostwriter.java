@@ -21,6 +21,7 @@ import org.machanism.machai.gw.tools.ProcessTerminationException;
 import org.machanism.machai.process.manager.UsageStatistics;
 import org.machanism.machai.process.provider.AbstractAIProvider;
 import org.machanism.machai.process.tools.EndTaskException;
+import org.machanism.machai.process.tools.ErrorResultException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -825,7 +826,11 @@ public final class Ghostwriter {
 	 * @return {@link #EXIT_CODE_ERROR}
 	 */
 	private static int handleProcessingFailure(String message, Exception exception) {
-		LOGGER.error("{}: {}", message, exception.getMessage(), exception);
+		if (exception instanceof ErrorResultException) {
+			LOGGER.error("{}: {}", message, AIFileProcessor.prettyPrintIfJson(exception.getMessage()));
+		} else {
+			LOGGER.error("{}: {}", message, exception.getMessage(), exception);
+		}
 		return EXIT_CODE_ERROR;
 	}
 
